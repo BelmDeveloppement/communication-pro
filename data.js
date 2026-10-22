@@ -15,10 +15,8 @@ window.DATA = {
    ],
    "taches": [
     "Phrase 1 (retraite à vie des ministres) : d'après la meilleure source trouvée, la phrase est-elle exacte ?",
-    "Phrase 1 : citez la source (organisme, titre, date).",
     "Phrase 2 (paiement des jours de grève) : d'après la meilleure source trouvée, la phrase est-elle exacte ?",
-    "Phrase 2 : citez la source (organisme, titre, date).",
-    "Avez-vous trouvé un texte officiel (loi, décret, réponse ministérielle, site public) pour chaque phrase ?",
+    "Citez la source de chaque phrase (organisme, titre, date).",
     "En combien de minutes avez-vous trouvé votre première source solide ?"
    ],
    "types": [
@@ -27,14 +25,12 @@ window.DATA = {
      "Inexacte",
      "À nuancer"
     ],
-    null,
     [
      "Exacte",
      "Inexacte",
      "À nuancer"
     ],
     null,
-    "on",
     "num"
    ],
    "livrable": "",
@@ -100,20 +96,17 @@ window.DATA = {
    "id": "EX1",
    "titre": "Choisir et formuler votre question de décision",
    "mode": "Équipes",
-   "duree": 20,
+   "duree": 15,
    "chap": "Carnet · chapitre 1",
    "situation": [
-    "La directrice de TransLor (PME de 120 salariés, entreprise fictive) vous confie un état de l'art pour éclairer une décision informatique.",
-    "Choisissez un sujet dans la liste (page « Sujets » de l'application, QR sur la diapositive).",
-    "Vous défendrez votre travail devant un jury à la fin du cours."
+    "La directrice de TransLor (PME de 120 salariés, fictive) vous confie un état de l'art pour éclairer une décision informatique.",
+    "Choisissez un sujet dans la liste (page « Sujets », QR) : vous le défendrez devant un jury à la fin du cours."
    ],
    "taches": [
-    "Choisissez un sujet dans la liste.",
-    "Reformulez-le en question de décision : « Faut-il … chez TransLor, selon quels critères ? »",
-    "Écrivez 4 critères de comparaison (par exemple coût, sécurité, facilité d'usage, délai).",
+    "Choisissez un sujet et reformulez-le : « Faut-il … chez TransLor, selon quels critères ? »",
+    "Écrivez 4 critères de comparaison (coût, sécurité, facilité d'usage, délai…).",
     "Écrivez 3 mots-clés en français et leur traduction en anglais.",
-    "Tapez-les dans Google Scholar : combien de résultats environ ? (le nombre)",
-    "Notez une chose que vous ne savez pas encore."
+    "Tapez-les dans Google Scholar : combien de résultats environ ?"
    ],
    "livrable": "Votre question de décision, 4 critères et 3 mots-clés → Dossier, section 1.",
    "corr": {
@@ -158,9 +151,7 @@ window.DATA = {
     null,
     null,
     null,
-    null,
-    "num",
-    null
+    "num"
    ]
   },
   "EX6": {
@@ -176,9 +167,7 @@ window.DATA = {
    "taches": [
     "Écrivez la conclusion en une phrase.",
     "Donnez trois arguments chiffrés.",
-    "Nommez un risque ou une réserve.",
-    "Formulez la décision demandée, avec une date.",
-    "Relisez : le lecteur peut-il agir sans vous poser de question ?"
+    "Ajoutez une réserve et la décision demandée, avec une date."
    ],
    "livrable": "Une note de synthèse de 6 lignes maximum.",
    "corr": {
@@ -224,7 +213,12 @@ window.DATA = {
      "Je recommande d'ajouter une copie hors site (1 800 € par an). Le disque unique a trois ans, avec une panne estimée à 10 % par an ; la restauration prendrait 9 h, contre 3 h avec la copie. Une journée d'arrêt coûterait environ 40 000 € (hypothèse), soit une perte attendue de 4 000 € par an. Réserve : la probabilité est une estimation à confirmer par un test. Décision demandée : valider avant le 30."
     ],
     "retenir": "Une note de synthèse se lit en une minute : conclusion, trois arguments chiffrés, réserve, décision demandée."
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX7": {
    "id": "EX7",
@@ -238,10 +232,8 @@ window.DATA = {
    ],
    "taches": [
     "Soulignez les 3 concepts clés de la question.",
-    "Pour chaque concept, écrivez des synonymes en français et en anglais.",
-    "Repérez les sigles ou termes techniques utiles.",
-    "Assemblez une requête avec guillemets et OR.",
-    "Appliquez la même méthode à votre propre question (EX1)."
+    "Écrivez les synonymes français et anglais de chaque concept.",
+    "Assemblez une requête avec guillemets et OR, puis faites de même pour votre question (EX1)."
    ],
    "livrable": "Un tableau : concepts, synonymes français et anglais, requête. → Dossier, section 3.",
    "corr": {
@@ -281,7 +273,12 @@ window.DATA = {
      "Oublier l'anglais : on perd une grande part de la littérature technique.",
      "Des mots trop généraux (« sécurité » seul)."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX8": {
    "id": "EX8",
@@ -294,12 +291,10 @@ window.DATA = {
     "Une recherche doit pouvoir être refaite : notez la requête exacte et la date."
    ],
    "taches": [
-    "Lancez une requête simple dans Google Scholar : combien de résultats ? (le nombre)",
-    "Précisez avec guillemets, OR, tiret (pour exclure) et le filtre de dates (5 dernières années) : écrivez la requête finale.",
-    "Combien de résultats après précision ? (le nombre)",
-    "Relevez 5 résultats utiles : titre, auteurs, année, type de document.",
-    "Pour chacun : article de revue, actes de conférence, rapport, thèse, page commerciale ?",
-    "Demandez à une IA une requête pour votre question ; essayez-la : trouve-t-elle des résultats utiles que vous n'aviez pas ? Notez la requête."
+    "Lancez une requête simple dans Google Scholar : combien de résultats ?",
+    "Précisez avec guillemets, OR, tiret et filtre de dates (5 ans) : écrivez la requête finale.",
+    "Combien de résultats après précision ?",
+    "Relevez 5 résultats utiles : titre, auteurs, année, type de document."
    ],
    "livrable": "La requête finale, la date, et 5 résultats notés. → Dossier, section 3.",
    "corr": {
@@ -348,57 +343,8 @@ window.DATA = {
     "num",
     null,
     "num",
-    null,
-    null,
     null
    ]
-  },
-  "F3": {
-   "id": "F3",
-   "titre": "Flash · Quel opérateur de recherche ?",
-   "mode": "Individuel",
-   "duree": 5,
-   "chap": "Carnet · chapitre 3",
-   "situation": [
-    "Pour chaque besoin, quel opérateur utilisez-vous dans Google Scholar ?"
-   ],
-   "taches": [
-    "Chercher l'expression exacte zero trust.",
-    "Accepter « cloud » ou « nuage ».",
-    "Exclure le mot « bitcoin » des résultats.",
-    "Ne garder que les cinq dernières années."
-   ],
-   "livrable": "",
-   "corr": {
-    "methode": [
-     "Guillemets : expression exacte.",
-     "OR : l'un ou l'autre.",
-     "Tiret : exclure.",
-     "Filtre de dates : menu de gauche."
-    ],
-    "rows": [
-     [
-      "1. Expression exacte",
-      "« zero trust » (entre guillemets)"
-     ],
-     [
-      "2. Synonymes",
-      "cloud OR nuage"
-     ],
-     [
-      "3. Exclure",
-      "-bitcoin (tiret collé au mot)"
-     ],
-     [
-      "4. Période",
-      "Filtre de dates, ou « depuis 20XX » dans le menu de gauche"
-     ]
-    ],
-    "erreurs": [
-     "Mettre un espace entre le tiret et le mot.",
-     "Oublier que OR s'écrit en majuscules."
-    ]
-   }
   },
   "EX9": {
    "id": "EX9",
@@ -411,11 +357,9 @@ window.DATA = {
     "Pistes : ANSSI et CNIL (France), ENISA (Europe), NIST (États-Unis), ISO et AFNOR (normes, parfois payantes)."
    ],
    "taches": [
-    "Trouvez deux documents utiles à votre question.",
+    "Trouvez deux documents d'organismes publics utiles à votre question.",
     "Notez pour chacun : organisme, titre, date, version, adresse.",
-    "Résumez en une phrase ce qu'il dit sur votre question.",
-    "Est-ce une recommandation, une norme, une obligation légale ou un rapport d'étude ?",
-    "Vérifiez la date : est-elle adaptée au sujet ?"
+    "Recommandation, norme, loi ou rapport ? Une phrase de synthèse par document."
    ],
    "livrable": "Deux références complètes avec une phrase de synthèse chacune. → Dossier, section 4.",
    "corr": {
@@ -455,7 +399,12 @@ window.DATA = {
      "Citer sans date ni version : le document a peut-être été remplacé.",
      "Citer un lien qui ne fonctionnera plus : enregistrer le document (Zotero)."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX10": {
    "id": "EX10",
@@ -468,11 +417,9 @@ window.DATA = {
     "Si l'installation est impossible sur votre poste, utilisez un tableur : auteur, année, titre, lien."
    ],
    "taches": [
-    "Installez Zotero et son extension, ou ouvrez la version web (zotero.org).",
-    "Depuis Google Scholar, enregistrez 5 références d'un clic sur l'extension.",
-    "Vérifiez dans Zotero : auteurs, année, titre, adresse.",
-    "Créez un dossier et deux étiquettes (par exemple « retenue », « à vérifier »).",
-    "Générez une bibliographie (clic droit, « Créer une bibliographie ») dans un style au choix."
+    "Installez Zotero et son extension (ou ouvrez la version web).",
+    "Enregistrez 5 références depuis Google Scholar et vérifiez auteurs, année, titre.",
+    "Générez une bibliographie dans un style au choix."
    ],
    "livrable": "Votre bibliographie de 5 références générée par Zotero. → Dossier, section 17.",
    "corr": {
@@ -516,7 +463,12 @@ window.DATA = {
      "Mélanger plusieurs styles de citation.",
      "Ne pas classer : on retrouve mal ses sources le jour de la rédaction."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX11": {
    "id": "EX11",
@@ -530,13 +482,12 @@ window.DATA = {
     "S2 — Brochure commerciale d'un éditeur, 2025, chiffres sans méthode.",
     "S3 — Rapport d'une agence publique, 2023, mesures sur 120 organisations, méthode publiée.",
     "S4 — Billet de blog anonyme, 2022, « 100 % fiable » sans source.",
-    "S5 — Article de presse généraliste, 2025, cite uniquement S2."
+    "S5 — Article de presse généraliste, 2025, cite uniquement S2.",
+    "Grille : Qui ? Quand ? Pourquoi ? Sur quoi ? Recoupé ? Reproductible ? (0 à 2 chacune, maximum 12). 9 et plus : fiable ; 5 à 8 : à recouper ; 4 et moins : à écarter ou citer avec prudence."
    ],
    "taches": [
-    "Notez chaque source de 0 à 2 sur 6 critères : Qui ? Quand ? Pourquoi ? Sur quoi (preuves) ? Recoupé ? Reproductible ? (maximum 12).",
-    "Seuils : 9 et plus fiable ; 5 à 8 à recouper ; 4 et moins à écarter ou à citer avec prudence.",
-    "Classez les sources.",
-    "Que gardez-vous pour un état de l'art ?",
+    "Notez S1 à S5 avec la grille (maximum 12).",
+    "Classez les sources : lesquelles gardez-vous ?",
     "Pourquoi S5 n'ajoute-t-elle rien à S2 ?"
    ],
    "livrable": "Un tableau de notation et la liste des sources retenues.",
@@ -595,54 +546,12 @@ window.DATA = {
      "Rejeter une brochure commerciale : on peut la citer comme position de l'acteur.",
      "Ne retenir que les sources qui confirment son idée (biais de confirmation)."
     ]
-   }
-  },
-  "F4": {
-   "id": "F4",
-   "titre": "Flash · Fiable, à recouper ou prudence ?",
-   "mode": "Individuel",
-   "duree": 5,
-   "chap": "Carnet · chapitre 4",
-   "situation": [
-    "Classez chaque source : fiable, à recouper, ou prudence.",
-    "1. Thèse de doctorat en ligne d'une université, 2023.",
-    "2. Livre blanc d'un éditeur de logiciels.",
-    "3. Réponse d'un forum technique, validée par 200 votes.",
-    "4. Rapport annuel d'une agence publique de cybersécurité."
-   ],
-   "taches": [
-    "Classez les quatre sources.",
-    "Donnez une raison pour chacune."
-   ],
-   "livrable": "",
-   "corr": {
-    "methode": [
-     "Qui, pourquoi, méthode, date.",
-     "Des votes ne sont pas des preuves."
-    ],
-    "rows": [
-     [
-      "1. Thèse",
-      "Fiable, sous réserve : relue par un jury ; vérifier la date et les publications associées"
-     ],
-     [
-      "2. Livre blanc",
-      "Prudence : position de l'éditeur, à citer comme telle"
-     ],
-     [
-      "3. Forum",
-      "À recouper : bonne piste, pas une preuve (les votes mesurent la popularité)"
-     ],
-     [
-      "4. Rapport d'agence",
-      "Fiable : vérifier la date et la méthode"
-     ]
-    ],
-    "erreurs": [
-     "Rejeter toute source commerciale.",
-     "Faire confiance au nombre de votes."
-    ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX12": {
    "id": "EX12",
@@ -655,11 +564,9 @@ window.DATA = {
     "Grille en six questions, 0 à 2 points chacune : Qui ? Quand ? Pourquoi ? Sur quoi ? Recoupé ? Reproductible ? (maximum 12)."
    ],
    "taches": [
-    "Choisissez 5 sources de votre question.",
-    "Notez-les avec la grille.",
-    "Classez-les et gardez-en 3 au moins.",
-    "Justifiez en une phrase chaque décision.",
-    "Dans Zotero, ajoutez l'étiquette « retenue » ou « écartée »."
+    "Choisissez 5 sources de votre question et notez-les avec la grille.",
+    "Gardez-en 3 au moins et justifiez chaque décision en une phrase.",
+    "Dans Zotero, étiquetez-les « retenue » ou « écartée »."
    ],
    "livrable": "La grille de 5 sources remplie et 3 sources retenues dans Zotero. → Dossier, section 5.",
    "corr": {
@@ -699,7 +606,12 @@ window.DATA = {
      "Retenir cinq sources du même éditeur : elles ne se recoupent pas.",
      "Écarter sans justifier : le jury demandera pourquoi."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX13": {
    "id": "EX13",
@@ -712,10 +624,9 @@ window.DATA = {
     "Ce chiffre est souvent répété ; sa source n'est pas indiquée dans l'article. À vérifier par vos soins."
    ],
    "taches": [
-    "Cherchez l'origine de ce chiffre (guillemets, moteur de recherche).",
-    "Notez le chemin : article, puis article, puis source d'origine.",
+    "Cherchez l'origine du chiffre et notez le chemin : article, article, origine.",
     "La source d'origine existe-t-elle ? Que mesure-t-elle exactement ?",
-    "Que répondez-vous à la directrice qui veut citer ce chiffre ?"
+    "Que répondez-vous à la directrice qui veut le citer ?"
    ],
    "livrable": "Le chemin de vos recherches et votre phrase de réponse. → Dossier, section 6.",
    "corr": {
@@ -755,7 +666,12 @@ window.DATA = {
      "Citer le chiffre parce qu'il est « connu ».",
      "Conclure qu'il est faux sans preuve : l'absence de source n'est pas une preuve du contraire."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "F5": {
    "id": "F5",
@@ -785,17 +701,13 @@ window.DATA = {
     "Plan B si vous n'en trouvez pas en 5 minutes : l'enseignant projette un extrait fictif (étude sur 40 organisations, −42 % de comptes compromis, volontaires, pas de groupe témoin, financée par un éditeur)."
    ],
    "taches": [
-    "Écrivez la référence complète (auteurs, année, titre, revue ou conférence).",
-    "Quelle est la question de l'article, en une phrase ?",
-    "Quelle est la méthode (échantillon, durée, groupe témoin) ?",
-    "Quel est le résultat principal, avec son chiffre ?",
+    "Écrivez la référence complète et la question de l'article en une phrase.",
+    "Quelles sont la méthode et le résultat principal (avec son chiffre) ?",
     "Combien de limites l'article reconnaît-il lui-même ?",
     "Une déclaration de financement ou de conflit d'intérêts est-elle indiquée ?",
     "Écrivez la phrase honnête qui citerait ce résultat dans votre état de l'art."
    ],
    "types": [
-    null,
-    null,
     null,
     null,
     "num",
@@ -857,24 +769,20 @@ window.DATA = {
    "duree": 15,
    "chap": "Carnet · chapitre 5",
    "situation": [
-    "Testez une IA générative (celle de votre choix) sur VOTRE question. Ne saisissez aucune donnée confidentielle ni personnelle : seulement votre question de décision.",
-    "Consigne à l'IA (à adapter) : « Donne-moi 5 références scientifiques ou institutionnelles (auteurs, année, titre, revue, DOI) sur : <votre question>. »",
-    "Vérifiez ensuite chaque référence SANS demander à l'IA de la confirmer : Google Scholar (titre exact entre guillemets), doi.org (le DOI), site de la revue ou de l'organisme."
+    "Testez une IA générative sur VOTRE question, sans donnée confidentielle ni personnelle.",
+    "Consigne : « Donne-moi 5 références (auteurs, année, titre, revue, DOI) sur : <votre question>. »",
+    "Vérifiez chaque référence sans demander à l'IA : Google Scholar (titre exact), doi.org (le DOI)."
    ],
    "taches": [
-    "Collez la consigne dans l'IA et recopiez les 5 références obtenues.",
-    "Combien de références existent réellement (titre, auteurs et revue corrects) ?",
-    "Combien ont un DOI qui s'ouvre vers le bon article ?",
-    "Y a-t-il au moins une référence inventée ou mélangée (vrais auteurs, faux titre) ?",
-    "Quels indices auraient dû vous alerter ?",
+    "Demandez à l'IA 5 références sur votre question (consigne ci-dessus) et recopiez-les.",
+    "Combien existent réellement (titre, auteurs et revue corrects) ?",
+    "Y a-t-il au moins une référence inventée ou mélangée ?",
     "Quelle règle appliquerez-vous avant de citer une source donnée par une IA ?"
    ],
    "types": [
     null,
     "num",
-    "num",
     "on",
-    null,
     null
    ],
    "livrable": "La liste des 5 références vérifiées et la règle → Dossier, section 8.",
@@ -947,8 +855,7 @@ window.DATA = {
     "Situation 1 : quel biais ?",
     "Situation 2 : quel biais ?",
     "Situation 3 : quel biais ?",
-    "Situation 4 : quel biais ?",
-    "Choisissez une situation et donnez une parade."
+    "Situation 4 : quel biais ?"
    ],
    "types": [
     [
@@ -974,8 +881,7 @@ window.DATA = {
      "Survivant",
      "Publication",
      "Financement"
-    ],
-    null
+    ]
    ],
    "livrable": "",
    "corr": {
@@ -1003,6 +909,14 @@ window.DATA = {
     ],
     "erreurs": [
      "Croire qu'une source financée est forcément fausse : elle demande seulement une vérification supplémentaire."
+    ],
+    "widths": [
+     0.7,
+     8.1
+    ],
+    "cols": [
+     "N°",
+     "Réponse"
     ]
    }
   },
@@ -1017,9 +931,8 @@ window.DATA = {
     "« Il faut l'activer partout, parce que 80 % des compromissions viennent de mots de passe volés. Tout le monde le fait. Et ça coûte peu. »"
    ],
    "taches": [
-    "Placez chaque élément dans le modèle de Toulmin : affirmation, données, garantie, fondement, réfutation, qualificatif.",
-    "Repérez ce qui manque.",
-    "Repérez l'élément qui n'est pas un argument.",
+    "Placez chaque élément du propos dans le modèle de Toulmin.",
+    "Repérez ce qui manque et ce qui n'est pas un argument.",
     "Réécrivez l'argument complet."
    ],
    "livrable": "Une carte de Toulmin complétée. → Dossier, section 9.",
@@ -1081,13 +994,18 @@ window.DATA = {
      "Qualificatif : probablement efficace, sous réserve de choisir un second facteur résistant."
     ],
     "retenir": "Un argument complet : affirmation, données sourcées, garantie, réfutation honnête, qualificatif."
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX17": {
    "id": "EX17",
    "titre": "Chasser les sophismes (téléphone)",
    "mode": "Individuel, téléphone",
-   "duree": 10,
+   "duree": 8,
    "chap": "Carnet · chapitre 6",
    "situation": [
     "Six phrases entendues en réunion :",
@@ -1104,8 +1022,7 @@ window.DATA = {
     "Phrase 3 : quel sophisme ?",
     "Phrase 4 : quel sophisme ?",
     "Phrase 5 : quel sophisme ?",
-    "Phrase 6 : quel sophisme ?",
-    "Reformulez la phrase 6 en hypothèse testable."
+    "Phrase 6 : quel sophisme ?"
    ],
    "types": [
     [
@@ -1155,8 +1072,7 @@ window.DATA = {
      "Faux dilemme",
      "Généralisation hâtive",
      "Post hoc"
-    ],
-    null
+    ]
    ],
    "livrable": "",
    "dossier": null,
@@ -1216,17 +1132,15 @@ window.DATA = {
     "Pour vous entraîner sur un cas connu : « L'authentification multifacteur bloque 99,9 % des attaques de prise de contrôle de compte » (attribué à Microsoft en 2019, voir D4 de EX11b)."
    ],
    "taches": [
-    "Recopiez l'affirmation chiffrée, l'adresse de la page et la date.",
-    "Posez les cinq questions : par rapport à quelle base ? mesuré comment ? sur quel échantillon ? par qui ? sur quelle durée ? (réponse de la page, ou « non indiqué »).",
-    "Combien de ces cinq questions restent sans réponse sur la page ?",
-    "La page cite-t-elle une étude ou une méthode accessible ?",
+    "Recopiez une affirmation chiffrée d'un site de fournisseur (adresse et date).",
+    "Posez les 5 questions (base, mesure, échantillon, auteur, durée) et notez les réponses de la page, ou « non indiqué ».",
+    "Combien de questions restent sans réponse ?",
     "Écrivez la phrase que vous mettriez dans votre état de l'art."
    ],
    "types": [
     null,
     null,
     "num",
-    "on",
     null
    ],
    "livrable": "L'affirmation, les cinq questions et la phrase d'état de l'art → Dossier, section 10.",
@@ -1295,8 +1209,7 @@ window.DATA = {
     "Écrivez l'affirmation provisoire (votre recommandation).",
     "Choisissez deux données, chacune avec sa source.",
     "Écrivez la garantie et le fondement.",
-    "Cherchez la réfutation : quand l'argument ne tient pas ?",
-    "Choisissez un qualificatif honnête."
+    "Cherchez une réfutation et choisissez un qualificatif."
    ],
    "livrable": "Votre fiche de Toulmin dans le carnet. → Dossier, section 9.",
    "corr": {
@@ -1345,7 +1258,13 @@ window.DATA = {
      "Une garantie qui répète l'affirmation.",
      "Pas de réfutation : le jury en trouvera trois."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null,
+    null
+   ]
   },
   "EX20": {
    "id": "EX20",
@@ -1358,18 +1277,14 @@ window.DATA = {
     "Puis l'équipe voisine ajoute une objection que l'IA n'a pas vue, et vous répondez par un fait, une concession ou une réserve."
    ],
    "taches": [
-    "Collez l'argument dans l'IA et recopiez les 3 objections.",
-    "Combien de ces objections sont pertinentes pour votre cas ?",
-    "L'IA a-t-elle inventé un chiffre ou une source ?",
-    "Quelle objection de plus l'équipe voisine formule-t-elle ?",
-    "Répondez à deux objections par un fait, une concession ou une réserve.",
-    "Notez ce que vous ajoutez à votre argument."
+    "Collez votre argument dans une IA (sans donnée confidentielle) et recopiez ses 3 objections.",
+    "Combien sont pertinentes pour votre cas ?",
+    "L'équipe voisine ajoute une objection : laquelle ?",
+    "Répondez à deux objections (fait, concession ou réserve)."
    ],
    "types": [
     null,
     "num",
-    "on",
-    null,
     null,
     null
    ],
@@ -1444,8 +1359,7 @@ window.DATA = {
     "Pondérations de départ : coût 30 %, sécurité 30 %, restauration 25 %, simplicité 15 %."
    ],
    "taches": [
-    "Dans un tableur, saisissez les scores et les poids (ligne séparée).",
-    "Calculez la note de chaque solution avec =SOMMEPROD.",
+    "Saisissez scores et poids dans un tableur ; calculez avec =SOMMEPROD.",
     "Test de sensibilité : coût 50 %, sécurité 20 %, restauration 20 %, simplicité 10 %. Le classement change-t-il ?",
     "Rédigez la conclusion en 3 phrases, avec un qualificatif et une réserve."
    ],
@@ -1500,7 +1414,12 @@ window.DATA = {
     ],
     "modele": "« Avec les pondérations de départ, la solution hybride paraît la plus adaptée (3,80 contre 3,70 et 3,35), mais l'écart avec le cloud est faible. Si le coût devient prioritaire (50 %), le classement s'inverse : disque local 3,80, cloud 3,50, hybride 3,30. Avant de décider, il faut sourcer les scores (coûts réels, tests de restauration) ; ces notes sont fictives. »",
     "retenir": "Un état de l'art honnête : critères explicites, test de sensibilité, réserve, sources à vérifier."
-   }
+   },
+   "types": [
+    null,
+    "on",
+    null
+   ]
   },
   "EX22": {
    "id": "EX22",
@@ -1512,12 +1431,10 @@ window.DATA = {
     "Votre équipe construit sa propre matrice : trois solutions, quatre critères (EX1), des scores sourcés."
    ],
    "taches": [
-    "Choisissez trois solutions à comparer.",
-    "Justifiez les poids par les priorités de la directrice.",
+    "Choisissez 3 solutions et 4 critères pondérés (total 100 %), selon les priorités de la directrice.",
     "Remplissez les scores en citant la source (référence Zotero) pour chacun.",
     "Calculez avec =SOMMEPROD et classez.",
-    "Faites un test de sensibilité sur le critère le plus discutable.",
-    "Écrivez une conclusion de 3 phrases avec qualificatif et réserve."
+    "Test de sensibilité sur le critère le plus discutable : le classement change-t-il ?"
    ],
    "livrable": "Votre matrice avec sources, le test de sensibilité et la conclusion. → Dossier, section 11.",
    "corr": {
@@ -1561,7 +1478,13 @@ window.DATA = {
      "Des critères qui se recouvrent (double comptage).",
      "Un classement présenté comme une vérité."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null,
+    "on"
+   ]
   },
   "EX23": {
    "id": "EX23",
@@ -1573,8 +1496,7 @@ window.DATA = {
     "Votre état de l'art tient en deux pages. Avant d'écrire, il faut un plan et un résumé de trois lignes (chapô)."
    ],
    "taches": [
-    "Écrivez le plan : chaque partie en une ligne.",
-    "Répartissez la longueur (en pourcentage de page).",
+    "Écrivez le plan : chaque partie en une ligne, avec sa longueur (en %).",
     "Écrivez le chapô : question, méthode, conclusion.",
     "Relisez : le lecteur a-t-il la réponse dans le chapô ?"
    ],
@@ -1638,7 +1560,12 @@ window.DATA = {
     ],
     "modele": "Chapô (fictif) : « Pour décider si TransLor doit ajouter une copie hors site à ses sauvegardes, nous avons comparé trois solutions à partir de neuf sources évaluées. L'option hybride est la plus adaptée sous les pondérations de départ, mais le classement s'inverse si le coût devient prioritaire. Recommandation : tester la restauration depuis le cloud avant de décider. »",
     "retenir": "Un chapô donne la réponse : question, méthode, conclusion et réserve."
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX24": {
    "id": "EX24",
@@ -1652,10 +1579,9 @@ window.DATA = {
    ],
    "taches": [
     "Répartissez les parties dans l'équipe.",
-    "Rédigez en pyramide inversée : conclusion, puis preuves.",
-    "Citez au moins 6 sources dans le texte.",
+    "Rédigez en pyramide inversée, avec au moins 6 sources citées.",
     "Générez la bibliographie avec Zotero.",
-    "Relisez avec la liste de vérification (question, méthode, sources, comparaison, réserve)."
+    "Relisez avec la liste (question, méthode, sources, comparaison, réserve)."
    ],
    "livrable": "L'état de l'art de 2 pages dans un document partagé (lien) avec sa bibliographie. → Dossier, section 13.",
    "corr": {
@@ -1714,7 +1640,13 @@ window.DATA = {
     "modele_titre": "Exemple d'extrait (fictif) : méthode de recherche",
     "modele": "« Nous avons interrogé Google Scholar (requête : « sauvegarde hors site » OR « off-site backup », période 2021-2026) et les publications de deux organismes publics. Sur 60 résultats lus, 9 ont été retenus après évaluation avec une grille en six questions (note de 9 ou plus sur 12). Les brochures commerciales sont citées comme positions d'éditeurs. »",
     "retenir": "Une méthode de recherche qu'un lecteur peut refaire vaut des points : requêtes, bases, dates, critères."
-   }
+   },
+   "types": [
+    null,
+    null,
+    null,
+    null
+   ]
   },
   "EX25": {
    "id": "EX25",
@@ -1726,11 +1658,9 @@ window.DATA = {
     "Échangez votre état de l'art avec une autre équipe. Relisez avec la grille de notation (EX24) pendant 10 minutes, puis donnez un feedback SBI."
    ],
    "taches": [
-    "Relisez le document de l'autre équipe avec la grille.",
-    "Notez deux points forts et deux améliorations, chacun avec un fait.",
+    "Relisez le document de l'autre équipe avec la grille : deux points forts, deux améliorations, chacun avec un fait.",
     "Formulez un feedback en SBI : situation, comportement, impact.",
-    "Écoutez le feedback reçu sans vous justifier ; reformulez.",
-    "Décidez deux corrections à faire."
+    "Écoutez le feedback reçu sans vous justifier ; décidez deux corrections."
    ],
    "livrable": "Deux points forts, deux améliorations, deux corrections décidées. → Dossier, section 14.",
    "corr": {
@@ -1761,7 +1691,12 @@ window.DATA = {
      "Juger la personne au lieu de décrire le texte.",
      "Se justifier au lieu de noter la correction."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX26": {
    "id": "EX26",
@@ -1775,8 +1710,6 @@ window.DATA = {
    "taches": [
     "Écrivez le message clé en une phrase.",
     "Construisez le plan : accroche, problème, solution, preuve, appel à décision.",
-    "Préparez une analogie et un chiffre.",
-    "Répartissez la parole entre les membres.",
     "Préparez les réponses aux 3 objections les plus probables.",
     "Chronométrez-vous une fois."
    ],
@@ -1826,7 +1759,13 @@ window.DATA = {
      "Lire ses notes.",
      "Oublier l'appel à décision."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null,
+    null
+   ]
   },
   "EX27": {
    "id": "EX27",
@@ -1839,9 +1778,8 @@ window.DATA = {
    ],
    "taches": [
     "Présentez votre état de l'art (5 minutes chronométrées).",
-    "Répondez aux questions : reformuler, répondre par un fait, une concession ou une réserve.",
-    "Observateurs : notez avec la grille et écrivez un feedback SBI.",
-    "Après chaque équipe : une minute de feedback du jury."
+    "Répondez aux questions : reformuler, puis fait, concession ou réserve.",
+    "Observateurs : notez avec la grille et écrivez un feedback SBI."
    ],
    "livrable": "La grille de notation de chaque équipe et un feedback SBI. → Dossier, section 15.",
    "corr": {
@@ -1906,7 +1844,12 @@ window.DATA = {
      "Que feriez-vous avec un mois de plus ?"
     ],
     "retenir": "Défendre, c'est dire ce que l'on sait, ce que l'on ne sait pas, et comment on le vérifiera."
-   }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "EX28": {
    "id": "EX28",
@@ -1920,9 +1863,8 @@ window.DATA = {
    "taches": [
     "Décrivez la vulnérabilité : qui, quoi, quand, impact.",
     "Donnez une preuve : donnée, observation ou source.",
-    "Construisez l'argument en Toulmin condensé : affirmation, données, garantie, réfutation.",
-    "Rédigez une recommandation avec un qualificatif et une réserve.",
-    "Dites comment vous la vérifierez avec votre tuteur."
+    "Construisez l'argument en Toulmin condensé.",
+    "Rédigez une recommandation avec qualificatif et réserve, et dites comment la vérifier."
    ],
    "livrable": "Une fiche d'une page, à rendre au tuteur. → Dossier, section 16.",
    "corr": {
@@ -1970,7 +1912,13 @@ window.DATA = {
      "Une vulnérabilité trop large (« la cybersécurité »).",
      "Aucune manière de vérifier la recommandation."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    null,
+    null
+   ]
   },
   "EX29": {
    "id": "EX29",
@@ -1985,8 +1933,7 @@ window.DATA = {
     "Q1. Complétez la carte de Toulmin de : « Il faut passer au cloud : tous nos concurrents l'ont fait. »",
     "Q2. Notez la source « blog anonyme, 2022, chiffres sans source » avec la grille en six questions.",
     "Q3. Quel sophisme dans « Soit on migre ce mois-ci, soit on perd nos clients » ?",
-    "Q4. Écrivez une requête pour chercher des études sur la sauvegarde hors site, en français et en anglais.",
-    "Q5. Réécrivez cette conclusion avec un qualificatif et une réserve : « Les passkeys sont meilleurs que les mots de passe. »"
+    "Q4. Réécrivez avec un qualificatif et une réserve : « Les passkeys sont meilleurs que les mots de passe. »"
    ],
    "livrable": "Vos réponses, comparées à la correction.",
    "corr": {
@@ -2029,7 +1976,20 @@ window.DATA = {
      "Oublier la réserve dans une conclusion.",
      "Écrire une requête sans synonymes."
     ]
-   }
+   },
+   "types": [
+    null,
+    null,
+    [
+     "Appel à la popularité",
+     "Attaque contre la personne",
+     "Pente glissante",
+     "Faux dilemme",
+     "Généralisation hâtive",
+     "Post hoc"
+    ],
+    null
+   ]
   },
   "EX2": {
    "id": "EX2",
@@ -2051,11 +2011,9 @@ window.DATA = {
     "8. J'explique le contexte, pas seulement la consigne."
    ],
    "taches": [
-    "Additionnez les points A (affirmations 1 à 4) puis B (5 à 8).",
-    "Placez-vous sur la grille : A de 11 à 16 = Direct, de 4 à 10 = Nuancé ; B de 11 à 16 = Relation, de 4 à 10 = Tâche. Le croisement donne votre profil.",
-    "Lisez votre profil (force, risque, conseil) sur la correction.",
-    "Comparez avec votre voisin : sur quelle situation vos styles se heurteraient-ils ?",
-    "Appliquez : à quel personnage de TransLor (Marc, Paul, Sonia, la directrice) ressemblez-vous le plus ?"
+    "Additionnez vos points A (affirmations 1 à 4) et B (5 à 8) : le calculateur le fait pour vous.",
+    "Lisez votre profil dans le tableau de la correction.",
+    "Comparez avec votre voisin : sur quelle situation vos styles se heurteraient-ils ?"
    ],
    "livrable": "Votre profil et un point d'attention, à noter dans le carnet (chapitre 1).",
    "corr": {
@@ -2107,8 +2065,69 @@ window.DATA = {
      "Se noter selon l'image que l'on voudrait donner plutôt que selon ses réactions réelles.",
      "Croire que le test mesure la personnalité : c'est un modèle pédagogique simplifié, pas un outil de recrutement.",
      "Sur TransLor : Marc (Décideur) écrit court ; Paul (Facilitateur) peut lire ses messages comme brusques. Le problème est l'écart, pas le style."
-    ]
-   }
+    ],
+    "matrix": {
+     "cols": [
+      [
+       "Nuancé",
+       "A de 4 à 10"
+      ],
+      [
+       "Direct",
+       "A de 11 à 16"
+      ]
+     ],
+     "rows": [
+      [
+       "Tâche",
+       "B de 4 à 10"
+      ],
+      [
+       "Relation",
+       "B de 11 à 16"
+      ]
+     ],
+     "cells": [
+      [
+       [
+        "Analyste",
+        "3B6FD8",
+        "rigueur, précision",
+        "trop long, décision retardée",
+        "donner la conclusion d'abord"
+       ],
+       [
+        "Décideur",
+        "E4572E",
+        "clarté, rapidité",
+        "paraît brusque",
+        "ajouter une phrase de contexte"
+       ]
+      ],
+      [
+       [
+        "Facilitateur",
+        "2E9E6B",
+        "écoute, consensus",
+        "évite le désaccord nécessaire",
+        "oser dire non avec une alternative"
+       ],
+       [
+        "Animateur",
+        "E9A400",
+        "énergie, lien",
+        "dilue le message",
+        "finir par une demande précise"
+       ]
+      ]
+     ]
+    }
+   },
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "F1": {
    "id": "F1",
@@ -2156,6 +2175,14 @@ window.DATA = {
     ],
     "erreurs": [
      "Retenir « 93 % non-verbal » : chiffre souvent cité hors contexte."
+    ],
+    "widths": [
+     0.7,
+     8.1
+    ],
+    "cols": [
+     "N°",
+     "Réponse"
     ]
    },
    "types": [
@@ -2173,20 +2200,15 @@ window.DATA = {
    "duree": 15,
    "chap": "Carnet · chapitre 2",
    "situation": [
-    "Six phrases entendues chez TransLor. Pour chacune, écrivez une reformulation de 15 mots maximum et nommez son type.",
+    "Trois phrases entendues chez TransLor. Pour chacune, écrivez une reformulation de 15 mots maximum et nommez son type (écho, clarification, synthèse, reflet).",
     "1. Marc : « Je n'en peux plus de ces tableaux Excel. »",
     "2. Léa : « La tablette plante dès que j'arrive à l'entrepôt. »",
-    "3. La directrice : « Il me faut une solution pour le dernier kilomètre avant l'été, sans exploser le budget. »",
-    "4. Sonia : « Les factures arrivent toujours en retard, je ne peux pas clôturer. »",
-    "5. Paul : « Les conducteurs sont démotivés, on devrait tout revoir. »",
-    "6. Léa : « Franchement, on ne nous écoute jamais. »"
+    "3. La directrice : « Il me faut une solution pour le dernier kilomètre avant l'été, sans exploser le budget. »"
    ],
    "taches": [
-    "Écrivez votre reformulation de 15 mots maximum pour chaque phrase, et nommez le type utilisé (écho, clarification, synthèse, reflet).",
-    "Soulignez tout conseil ou jugement caché dans vos reformulations, et retirez-le.",
-    "Test avec une IA : collez vos six reformulations (phrases fictives, aucune donnée réelle) avec la consigne « Repère tout conseil, jugement ou question fermée cachés. » Recopiez ses remarques.",
-    "Combien de remarques de l'IA retenez-vous ?",
-    "Choisissez la phrase la plus risquée et dites pourquoi."
+    "Écrivez vos trois reformulations et nommez le type de chacune.",
+    "Retirez tout conseil ou jugement caché.",
+    "Test IA (ordinateur) : collez vos reformulations avec la consigne « Repère tout conseil ou jugement caché » ; combien de remarques retenez-vous ?"
    ],
    "livrable": "Six reformulations, chacune avec son type.",
    "corr": {
@@ -2223,21 +2245,6 @@ window.DATA = {
       "« Deux contraintes : avant l'été et budget maîtrisé. Laquelle prime si on doit choisir ? »"
      ],
      [
-      "4",
-      "Reflet + clarification",
-      "« Le retard bloque votre clôture. De qui dépendent ces factures ? »"
-     ],
-     [
-      "5",
-      "Clarification",
-      "« Qu'avez-vous observé qui vous fait dire qu'ils sont démotivés ? »"
-     ],
-     [
-      "6",
-      "Reflet",
-      "« Vous avez le sentiment de ne pas être entendue. Sur quel sujet récemment ? »"
-     ],
-     [
       "Test IA",
       "Elle repère souvent un conseil caché (« vous devriez… »). Elle peut aussi se tromper ou juger à tort : vous décidez, phrase par phrase.",
       "Ne jamais coller de vrais échanges avec des personnes identifiables"
@@ -2252,9 +2259,7 @@ window.DATA = {
    "types": [
     null,
     null,
-    null,
-    "num",
-    null
+    "num"
    ]
   },
   "EX4": {
@@ -2266,14 +2271,14 @@ window.DATA = {
    "situation": [
     "Marc, gestionnaire d'exploitation, vous dit : « Je voudrais un export Excel des tournées du jour. »",
     "Vous êtes l'ingénieur chargé d'étudier la demande. Votre binôme joue Marc (sa fiche de rôle est sur l'application, à ne pas montrer à l'enquêteur).",
-    "Vous avez 8 minutes. Ne proposez aucune solution avant d'avoir compris le besoin."
+    "Vous avez 8 minutes. Ne proposez aucune solution avant d'avoir compris le besoin.",
+    "Exemple de 6 questions pour une autre demande (« un tableau de bord ») : Qui le lira ? Quelles décisions en dépendent ? À quelle fréquence ? Où se trouvent les données ? Combien de temps y consacrez-vous aujourd'hui ? Comment saurez-vous qu'il est réussi ?"
    ],
    "taches": [
-    "Préparez 6 questions avec QQOQCCP (qui, quoi, où, quand, comment, combien, pourquoi), en entonnoir : large, puis précis, puis de confirmation.",
-    "Menez l'entretien (8 minutes).",
+    "Préparez 6 questions avec QQOQCCP, en entonnoir (large, précis, confirmation).",
+    "Menez l'entretien (8 minutes) sans proposer de solution.",
     "Reformulez le besoin réel en une phrase.",
-    "Chiffrez le coût annuel actuel, en euros (45 min par jour et par gestionnaire, 225 jours, 15 gestionnaires, 32 € de l'heure) : écrivez le nombre.",
-    "Faites valider par Marc le critère de réussite."
+    "Chiffrez le coût annuel actuel, en euros (45 min par jour et par gestionnaire, 225 jours, 15 gestionnaires, 32 € de l'heure)."
    ],
    "livrable": "Besoin reformulé, coût annuel, critère de réussite. → Dossier, section 2.",
    "fiche_role": "FICHE DE MARC (secrète). Demande affichée : un export Excel des tournées. Besoin réel : savoir avant 7 h quelles tournées risquent un retard pour prévenir les clients. À dévoiler seulement si l'enquêteur pose des questions ouvertes : 20 tournées par jour, 12 % dépassent le créneau, il recopie les heures dans Excel 45 minutes par jour, 3 clients (60 % du CA) pénalisent les retards, budget maximal 2 k€, critère de réussite : une alerte au moins 30 minutes avant le créneau. Si on vous propose une solution trop vite, répondez « oui, peut-être ».",
@@ -2316,8 +2321,7 @@ window.DATA = {
     null,
     null,
     null,
-    "num",
-    null
+    "num"
    ]
   },
   "EX5": {
@@ -2333,12 +2337,9 @@ window.DATA = {
     "E3 : « OK merci ! » envoyé en « Répondre à tous » à 40 personnes."
    ],
    "taches": [
-    "Pour chaque e-mail, trouvez trois défauts.",
-    "Réécrivez l'objet de E1 et de E2 (8 mots maximum).",
-    "Réécrivez le texte de E1 en 4 lignes, conclusion en premier.",
-    "E2 : faut-il un seul e-mail ou trois ?",
-    "Que répondez-vous à l'auteur de E3 ?",
-    "Test de lisibilité avec une IA : collez votre E1 réécrit (fictif) et demandez « Quelle action attend-on du lecteur, et pour quand ? ». Si elle ne trouve pas, réécrivez."
+    "Pour E1, E2 et E3, trouvez les défauts (un par e-mail pour commencer).",
+    "Réécrivez l'objet de E1 et de E2 (8 mots maximum) et le texte de E1 en 4 lignes, conclusion en premier.",
+    "Test IA (ordinateur) : collez votre E1 réécrit et demandez « Quelle action attend-on du lecteur, pour quand ? »."
    ],
    "livrable": "Trois e-mails corrigés.",
    "corr": {
@@ -2376,94 +2377,12 @@ window.DATA = {
      "Aucune échéance : la demande n'est jamais traitée."
     ]
    },
-   "outil": "e-mail réel, IA générative (test de lisibilité)"
-  },
-  "F2": {
-   "id": "F2",
-   "titre": "Flash · Pyramide inversée : remettre le message dans l'ordre",
-   "mode": "Binôme",
-   "duree": 4,
-   "chap": "Carnet · chapitre 2",
-   "situation": [
-    "Cinq phrases d'un e-mail à la directrice, mélangées :",
-    "A. Contexte : lors du comité du 3 mars, deux options ont été discutées.",
-    "B. Détails : option 1 coûte 40 k€, option 2 coûte 55 k€ mais réduit les retards.",
-    "C. Je recommande l'option 2.",
-    "D. Merci de confirmer avant jeudi 12 h.",
-    "E. Cordialement."
-   ],
-   "taches": [
-    "Remettez les phrases dans l'ordre d'un message efficace.",
-    "Justifiez en une phrase.",
-    "Quelle phrase mettre dans l'objet ?"
-   ],
-   "livrable": "",
-   "corr": {
-    "methode": [
-     "Conclusion d'abord, action ensuite, contexte et détails après."
-    ],
-    "rows": [
-     [
-      "Ordre",
-      "C, D, A, B, E"
-     ],
-     [
-      "Pourquoi",
-      "La directrice lit d'abord la décision et l'échéance, puis choisit de lire le détail"
-     ],
-     [
-      "Objet",
-      "« Option 2 recommandée : confirmation avant jeudi 12 h »"
-     ]
-    ],
-    "erreurs": [
-     "Raconter l'historique avant la conclusion."
-    ]
-   }
-  },
-  "F8": {
-   "id": "F8",
-   "titre": "Flash · Vulgariser trois phrases techniques",
-   "mode": "Binôme",
-   "duree": 6,
-   "chap": "Carnet · chapitre 8",
-   "situation": [
-    "Traduisez pour la directrice (non technique), en une phrase, sans jargon :",
-    "1. « Le TMS a une latence élevée aux heures de pointe. »",
-    "2. « Nous allons segmenter le réseau en VLAN. »",
-    "3. « Le RPO est de 4 heures. »"
-   ],
-   "taches": [
-    "Écrivez une phrase par traduction.",
-    "Ajoutez une analogie pour la phrase 2.",
-    "Testez sur votre voisin : a-t-il compris sans question ?"
-   ],
-   "livrable": "",
-   "corr": {
-    "methode": [
-     "Partir de l'enjeu de l'auditeur (retard, argent, risque).",
-     "Remplacer le terme par ce qu'il change concrètement.",
-     "Une analogie, pas trois."
-    ],
-    "rows": [
-     [
-      "1",
-      "« Le logiciel de tournées répond lentement quand tout le monde s'y connecte vers 7 h. »"
-     ],
-     [
-      "2",
-      "« Nous séparons le réseau en zones, comme des pièces avec des portes : un incident ne se propage plus partout. »"
-     ],
-     [
-      "3",
-      "« Si une panne survient, nous pouvons perdre au maximum 4 heures de données. »"
-     ]
-    ],
-    "erreurs": [
-     "Remplacer un sigle par un autre sigle.",
-     "Une analogie trop longue qui devient plus compliquée que le sujet."
-    ]
-   }
+   "outil": "e-mail réel, IA générative (test de lisibilité)",
+   "types": [
+    null,
+    null,
+    null
+   ]
   },
   "F9": {
    "id": "F9",
@@ -4095,27 +4014,23 @@ window.DATA = {
    "duree": 20,
    "chap": "Carnet · chapitre 4",
    "situation": [
-    "Cinq vrais documents repérés par recherche en octobre 2026 (adresses et contenus à vérifier : ils peuvent changer ou disparaître) :",
-    "D1 · NIST, SP 800-63B-4, « Digital Identity Guidelines: Authentication and Authenticator Management », version finale, juillet 2025. À retrouver : csrc.nist.gov, Publications, « SP 800-63B-4 ».",
-    "D2 · ANSSI, « Recommandations relatives à l'authentification multifacteur et aux mots de passe », 2021. À retrouver : cyber.gouv.fr, Publications.",
-    "D3 · IT-Connect, « Nouveau guide ANSSI sur les mots de passe et l'authentification multifacteur », article du 11 octobre 2021. À retrouver : it-connect.fr, recherche par titre.",
-    "D4 · Slaw.ca, « Using multi-factor authentication blocks 99.9 % of account takeover attacks », 27 septembre 2019. À retrouver : slaw.ca, recherche par titre.",
-    "D5 · ENISA, « ENISA Threat Landscape 2025 », rapport (plusieurs versions publiées). À retrouver : enisa.europa.eu, Publications."
+    "Cinq vrais documents (octobre 2026 ; adresses susceptibles de changer). Retrouvez-les avec leur titre dans un moteur de recherche :",
+    "D1 · NIST, SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management (juillet 2025).",
+    "D2 · ANSSI, Recommandations relatives à l'authentification multifacteur et aux mots de passe (2021).",
+    "D3 · IT-Connect, « Nouveau guide ANSSI sur les mots de passe et l'authentification multifacteur » (11 octobre 2021).",
+    "D4 · Slaw.ca, « Using multi-factor authentication blocks 99.9 % of account takeover attacks » (27 septembre 2019).",
+    "D5 · ENISA, ENISA Threat Landscape 2025 (plusieurs versions)."
    ],
    "taches": [
-    "Ouvrez chaque document : qui l'a écrit, pour qui, à quelle date ?",
-    "Notez D1 à D5 avec la grille en six questions (0 à 2 points chacune, maximum 12) : écrivez les cinq totaux.",
+    "Notez D1 à D5 avec la grille en six questions : écrivez les cinq totaux.",
     "Lesquels sont des sources d'origine ? Lesquels relaient une autre source ?",
     "D4 : le chiffre « 99,9 % » renvoie-t-il à une étude précise nommée dans l'article ?",
-    "Quel document utilisez-vous pour affirmer un fait ? Lequel pour citer une position ?",
-    "D5 : quelle est la version la plus récente et sa date ?"
+    "Quel document pour affirmer un fait ? Lequel pour citer une position ?"
    ],
    "types": [
     null,
     null,
-    null,
     "on",
-    null,
     null
    ],
    "livrable": "Le tableau de notation de 5 documents réels → Dossier, section 5.",
@@ -5061,14 +4976,11 @@ window.DATA = {
   "EX4",
   "EX5",
   "EX6",
-  "F2",
   "EX7",
   "EX8",
-  "F3",
   "EX9",
   "EX10",
   "EX11",
-  "F4",
   "EX11b",
   "EX12",
   "EX13",
@@ -5087,7 +4999,6 @@ window.DATA = {
   "EX23",
   "EX24",
   "EX25",
-  "F8",
   "EX26",
   "EX27",
   "EX28",

@@ -38,7 +38,7 @@
         h("a", { class: "tile g", href: "#/jeu21" }, h("b", {}, "Jeu 21 · Mardi 6 h 50"), h("div", { class: "meta" }, "Communication de crise, 5 injects")),
         h("a", { class: "tile g", href: "#/quiz-final" }, h("b", {}, "Quiz final"), h("div", { class: "meta" }, "10 questions, individuel")),
         h("a", { class: "tile", href: "#/outils" }, h("b", {}, "Boîte à outils"), h("div", { class: "meta" }, "Modèles à copier, calculettes, outils réels")),
-        h("a", { class: "tile", href: "#/dossier" }, h("b", {}, "Dossier d'état de l'art"), h("div", { class: "meta" }, "Modèle Word à remplir au fil des exercices")),
+        h("a", { class: "tile", href: "#/dossier" }, h("b", {}, "Dossier d'état de l'art"), h("div", { class: "meta" }, "Modèle PowerPoint à remplir au fil des exercices")),
         h("a", { class: "tile", href: "#/sujets" }, h("b", {}, "Sujets de l'état de l'art"), h("div", { class: "meta" }, D.sujets.length + " questions de départ"))),
       h("h2", {}, "Exercices"),
       h("div", { class: "grid" }, EX.map(function (i) { return h("a", { class: "tile", href: "#/ex/" + i }, h("b", {}, i.replace("EX", "EX ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
@@ -483,9 +483,9 @@
       ["7", "Fiche de lecture", "EX14"], ["8", "Références vérifiées (IA)", "EX15"], ["9", "Argument de Toulmin", "EX16, EX19"], ["10", "Chiffre de fournisseur et objections", "EX18, EX20"], ["11", "Matrice pondérée", "EX21, EX22"], ["12", "Plan et chapô", "EX23"],
       ["13", "État de l'art (2 pages)", "EX24"], ["14", "Retours de relecture", "EX25"], ["15", "Pitch et jury", "EX26, EX27"], ["16", "Fiche de vulnérabilité", "EX28"], ["17", "Bibliographie (Zotero)", "EX10"], ["18", "Déclaration d'usage de l'IA", "tout le cours"]];
     mount(h("h1", {}, "Dossier d'état de l'art"),
-      h("div", { class: "card" }, h("p", {}, "Un seul document Word, rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
-        h("a", { class: "btn", href: "modele-dossier-etat-de-l-art.docx", download: "modele-dossier-etat-de-l-art.docx" }, "Télécharger le modèle (Word)"),
-        h("p", { class: "meta" }, "Ouvrir avec Word ou LibreOffice, ou importer dans Google Docs. Aucune donnée confidentielle ni personnelle.")),
+      h("div", { class: "card" }, h("p", {}, "Un seul fichier PowerPoint (une diapositive par section), rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
+        h("a", { class: "btn", href: "modele-dossier-etat-de-l-art.pptx", download: "modele-dossier-etat-de-l-art.pptx" }, "Télécharger le modèle (PowerPoint)"),
+        h("p", { class: "meta" }, "Ouvrir avec PowerPoint ou LibreOffice Impress, ou importer dans Google Slides. Aucune donnée confidentielle ni personnelle.")),
       h("div", { class: "card" }, h("h2", {}, "Les 18 sections"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
         SEC.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); }))),
       h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés."));
