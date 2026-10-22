@@ -38,6 +38,7 @@
         h("a", { class: "tile g", href: "#/jeu21" }, h("b", {}, "Jeu 21 · Mardi 6 h 50"), h("div", { class: "meta" }, "Communication de crise, 5 injects")),
         h("a", { class: "tile g", href: "#/quiz-final" }, h("b", {}, "Quiz final"), h("div", { class: "meta" }, "10 questions, individuel")),
         h("a", { class: "tile", href: "#/outils" }, h("b", {}, "Boîte à outils"), h("div", { class: "meta" }, "Modèles à copier, calculettes, outils réels")),
+        h("a", { class: "tile", href: "#/dossier" }, h("b", {}, "Dossier d'état de l'art"), h("div", { class: "meta" }, "Modèle Word à remplir au fil des exercices")),
         h("a", { class: "tile", href: "#/sujets" }, h("b", {}, "Sujets de l'état de l'art"), h("div", { class: "meta" }, D.sujets.length + " questions de départ"))),
       h("h2", {}, "Exercices"),
       h("div", { class: "grid" }, EX.map(function (i) { return h("a", { class: "tile", href: "#/ex/" + i }, h("b", {}, i.replace("EX", "EX ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
@@ -113,12 +114,19 @@
     var state = Sess.get(id), fields = [], saved = h("p", { class: "meta" }), tmr = null;
     function flush() { state.a = fields.map(function (f) { return f.value; }); Sess.save(id, state); saved.textContent = Sess.ok ? "Enregistré et envoyé à l'enseignant." : "Enregistré sur ce téléphone."; }
     function setAnswer(i, txt) { if (fields[i]) { fields[i].value = txt; flush(); } }
+    function makeField(i) {
+      var ty = e.types && e.types[i], opts = ty === "vf" ? ["VRAI", "FAUX"] : ty === "on" ? ["OUI", "NON"] : Array.isArray(ty) ? ty : null, f;
+      if (opts) {
+        f = { value: state.a[i] || "" }; var bs = [];
+        var paint = function () { bs.forEach(function (b) { b.className = "choice" + (b.getAttribute("data-v") === f.value ? " on" : ""); }); };
+        opts.forEach(function (o) { var b = h("button", { class: "choice", "data-v": o, type: "button", onclick: function () { f.value = f.value === o ? "" : o; paint(); flush(); } }, o); bs.push(b); });
+        paint(); f.el = h("div", { class: "choices" }, bs); return f;
+      }
+      if (ty === "num") { f = h("input", { type: "text", inputmode: "decimal", pattern: "[0-9]*[.,]?[0-9]*", placeholder: "Un nombre", class: "num" }); f.value = state.a[i] || ""; f.addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(flush, 500); }); f.el = f; return f; }
+      f = h("textarea", { placeholder: "Votre réponse à la tâche " + (i + 1) }); f.value = state.a[i] || ""; f.addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(flush, 500); }); f.el = f; return f;
+    }
     var ansBox = h("div", { class: "card" }, h("h2", {}, "Mes réponses"),
-      e.taches.map(function (t, i) {
-        var f = h("textarea", { placeholder: "Votre réponse à la tâche " + (i + 1) }); f.value = state.a[i] || ""; fields.push(f);
-        f.addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(flush, 500); });
-        return h("div", {}, h("label", { class: "meta" }, (i + 1) + ". " + t), f);
-      }), saved);
+      e.taches.map(function (t, i) { var f = makeField(i); fields.push(f); return h("div", {}, h("label", { class: "meta" }, (i + 1) + ". " + t), f.el); }), saved);
     var doneBtn = h("button", { class: "ok" }, state.done ? "Marqué comme terminé (annuler)" : "J'ai terminé");
     doneBtn.addEventListener("click", function () { state.done = !state.done; flush(); doneBtn.textContent = state.done ? "Marqué comme terminé (annuler)" : "J'ai terminé"; });
     var corrBox = h("div", {}), cb = h("button", { class: "ok" }, "Afficher la correction"), lock = h("p", { class: "meta" });
@@ -470,6 +478,18 @@
     upd(); return box;
   }
 
+  function dossierPage() {
+    var SEC = [["1", "Question de décision", "EX1"], ["2", "Besoin du commanditaire", "EX4"], ["3", "Stratégie de recherche", "EX7, EX8"], ["4", "Sources institutionnelles", "EX9"], ["5", "Sources enregistrées et évaluées", "EX10, EX11b, EX12"], ["6", "Origine d'un chiffre", "EX13"],
+      ["7", "Fiche de lecture", "EX14"], ["8", "Références vérifiées (IA)", "EX15"], ["9", "Argument de Toulmin", "EX16, EX19"], ["10", "Chiffre de fournisseur et objections", "EX18, EX20"], ["11", "Matrice pondérée", "EX21, EX22"], ["12", "Plan et chapô", "EX23"],
+      ["13", "État de l'art (2 pages)", "EX24"], ["14", "Retours de relecture", "EX25"], ["15", "Pitch et jury", "EX26, EX27"], ["16", "Fiche de vulnérabilité", "EX28"], ["17", "Bibliographie (Zotero)", "EX10"], ["18", "Déclaration d'usage de l'IA", "tout le cours"]];
+    mount(h("h1", {}, "Dossier d'état de l'art"),
+      h("div", { class: "card" }, h("p", {}, "Un seul document Word, rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
+        h("a", { class: "btn", href: "modele-dossier-etat-de-l-art.docx", download: "modele-dossier-etat-de-l-art.docx" }, "Télécharger le modèle (Word)"),
+        h("p", { class: "meta" }, "Ouvrir avec Word ou LibreOffice, ou importer dans Google Docs. Aucune donnée confidentielle ni personnelle.")),
+      h("div", { class: "card" }, h("h2", {}, "Les 18 sections"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
+        SEC.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); }))),
+      h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés."));
+  }
   function outilsPage() {
     var calcs = [
       calculette("Calculette · coût de la non-communication (EX2)", [["n", "Salariés", 120], ["h", "Heures perdues par salarié et par semaine", 1.5], ["s", "Semaines travaillées", 45], ["c", "Coût horaire chargé (€)", 32],
@@ -481,8 +501,12 @@
       calculette("Calculette · coût d'une réunion (F7)", [["n", "Participants", 8], ["d", "Durée (heures)", 1], ["s", "Réunions par an", 45], ["c", "Coût horaire chargé (€)", 32]],
         function (v) { var u = v.n * v.d * v.c; return "Une réunion : " + euro(u) + "\nPar an : " + euro(u * v.s); })];
     var ref = [["Google Scholar", "https://scholar.google.com/", "Recherche d'articles scientifiques. Astuce : « guillemets », OR, − et filtre de dates."], ["Semantic Scholar", "https://www.semanticscholar.org/", "Recherche d'articles avec résumés."],
-      ["Zotero", "https://www.zotero.org/", "Gestion de références, gratuit : installer l'extension du navigateur (EX17)."], ["GitHub Issues", "https://docs.github.com/fr/issues", "Tickets d'incident et demandes (EX14)."],
-      ["LanguageTool", "https://languagetool.org/fr", "Correcteur de ton et d'orthographe pour vos e-mails."]];
+      ["Zotero", "https://www.zotero.org/", "Gestion de références, gratuit : installer l'extension du navigateur (EX10)."], ["GitHub Issues", "https://docs.github.com/fr/issues", "Tickets d'incident et demandes (EX14)."],
+      ["LanguageTool", "https://languagetool.org/fr", "Correcteur de ton et d'orthographe pour vos e-mails."],
+      ["doi.org", "https://doi.org/", "Ouvrir un DOI : vérifier qu'il mène au bon article (EX15)."], ["Légifrance", "https://www.legifrance.gouv.fr/", "Textes de loi et décrets (F0)."], ["service-public.fr", "https://www.service-public.fr/", "Informations officielles pour les particuliers et les agents (F0)."],
+      ["Questions écrites, Assemblée nationale", "https://questions.assemblee-nationale.fr/", "Questions et réponses ministérielles (F0)."], ["NIST, publications", "https://csrc.nist.gov/publications", "SP 800-63B-4 (EX11b)."], ["ANSSI / cyber.gouv.fr", "https://cyber.gouv.fr/", "Guides et recommandations (EX9, EX11b)."], ["ENISA", "https://www.enisa.europa.eu/publications", "Rapports européens (EX11b)."],
+      ["Perplexity (IA)", "https://www.perplexity.ai/", "Réponses avec liens vers les sources : ouvrir chaque lien. Aucune donnée confidentielle."], ["Elicit (IA)", "https://elicit.com/", "Recherche et extraction dans des articles scientifiques."], ["Consensus (IA)", "https://consensus.app/", "Moteur de recherche académique assisté par IA."],
+      ["NotebookLM (IA)", "https://notebooklm.google.com/", "Interroger vos propres documents publics."], ["Scite (IA)", "https://scite.ai/", "Citations qui soutiennent ou contredisent (payant)."]];
     mount(h("h1", {}, "Boîte à outils"), h("p", { class: "meta" }, "Concepts et modèles à copier-coller, calculettes, outils réels. Les calculettes « coût de la non-communication » et « réunion » servent à l'annexe. Cas fictif TransLor ; chiffres inventés. Adresses des outils réels à vérifier avant le cours."),
       h("h2", {}, "Calculettes"), evaluateurSource(), matrice(), calcs[0], calcs[1],
       h("h2", {}, "Outils réels"), h("div", { class: "card" }, ref.map(function (r) { return h("p", {}, h("a", { href: r[1], target: "_blank", rel: "noopener" }, r[0]), " : " + r[2]); })),
@@ -503,6 +527,7 @@
     if (a === "prof") return profPage();
     if (a === "outils") return outilsPage();
     if (a === "sujets") return sujetsPage();
+    if (a === "dossier") return dossierPage();
     notFound();
   }
   window.addEventListener("hashchange", route); route();

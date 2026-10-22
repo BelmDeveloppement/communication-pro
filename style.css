@@ -13,3 +13,5 @@ textarea,input,select{font:inherit;width:100%;padding:8px;border:1px solid #b9c4
 .opt{display:block;width:100%;text-align:left;background:#fff;color:var(--t);border:2px solid #b9c4e8;margin:8px 0;padding:12px}.opt.sel{border-color:var(--b);background:var(--l)}.opt.good{border-color:var(--g);background:#dff3e8}.opt.bad{border-color:var(--r)}
 .team{display:inline-block;border-radius:20px;padding:4px 12px;color:#fff;font-weight:700;margin:3px}.code{font-size:56px;letter-spacing:8px;font-weight:700;color:var(--m)}
 .big{font-size:22px}.warn{background:#FFF3D6;border-left:6px solid var(--o);padding:8px 12px;border-radius:6px}ol li,ul li{margin:4px 0}
+
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}button.choice{flex:1 1 40%;min-height:48px;background:#e8ecf8;color:#1F2A5C;border:2px solid #b9c4e8;font-weight:700}button.choice.on{background:#3B6FD8;color:#fff;border-color:#1F2A5C}input.num{max-width:200px;font-size:20px;margin-bottom:10px}
