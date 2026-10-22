@@ -83,11 +83,19 @@
     var qs = ["Je dis franchement ce que je pense, même si cela peut déplaire.", "En réunion, je donne mon avis en premier.", "Je préfère une réponse courte et claire.", "Quand je ne suis pas d'accord, je le dis tout de suite.",
       "Avant de parler d'un problème, je prends des nouvelles de la personne.", "Je repère vite l'ambiance d'une équipe.", "Je préfère régler un désaccord à l'oral.", "J'explique le contexte, pas seulement la consigne."];
     var sel = qs.map(function () { var s = h("select", {}, [1, 2, 3, 4].map(function (n) { return h("option", { value: n }, String(n)); })); s.value = "2"; return s; });
-    var res = h("p", { class: "big" });
+    var res = h("div", {});
+    var PROF = { "Décideur": ["Direct + Tâche", "Clarté, rapidité", "Paraît brusque, oublie le contexte", "Ajouter une phrase de contexte"],
+      "Animateur": ["Direct + Relation", "Énergie, lien avec les autres", "Dilue le message dans l'ambiance", "Finir par une demande précise"],
+      "Analyste": ["Nuancé + Tâche", "Rigueur, précision", "Trop long, décision retardée", "Donner la conclusion d'abord"],
+      "Facilitateur": ["Nuancé + Relation", "Écoute, consensus", "Évite le désaccord nécessaire", "Oser dire non avec une alternative"] };
     var calc = h("button", { onclick: function () {
       var v = sel.map(function (s) { return parseInt(s.value, 10); }), A = v[0] + v[1] + v[2] + v[3], B = v[4] + v[5] + v[6] + v[7];
-      var dir = A >= 11, rel = B >= 11, p = dir ? (rel ? "Animateur" : "Décideur") : (rel ? "Facilitateur" : "Analyste");
-      res.textContent = "A = " + A + " (" + (dir ? "Direct" : "Nuancé") + ") · B = " + B + " (" + (rel ? "Relation" : "Tâche") + ") → profil : " + p; store("profil", p);
+      var dir = A >= 11, rel = B >= 11, p = dir ? (rel ? "Animateur" : "Décideur") : (rel ? "Facilitateur" : "Analyste"), x = PROF[p]; store("profil", p);
+      res.innerHTML = ""; res.appendChild(h("div", { class: "corr" }, h("h2", {}, "Votre profil : " + p + " (" + x[0] + ")"),
+        h("p", {}, "Axe A, façon de s'exprimer : " + A + " / 16 → " + (dir ? "Direct (11 et plus)" : "Nuancé (10 et moins)")),
+        h("p", {}, "Axe B, centre d'attention : " + B + " / 16 → " + (rel ? "Relation (11 et plus)" : "Tâche (10 et moins)")),
+        h("p", {}, h("b", {}, "Force : "), x[1]), h("p", {}, h("b", {}, "Risque en entreprise : "), x[2]), h("p", {}, h("b", {}, "Conseil : "), x[3]),
+        h("p", { class: "meta" }, "Modèle pédagogique simplifié : aucun profil n'est meilleur ; l'enjeu est l'écart avec la personne en face.")));
     } }, "Calculer mon profil");
     return h("div", { class: "card" }, h("h2", {}, "Calculateur de profil (1 = pas du tout d'accord, 4 = tout à fait)"),
       qs.map(function (q, i) { return h("div", {}, h("label", {}, (i + 1) + ". " + q), sel[i]); }), calc, res);
