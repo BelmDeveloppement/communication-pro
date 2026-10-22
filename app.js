@@ -30,18 +30,21 @@
     var ex = Object.keys(D.exo), nums = function (a, b) { return parseInt(a.replace(/\D/g, ""), 10) - parseInt(b.replace(/\D/g, ""), 10); };
     var EX = ex.filter(function (i) { return i.indexOf("EX") === 0; }).sort(nums), F = ex.filter(function (i) { return i.charAt(0) === "F"; }).sort(nums);
     var bar0 = h("div", {}); Sess.onchange = function () { bar0.innerHTML = ""; bar0.appendChild(sessionBar()); }; Sess.onchange(); Sess.connect();
-    mount(h("h1", {}, "Exercices, quiz et jeux"), bar0,
+    mount(h("h1", {}, "Communication professionnelle : exercices, quiz et jeux"), bar0,
       h("p", { class: "meta" }, "Scannez le QR code de la diapositive, ou choisissez ci-dessous. Cas fictif : TransLor."),
       h("h2", {}, "Jeux"),
       h("div", { class: "grid" },
-        h("a", { class: "tile g", href: "#/jeu20" }, h("b", {}, "Jeu 20 · Le quiz de la Vigie"), h("div", { class: "meta" }, "54 questions, équipes sur téléphone")),
+        h("a", { class: "tile g", href: "#/jeu20" }, h("b", {}, "Jeu 20 · Quiz Chercher, évaluer, argumenter"), h("div", { class: "meta" }, D.quiz.length + " questions, équipes sur téléphone")),
         h("a", { class: "tile g", href: "#/jeu21" }, h("b", {}, "Jeu 21 · Mardi 6 h 50"), h("div", { class: "meta" }, "Communication de crise, 5 injects")),
         h("a", { class: "tile g", href: "#/quiz-final" }, h("b", {}, "Quiz final"), h("div", { class: "meta" }, "10 questions, individuel")),
-        h("a", { class: "tile", href: "#/outils" }, h("b", {}, "Boîte à outils"), h("div", { class: "meta" }, "Modèles à copier, calculettes, outils réels"))),
+        h("a", { class: "tile", href: "#/outils" }, h("b", {}, "Boîte à outils"), h("div", { class: "meta" }, "Modèles à copier, calculettes, outils réels")),
+        h("a", { class: "tile", href: "#/sujets" }, h("b", {}, "Sujets de l'état de l'art"), h("div", { class: "meta" }, D.sujets.length + " questions de départ"))),
       h("h2", {}, "Exercices"),
       h("div", { class: "grid" }, EX.map(function (i) { return h("a", { class: "tile", href: "#/ex/" + i }, h("b", {}, i.replace("EX", "EX ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
       h("h2", {}, "Exercices flash et exit tickets"),
-      h("div", { class: "grid" }, F.map(function (i) { return h("a", { class: "tile f", href: "#/f/" + i }, h("b", {}, i.replace("F", "F ")), h("div", { class: "meta" }, D.exo[i].titre)); })));
+      h("div", { class: "grid" }, F.map(function (i) { return h("a", { class: "tile f", href: "#/f/" + i }, h("b", {}, i.replace("F", "F ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
+      h("h2", {}, "Annexe : communication générale (hors temps de cours)"),
+      h("div", { class: "grid" }, (D.annexe || []).map(function (i) { return h("a", { class: "tile f", href: "#/ex/" + i }, h("b", {}, i.replace("AX", "Annexe X ").replace("AF", "Annexe F ")), h("div", { class: "meta" }, D.exo[i].titre)); })));
   }
 
   /* ---------- Session : réponses individuelles ---------- */
@@ -138,7 +141,7 @@
       h("div", { class: "card" }, disp, bt, reset)];
     if (e.fiche_role) parts.push(h("div", { class: "card" }, h("p", { class: "meta" }, "Réservé au joueur qui tient le rôle de Marc."),
       h("button", { class: "sec", onclick: function () { roleBox.innerHTML = ""; roleBox.appendChild(h("div", { class: "corr pre" }, e.fiche_role)); } }, "Afficher la fiche de rôle"), roleBox));
-    if (id === "EX1") parts.push(styleWidget(setAnswer));
+    if (id === "EX2") parts.push(styleWidget(setAnswer));
     parts.push(ansBox, h("div", {}, doneBtn), h("div", {}, cb, lock, corrBox));
     mount.apply(null, parts);
   }
@@ -174,7 +177,7 @@
   }
 
   /* ---------- Enseignant : adresse récapitulative (#/prof) ---------- */
-  var ORDRE = ["F0","EX1","F1","EX2","EX3","EX4","F2","EX5","EX6","EX7","F3","EX8","EX9","F4","EX11","EX12","EX13","EX14","EX10","F5","EX15","EX16","EX17","EX18","EX19","F8","F6","EX20","EX21","F7","EX22","EX23","EX24","F9"];
+  var ORDRE = (D.ordre || []).concat(D.annexe || []);
   function exOrder() { return ORDRE.filter(function (i) { return D.exo[i]; }); }
   function profPage() {
     var P = LSget("prof") || { salle: "", data: {}, unlocked: [] }, peer = null, online = {}, root = h("div", {}), content = h("div", {}), view = "avancement", sel = "", follow = true, big = false, dirty = false;
@@ -261,7 +264,7 @@
   /* ---------- Jeux : entrée ---------- */
   function params() { var q = (location.hash.split("?")[1] || ""), o = {}; q.split("&").forEach(function (p) { var a = p.split("="); if (a[0]) o[a[0]] = decodeURIComponent(a[1] || ""); }); return o; }
   function gameEntry(mode) {
-    var name = mode === "quiz" ? "Jeu 20 · Le quiz de la Vigie" : "Jeu 21 · Mardi 6 h 50", p = params();
+    var name = mode === "quiz" ? "Jeu 20 · Quiz Chercher, évaluer, argumenter" : "Jeu 21 · Mardi 6 h 50", p = params();
     var code = h("input", { placeholder: "Code à 4 caractères", maxlength: 4, style: "text-transform:uppercase" }); code.value = (p.c || "").toUpperCase();
     var nm = h("input", { placeholder: "Nom de l'équipe", maxlength: 24 }); nm.value = store("nom-equipe") || "";
     var nq = h("select", {}, [10, 20, 30, 54].map(function (n) { return h("option", { value: n }, n + " questions"); })); nq.value = "20";
@@ -295,7 +298,7 @@
     }
     function render() {
       var v = E.view(st), kids = [];
-      var title = mode === "quiz" ? "Jeu 20 · Le quiz de la Vigie" : "Jeu 21 · Mardi 6 h 50";
+      var title = mode === "quiz" ? "Jeu 20 · Quiz Chercher, évaluer, argumenter" : "Jeu 21 · Mardi 6 h 50";
       kids.push(h("p", { class: "meta" }, title + (v.idx >= 0 && v.phase !== "end" ? " · question " + (v.idx + 1) + "/" + v.total : "")));
       if (status) kids.push(h("p", { class: "warn" }, status));
       if (v.phase === "lobby") {
@@ -397,8 +400,24 @@
 
   function notFound() { mount(h("h1", {}, "Page introuvable"), h("a", { class: "btn", href: "#/" }, "Accueil")); }
 
+  /* ---------- Sujets ---------- */
+  function sujetsPage() {
+    var mine = store("sujet");
+    mount(h("h1", {}, "Sujets de l'état de l'art"), h("p", { class: "meta" }, "Choisissez un sujet avec votre équipe, puis formulez votre question de décision (EX1). Sujets proposés par l'enseignant, à valider : vérifiez qu'il existe au moins cinq sources sérieuses."),
+      h("div", {}, D.sujets.map(function (s, i) { var b = h("button", { class: "sec", onclick: function () { store("sujet", s[0]); sujetsPage(); } }, mine === s[0] ? "Choisi ✓" : "Choisir");
+        return h("div", { class: "card" }, h("b", {}, (i + 1) + ". " + s[0]), h("p", {}, s[1]), b); })),
+      h("p", {}, h("a", { href: "#/ex/EX1" }, "→ Exercice EX1 : formuler la question")), h("p", {}, h("a", { href: "#/" }, "← Retour à l'accueil")));
+  }
+
   /* ---------- Boîte à outils ---------- */
   var MODELES = [
+    ["Requête de recherche (Scholar)", "Outil réel", "Concepts : …, …, …\nSynonymes FR : … OR …\nSynonymes EN : … OR …\nRequête : (\"…\" OR \"…\") (\"…\" OR \"…\") -mot-exclu\nFiltre de dates : depuis 20XX\nDate de la recherche : …  Nombre de résultats : …"],
+    ["Fiche de lecture d'un article", "Modèle", "Référence : …\nQuestion de l'article : …\nMéthode (échantillon, durée, groupe témoin ?) : …\nRésultat principal (avec chiffre) : …\nLimites : … / … / …\nFinancement et conflits d'intérêts : …\nCe que je peux écrire honnêtement : « … »"],
+    ["Plan de l'état de l'art (2 pages)", "Modèle", "Chapô (3 lignes) : question, méthode, conclusion\n1. Question et contexte (10 %)\n2. Méthode de recherche : requêtes, bases, période, sources retenues et écartées (15 %)\n3. Panorama des solutions, avec sources (25 %)\n4. Comparaison : matrice, test de sensibilité (25 %)\n5. Discussion et limites (15 %)\n6. Conclusion : recommandation, qualificatif, réserve (10 %)\nRéférences (Zotero)"],
+    ["Grille de notation de l'état de l'art (20 points)", "Modèle", "Question et contexte : /2\nMéthode de recherche : /3\nQualité des sources : /4\nComparaison : /4\nArgumentation : /4\nClarté et références : /3\nTotal : /20"],
+    ["Grille de jury (pitch, 20 points)", "Modèle", "Message clé : /3\nStructure : /3\nClarté et vulgarisation : /3\nPreuves et sources : /4\nRéponse aux questions : /4\nVoix et posture : /3\nTotal : /20\nFeedback SBI : S … B … I …"],
+    ["Fiche : vulnérabilité clé de mon organisation", "Modèle", "Vulnérabilité : …\nQui, quoi, quand, impact : …\nPreuve (donnée, observation, source) : …\nArgument : affirmation … ; données … ; garantie … ; réfutation …\nRecommandation (qualificatif, réserve) : …\nComment la vérifier avec le tuteur, et quand : …"],
+    ["Note de synthèse d'une page", "Modèle", "Conclusion (une phrase) : …\nArgument 1 (chiffré) : …\nArgument 2 (chiffré) : …\nArgument 3 (chiffré) : …\nRisque ou réserve : …\nDécision demandée et date : …"],
     ["DESC : feedback ou désaccord", "Concept", "D · Décrire : « … (faits, sans jugement) »\nE · Exprimer : « … (l'effet sur moi ou sur le travail) »\nS · Spécifier : « … (ce que je demande, précis et daté) »\nC · Conséquences : « … (ce qui s'améliore, ou ce qui se passera sinon) »"],
     ["SBI : feedback en trois temps", "Concept", "S · Situation : quand, où ? « … »\nB · Comportement : ce que j'ai vu ou entendu. « … »\nI · Impact : l'effet sur moi, l'équipe ou le client. « … »\nPuis une question : « Comment voyez-vous les choses ? »"],
     ["Reformulation (écho, clarification, synthèse, reflet)", "Concept", "Écho : « Vous dites que … »\nClarification : « Quand vous dites …, que voulez-vous dire exactement ? »\nSynthèse : « Si je résume, vous avez … contraintes : … et … »\nReflet : « Vous semblez … »\nInterdits : conseil, jugement, « moi aussi »."],
@@ -429,6 +448,28 @@
     function upd() { var v = {}; Object.keys(inputs).forEach(function (k) { v[k] = num(inputs[k].value); }); out.textContent = calc(v); }
     upd(); return box;
   }
+
+  function evaluateurSource() {
+    var crit = ["Qui ? (auteur compétent, indépendant)", "Quand ? (date adaptée)", "Pourquoi ? (informer plutôt que vendre)", "Sur quoi ? (données et méthode visibles)", "Recoupé ? (autres sources indépendantes)", "Reproductible ? (méthode refaisable)"];
+    var sel = [], out = h("div", { class: "pre" }), box = h("div", { class: "card" }, h("h3", {}, "Évaluateur de source (grille en six questions)"));
+    crit.forEach(function (c) { var s = h("select", {}, h("option", { value: "0" }, "0"), h("option", { value: "1" }, "1"), h("option", { value: "2" }, "2")); s.addEventListener("change", upd); sel.push(s); box.appendChild(h("label", {}, c + " : 0 à 2")); box.appendChild(s); });
+    box.appendChild(out);
+    function upd() { var t = 0; sel.forEach(function (s) { t += parseInt(s.value, 10); }); out.textContent = "Total : " + t + " / 12 → " + (t >= 9 ? "fiable : à retenir" : t >= 5 ? "à recouper avant de citer" : "à écarter ou à citer avec prudence") + "\n(Seuils pédagogiques du cours.)"; }
+    upd(); return box;
+  }
+  function matrice() {
+    var box = h("div", { class: "card" }, h("h3", {}, "Matrice pondérée (3 solutions, 4 critères)")), out = h("div", { class: "pre" }), poids = [], noms = [], scores = [];
+    box.appendChild(h("p", { class: "meta" }, "Saisissez les poids (somme = 100) et les scores de 1 à 5. Modifiez les poids pour le test de sensibilité."));
+    var wr = h("div", { class: "grid" }); ["Coût", "Sécurité", "Restauration", "Simplicité"].forEach(function (n, j) { var i = h("input", { value: [30, 30, 25, 15][j], inputmode: "decimal" }); i.addEventListener("input", upd); poids.push(i); wr.appendChild(h("div", {}, h("label", {}, "Poids " + n + " (%)"), i)); }); box.appendChild(wr);
+    [["Disque local", [5, 2, 2, 5]], ["Cloud", [3, 4, 4, 4]], ["Hybride", [2, 5, 5, 3]]].forEach(function (s) { var row = h("div", { class: "grid" }), line = [], nm = h("input", { value: s[0] }); nm.addEventListener("input", upd); noms.push(nm);
+      row.appendChild(h("div", {}, h("label", {}, "Solution"), nm)); s[1].forEach(function (v) { var i = h("input", { value: v, inputmode: "decimal" }); i.addEventListener("input", upd); line.push(i); row.appendChild(h("div", {}, h("label", {}, "Score"), i)); }); scores.push(line); box.appendChild(row); });
+    box.appendChild(out);
+    function upd() { var w = poids.map(function (i) { return num(i.value); }), sw = w.reduce(function (a, b) { return a + b; }, 0) || 1;
+      var res = scores.map(function (l, k) { return [noms[k].value, l.reduce(function (a, i, j) { return a + num(i.value) * w[j] / sw; }, 0)]; }).sort(function (a, b) { return b[1] - a[1]; });
+      out.textContent = "Somme des poids : " + sw + " %\n" + res.map(function (r, i) { return (i + 1) + ". " + r[0] + " : " + r[1].toFixed(2); }).join("\n") + "\n(Scores fictifs d'exemple : à remplacer et à sourcer.)"; }
+    upd(); return box;
+  }
+
   function outilsPage() {
     var calcs = [
       calculette("Calculette · coût de la non-communication (EX2)", [["n", "Salariés", 120], ["h", "Heures perdues par salarié et par semaine", 1.5], ["s", "Semaines travaillées", 45], ["c", "Coût horaire chargé (€)", 32],
@@ -442,8 +483,8 @@
     var ref = [["Google Scholar", "https://scholar.google.com/", "Recherche d'articles scientifiques. Astuce : « guillemets », OR, − et filtre de dates."], ["Semantic Scholar", "https://www.semanticscholar.org/", "Recherche d'articles avec résumés."],
       ["Zotero", "https://www.zotero.org/", "Gestion de références, gratuit : installer l'extension du navigateur (EX17)."], ["GitHub Issues", "https://docs.github.com/fr/issues", "Tickets d'incident et demandes (EX14)."],
       ["LanguageTool", "https://languagetool.org/fr", "Correcteur de ton et d'orthographe pour vos e-mails."]];
-    mount(h("h1", {}, "Boîte à outils"), h("p", { class: "meta" }, "Concepts et modèles à copier-coller, calculettes, outils réels. Cas fictif TransLor ; chiffres inventés. Adresses des outils réels à vérifier avant le cours."),
-      h("h2", {}, "Calculettes"), calcs[0], calcs[1],
+    mount(h("h1", {}, "Boîte à outils"), h("p", { class: "meta" }, "Concepts et modèles à copier-coller, calculettes, outils réels. Les calculettes « coût de la non-communication » et « réunion » servent à l'annexe. Cas fictif TransLor ; chiffres inventés. Adresses des outils réels à vérifier avant le cours."),
+      h("h2", {}, "Calculettes"), evaluateurSource(), matrice(), calcs[0], calcs[1],
       h("h2", {}, "Outils réels"), h("div", { class: "card" }, ref.map(function (r) { return h("p", {}, h("a", { href: r[1], target: "_blank", rel: "noopener" }, r[0]), " : " + r[2]); })),
       h("h2", {}, "Modèles à copier"),
       h("div", {}, MODELES.map(function (m) { var b = h("button", { onclick: function () { copier(m[2], b); } }, "Copier"); return h("div", { class: "card" }, h("b", {}, m[0]), h("span", { class: "meta" }, " · " + m[1]), h("pre", { class: "pre" }, m[2]), b); })),
@@ -461,6 +502,7 @@
     if (a === "session") return sessionPage();
     if (a === "prof") return profPage();
     if (a === "outils") return outilsPage();
+    if (a === "sujets") return sujetsPage();
     notFound();
   }
   window.addEventListener("hashchange", route); route();
