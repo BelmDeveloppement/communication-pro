@@ -36,7 +36,8 @@
       h("div", { class: "grid" },
         h("a", { class: "tile g", href: "#/jeu20" }, h("b", {}, "Jeu 20 · Le quiz de la Vigie"), h("div", { class: "meta" }, "54 questions, équipes sur téléphone")),
         h("a", { class: "tile g", href: "#/jeu21" }, h("b", {}, "Jeu 21 · Mardi 6 h 50"), h("div", { class: "meta" }, "Communication de crise, 5 injects")),
-        h("a", { class: "tile g", href: "#/quiz-final" }, h("b", {}, "Quiz final"), h("div", { class: "meta" }, "10 questions, individuel"))),
+        h("a", { class: "tile g", href: "#/quiz-final" }, h("b", {}, "Quiz final"), h("div", { class: "meta" }, "10 questions, individuel")),
+        h("a", { class: "tile", href: "#/outils" }, h("b", {}, "Boîte à outils"), h("div", { class: "meta" }, "Modèles à copier, calculettes, outils réels"))),
       h("h2", {}, "Exercices"),
       h("div", { class: "grid" }, EX.map(function (i) { return h("a", { class: "tile", href: "#/ex/" + i }, h("b", {}, i.replace("EX", "EX ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
       h("h2", {}, "Exercices flash et exit tickets"),
@@ -371,7 +372,7 @@
       });
       conn.on("error", function () { root.innerHTML = ""; root.appendChild(h("p", { class: "warn" }, "Connexion impossible. Vérifiez le code.")); });
     });
-    peer.on("error", function (err) { root.innerHTML = ""; root.appendChild(h("p", { class: "warn" }, "Erreur réseau : " + err.type + ". Vérifiez le code et la connexion.")); });
+    peer.on("error", function (err) { root.innerHTML = ""; root.appendChild(h("p", { class: "warn" }, err.type === "peer-unavailable" ? "Aucune salle avec ce code. L'animateur doit d'abord créer la salle (bouton « Créer une salle »), puis vous donner le code." : "Erreur réseau : " + err.type + ". Vérifiez la connexion (Wi-Fi bloqué : partage de connexion).")); });
   }
 
   /* ---------- Quiz final individuel ---------- */
@@ -395,6 +396,60 @@
   }
 
   function notFound() { mount(h("h1", {}, "Page introuvable"), h("a", { class: "btn", href: "#/" }, "Accueil")); }
+
+  /* ---------- Boîte à outils ---------- */
+  var MODELES = [
+    ["DESC : feedback ou désaccord", "Concept", "D · Décrire : « … (faits, sans jugement) »\nE · Exprimer : « … (l'effet sur moi ou sur le travail) »\nS · Spécifier : « … (ce que je demande, précis et daté) »\nC · Conséquences : « … (ce qui s'améliore, ou ce qui se passera sinon) »"],
+    ["SBI : feedback en trois temps", "Concept", "S · Situation : quand, où ? « … »\nB · Comportement : ce que j'ai vu ou entendu. « … »\nI · Impact : l'effet sur moi, l'équipe ou le client. « … »\nPuis une question : « Comment voyez-vous les choses ? »"],
+    ["Reformulation (écho, clarification, synthèse, reflet)", "Concept", "Écho : « Vous dites que … »\nClarification : « Quand vous dites …, que voulez-vous dire exactement ? »\nSynthèse : « Si je résume, vous avez … contraintes : … et … »\nReflet : « Vous semblez … »\nInterdits : conseil, jugement, « moi aussi »."],
+    ["E-mail en pyramide inversée", "Modèle", "Objet : [sujet] + [action attendue] (8 mots)\n\nBonjour [prénom],\n\nConclusion / demande : …\nAction attendue, de qui, pour quand : …\nContexte en deux lignes : …\nDétails : en pièce jointe.\n\nCordialement,"],
+    ["Compte rendu de réunion (Markdown)", "Modèle", "# Compte rendu — [objet], [date]\n**Participants :** …\n\n## Décisions\n- …\n\n## Actions (qui / quoi / quand)\n- [Qui] : [quoi] avant le [date]\n\n## Points ouverts\n- … (responsable : …)\n\n**Prochaine réunion :** …"],
+    ["Ticket d'incident (GitHub Issues, Markdown)", "Outil réel", "**Titre :** [où] : [quoi] depuis [quand]\n\n## Contexte\n…\n## Impact\n[nombre de personnes, temps perdu]\n## Observé / attendu\nObservé : …\nAttendu : …\n## Pour reproduire\n1. …\n2. …\n## Pièces jointes\n[capture, journal]\n## Dernier changement\n…\n**Priorité :** P1 / P2 / P3 / P4 — justification : …"],
+    ["Modèle de Toulmin", "Concept", "Affirmation : …\nDonnées : …\nGarantie : …\nFondement : …\nRéfutation (sauf si…) : …\nQualificatif (probablement, dans ces conditions…) : …"],
+    ["Grille d'évaluation d'une source (six questions)", "Concept", "| Source | Qui ? | Quand ? | Pourquoi ? | Sur quoi ? | Recoupé ? | Reproductible ? | Total /12 |\n|---|---|---|---|---|---|---|---|\n| … | 0-2 | 0-2 | 0-2 | 0-2 | 0-2 | 0-2 | … |\nSeuils : 9 et plus fiable ; 5 à 8 à recouper ; 4 et moins à écarter ou à citer avec prudence."],
+    ["Matrice pondérée (tableur)", "Outil réel", "Ligne 1 : critères. Ligne 7 : poids (somme = 100 %).\nLignes 2 à 4 : une solution par ligne, scores de 1 à 5.\nNote : =SOMMEPROD(B2:E2;$B$7:$E$7)\nTest de sensibilité : changer les poids et regarder si le classement change."],
+    ["Plan de pitch (2 minutes)", "Modèle", "Message clé (une phrase) : …\nAccroche (scène ou chiffre) : …\nProblème : …\nSolution : …\nPreuve (fait, chiffre, exemple) : …\nAppel à décision (daté, chiffré) : …"],
+    ["Ordre du jour de réunion", "Modèle", "Objectif de la réunion (une phrase) : …\nDate, durée, lieu : …\nInvités et rôle : …\nAnimateur : … Secrétaire : … Gardien du temps : …\nPoints (durée, décision attendue) :\n1. … (10 min) — décider / informer / discuter\n2. …"],
+    ["Message de crise (trois éléments)", "Modèle", "Fait : « … »\nConsigne : « … »\nProchain point : « … à [heure] »\n(Pas de promesse non fondée, pas de coupable, pas de « tout va bien ».)"],
+    ["Plan 30-60-90 jours", "Modèle", "Compétence 1 : …\n  J+30 : … (indicateur : …)\n  J+60 : … (indicateur : …)\n  J+90 : … (indicateur : …)\nCompétence 2 : …\nCompétence 3 : …\nPremier pas demain (moins de 15 min) : …\nDate de point avec : … le …"]
+  ];
+  function copier(txt, btn) {
+    function ok() { btn.textContent = "Copié ✓"; setTimeout(function () { btn.textContent = "Copier"; }, 1500); }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(txt).then(ok, fallback); return; } } catch (e) {}
+    fallback();
+    function fallback() { var t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); ok(); } catch (e) { btn.textContent = "Copie impossible"; } document.body.removeChild(t); }
+  }
+  function num(v) { var x = parseFloat(String(v).replace(",", ".")); return isFinite(x) ? x : 0; }
+  function euro(x) { return Math.round(x).toLocaleString("fr-FR") + " €"; }
+  function calculette(titre, champs, calc) {
+    var inputs = {}, out = h("div", { class: "pre" });
+    var box = h("div", { class: "card" }, h("h3", {}, titre));
+    champs.forEach(function (c) { var i = h("input", { type: "text", inputmode: "decimal", value: String(c[2]) }); inputs[c[0]] = i; i.addEventListener("input", upd); box.appendChild(h("label", {}, c[1])); box.appendChild(i); });
+    box.appendChild(out);
+    function upd() { var v = {}; Object.keys(inputs).forEach(function (k) { v[k] = num(inputs[k].value); }); out.textContent = calc(v); }
+    upd(); return box;
+  }
+  function outilsPage() {
+    var calcs = [
+      calculette("Calculette · coût de la non-communication (EX2)", [["n", "Salariés", 120], ["h", "Heures perdues par salarié et par semaine", 1.5], ["s", "Semaines travaillées", 45], ["c", "Coût horaire chargé (€)", 32],
+        ["r", "Réduction de la perte par le plan (%)", 40], ["f", "Heures de formation par salarié", 7], ["p", "Prestation (€)", 6000], ["d", "Décote de prudence sur le gain (%)", 50]],
+        function (v) { var hp = v.n * v.h * v.s, cout = hp * v.c, gain = cout * v.r / 100, plan = v.n * v.f * v.c + v.p, gp = gain * (1 - v.d / 100);
+          return "Heures perdues par an : " + Math.round(hp).toLocaleString("fr-FR") + " h\nCoût annuel : " + euro(cout) + "\nGain annuel : " + euro(gain) + "\nCoût du plan : " + euro(plan) +
+            "\nROI année 1 : " + (plan ? Math.round((gain - plan) / plan * 100) : 0) + " %\nRetour : " + (gain ? (plan / gain * 12).toFixed(1) : "—") + " mois" +
+            "\nVersion prudente : gain " + euro(gp) + ", ROI " + (plan ? Math.round((gp - plan) / plan * 100) : 0) + " %, retour " + (gp ? (plan / gp * 12).toFixed(1) : "—") + " mois\n(Hypothèses pédagogiques inventées.)"; }),
+      calculette("Calculette · coût d'une réunion (F7)", [["n", "Participants", 8], ["d", "Durée (heures)", 1], ["s", "Réunions par an", 45], ["c", "Coût horaire chargé (€)", 32]],
+        function (v) { var u = v.n * v.d * v.c; return "Une réunion : " + euro(u) + "\nPar an : " + euro(u * v.s); })];
+    var ref = [["Google Scholar", "https://scholar.google.com/", "Recherche d'articles scientifiques. Astuce : « guillemets », OR, − et filtre de dates."], ["Semantic Scholar", "https://www.semanticscholar.org/", "Recherche d'articles avec résumés."],
+      ["Zotero", "https://www.zotero.org/", "Gestion de références, gratuit : installer l'extension du navigateur (EX17)."], ["GitHub Issues", "https://docs.github.com/fr/issues", "Tickets d'incident et demandes (EX14)."],
+      ["LanguageTool", "https://languagetool.org/fr", "Correcteur de ton et d'orthographe pour vos e-mails."]];
+    mount(h("h1", {}, "Boîte à outils"), h("p", { class: "meta" }, "Concepts et modèles à copier-coller, calculettes, outils réels. Cas fictif TransLor ; chiffres inventés. Adresses des outils réels à vérifier avant le cours."),
+      h("h2", {}, "Calculettes"), calcs[0], calcs[1],
+      h("h2", {}, "Outils réels"), h("div", { class: "card" }, ref.map(function (r) { return h("p", {}, h("a", { href: r[1], target: "_blank", rel: "noopener" }, r[0]), " : " + r[2]); })),
+      h("h2", {}, "Modèles à copier"),
+      h("div", {}, MODELES.map(function (m) { var b = h("button", { onclick: function () { copier(m[2], b); } }, "Copier"); return h("div", { class: "card" }, h("b", {}, m[0]), h("span", { class: "meta" }, " · " + m[1]), h("pre", { class: "pre" }, m[2]), b); })),
+      h("p", {}, h("a", { href: "#/" }, "← Retour à l'accueil")));
+  }
+
   function route() {
     var p = (location.hash || "#/").replace(/\?.*$/, "").split("/").filter(Boolean); p.shift();
     Sess_off(); var a = p[0] || "";
@@ -405,6 +460,7 @@
     if (a === "quiz-final") return quizFinal();
     if (a === "session") return sessionPage();
     if (a === "prof") return profPage();
+    if (a === "outils") return outilsPage();
     notFound();
   }
   window.addEventListener("hashchange", route); route();
