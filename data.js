@@ -5070,6 +5070,304 @@ window.DATA = {
     ]
    },
    "notes_extra": ""
+  },
+  "M1": {
+   "id": "M1",
+   "titre": "Défi chrono : retrouver le texte officiel en 3 minutes",
+   "mode": "Binômes, ordinateur",
+   "duree": 15,
+   "chap": "Carnet · chapitre 3",
+   "outil": "Google (site:, filetype:), sites officiels",
+   "situation": [
+    "Trois documents à retrouver, 3 minutes chacun, avec une requête qui contient au moins un opérateur. Le lien final doit mener au site de l'organisme ou au journal officiel, pas à un blog qui le cite.",
+    "① Le guide de l'ANSSI sur l'authentification multifacteur et les mots de passe (2021). ② La publication NIST SP 800-63B sur l'authentification. ③ Le texte officiel de la directive européenne NIS2 (directive (UE) 2022/2555)."
+   ],
+   "taches": [
+    "Document ① : écrivez la requête gagnante et le nom de domaine du site trouvé.",
+    "Document ② : même chose.",
+    "Document ③ : même chose.",
+    "Quel opérateur vous a fait gagner le plus de temps ?",
+    "Avec ChatGPT ou une autre IA (notez laquelle) : demandez-lui l'adresse du document ③. L'adresse proposée s'ouvre-t-elle et mène-t-elle au bon texte ?"
+   ],
+   "types": [
+    null,
+    null,
+    null,
+    [
+     "site:",
+     "filetype:pdf",
+     "guillemets",
+     "intitle:",
+     "OR"
+    ],
+    "on"
+   ],
+   "livrable": "Trois requêtes gagnantes à copier dans votre carnet → Dossier, section 4.",
+   "corr": {
+    "methode": [
+     "Écrire le titre exact entre guillemets (ou le numéro du texte).",
+     "Limiter au bon site avec site: (cyber.gouv.fr, nist.gov, eur-lex.europa.eu).",
+     "Ajouter filetype:pdf si vous voulez le document, puis l'ouvrir : titre, date, version."
+    ],
+    "cols": [
+     "Document",
+     "Requête efficace (exemple)",
+     "À contrôler"
+    ],
+    "widths": [
+     1.4,
+     3.4,
+     3.2
+    ],
+    "rows": [
+     [
+      "① Guide ANSSI",
+      "« authentification multifacteur » « mots de passe » site:cyber.gouv.fr filetype:pdf",
+      "Titre exact « Recommandations relatives à l'authentification multifacteur et aux mots de passe », version de 2021 (ancien domaine : ssi.gouv.fr)."
+     ],
+     [
+      "② NIST",
+      "« 800-63B » site:nist.gov",
+      "Prendre la version la plus récente : SP 800-63B-4 (juillet 2025) ; les anciennes versions restent en ligne."
+     ],
+     [
+      "③ NIS2",
+      "directive 2022/2555 site:eur-lex.europa.eu",
+      "Numéro (UE) 2022/2555 ; texte du Journal officiel de l'Union européenne ; choisir la langue française."
+     ],
+     [
+      "Opérateur gagnant",
+      "site: pour presque tous les cas ; filetype:pdf pour le guide.",
+      "Sans site:, les premiers résultats sont souvent des blogs ou des résumés."
+     ],
+     [
+      "IA · adresse proposée",
+      "Souvent une adresse plausible mais fausse ou périmée (page déplacée, version ancienne).",
+      "Ouvrez toujours l'adresse : une IA propose, le site officiel prouve."
+     ]
+    ],
+    "erreurs": [
+     "Se contenter du premier résultat, un blog qui cite le guide : remontez au site de l'organisme.",
+     "Oublier la version et la date du document.",
+     "Taper la question entière au lieu des mots exacts du titre."
+    ],
+    "retenir": "Titre exact entre guillemets + site: = le document officiel en moins de 3 minutes."
+   }
+  },
+  "M2": {
+   "id": "M2",
+   "titre": "Défi chrono : trouver l'article en accès libre",
+   "mode": "Binômes, ordinateur",
+   "duree": 15,
+   "chap": "Carnet · chapitre 3",
+   "outil": "Google Scholar, arXiv, HAL, Unpaywall, Zotero",
+   "situation": [
+    "Un article payant n'est pas un article inaccessible : l'auteur en dépose souvent une version gratuite (archive ouverte). Vous avez 5 minutes par article.",
+    "Article 1 : Meyer L. A. et al. (2023), « How effective is multifactor authentication at deterring cyberattacks? ». Article 2 : un article payant de votre sujet, trouvé dans Google Scholar (ou, à défaut, tout article dont le PDF vous est refusé)."
+   ],
+   "taches": [
+    "Article 1 : cherchez son titre exact entre guillemets dans Google Scholar. Combien de versions propose le lien « Toutes les versions » ?",
+    "Article 1 : quelle est l'adresse de la version gratuite ?",
+    "Article 2 : essayez dans l'ordre le lien [PDF] de Scholar, « Toutes les versions », HAL, arXiv, puis l'extension Unpaywall. Quelle voie a marché ?",
+    "Si rien ne marche pour l'article 2 : notez la référence et le résumé, et indiquez « accès payant » dans votre fiche.",
+    "Avec Gemini ou une autre IA (notez laquelle) : demandez le lien gratuit de l'article 2. Le lien proposé est-il réel ?"
+   ],
+   "types": [
+    "num",
+    null,
+    [
+     "Lien [PDF] de Scholar",
+     "Toutes les versions",
+     "HAL ou arXiv",
+     "Unpaywall",
+     "Aucune"
+    ],
+    null,
+    "on"
+   ],
+   "livrable": "Une référence avec son lien d'accès libre, enregistrée dans Zotero → Dossier, section 17.",
+   "corr": {
+    "methode": [
+     "Chercher le titre exact entre guillemets.",
+     "Ouvrir « Toutes les versions » avant de payer quoi que ce soit.",
+     "Tester une archive ouverte (HAL, arXiv), puis Unpaywall ; sinon noter « accès payant »."
+    ],
+    "cols": [
+     "Étape",
+     "Résultat attendu (article 1)"
+    ],
+    "widths": [
+     1.8,
+     6.2
+    ],
+    "rows": [
+     [
+      "Recherche",
+      "Titre exact entre guillemets dans Scholar : la page de résultats propose une version arXiv (arxiv.org/abs/2305.00945) et la page de l'éditeur."
+     ],
+     [
+      "Version gratuite",
+      "arXiv : arxiv.org/abs/2305.00945 (version 1 du 1er mai 2023), PDF libre."
+     ],
+     [
+      "Voies pour l'article 2",
+      "1. Lien [PDF] à droite du résultat. 2. « Toutes les versions ». 3. HAL (hal.science) pour les travaux français, arXiv en informatique. 4. L'extension Unpaywall (unpaywall.org) signale une version légale gratuite. 5. Le bouton « Find Available PDF » de Zotero fait la même recherche."
+     ],
+     [
+      "Si aucune version",
+      "Ne pas contourner l'accès payant : citer le résumé comme tel, ou demander l'article par la bibliothèque de l'école."
+     ],
+     [
+      "IA · lien proposé",
+      "Souvent un lien inventé ou un site pirate : n'ouvrez que des adresses d'éditeurs, d'archives ouvertes ou d'institutions."
+     ]
+    ],
+    "erreurs": [
+     "Payer un article sans avoir cherché une version gratuite.",
+     "Citer un article dont on n'a lu que le titre.",
+     "Utiliser un site pirate : illégal et risqué pour le poste."
+    ],
+    "retenir": "Titre exact + « Toutes les versions » + archive ouverte : trois gestes avant de payer."
+   }
+  },
+  "M3": {
+   "id": "M3",
+   "titre": "Mission : écrire la phrase honnête (source, chiffre, limite)",
+   "mode": "Équipes",
+   "duree": 20,
+   "chap": "Carnet · chapitre 7",
+   "outil": "modèle de phrase, IA (relecture)",
+   "situation": [
+    "Un état de l'art contient des phrases qui portent un chiffre. Chaque phrase suit le même modèle : « Selon [qui] ([année]), [chiffre avec ce qui est mesuré] ; [limite : échantillon, auteur, durée]. Verbe prudent. »",
+    "Trois faits bruts. ① Étude de Microsoft (Meyer et al., 2023) : l'authentification multifacteur réduit de 99,22 % le risque de compromission de comptes Azure AD. ② Brochure d'un fournisseur de sauvegarde (2025) : « restauration 70 % plus rapide », sans méthode. ③ Test interne de TransLor (juin) : restauration en 9 h, un seul essai."
+   ],
+   "taches": [
+    "Écrivez la phrase d'état de l'art pour le fait ①.",
+    "Écrivez la phrase pour le fait ②.",
+    "Écrivez la phrase pour le fait ③.",
+    "Écrivez une quatrième phrase, avec une vraie source de votre sujet (EX12).",
+    "Avec Copilot ou une autre IA (notez laquelle) : demandez-lui de rendre vos phrases « plus percutantes ». Garde-t-elle la limite et le verbe prudent ?"
+   ],
+   "types": [
+    null,
+    null,
+    null,
+    null,
+    "on"
+   ],
+   "livrable": "Quatre phrases sourcées, à placer dans votre état de l'art → Dossier, section 13.",
+   "corr": {
+    "methode": [
+     "Qui dit quoi, et quand ? (source + année).",
+     "Qu'est-ce qui est mesuré, avec quel chiffre ?",
+     "Quelle limite : auteur, échantillon, durée, méthode ?",
+     "Un verbe prudent : « indique », « annonce », « suggère »."
+    ],
+    "cols": [
+     "Fait",
+     "Phrase possible"
+    ],
+    "widths": [
+     1.2,
+     7.0
+    ],
+    "rows": [
+     [
+      "①",
+      "« Selon une étude de Microsoft sur ses propres comptes Azure AD (Meyer et al., 2023), l'authentification multifacteur réduit de 99,22 % le risque de compromission ; l'étude est réalisée par l'éditeur du service. »"
+     ],
+     [
+      "②",
+      "« Le fournisseur annonce une restauration 70 % plus rapide (brochure, 2025) ; la méthode et la base de comparaison ne sont pas publiées : à confirmer par un test. »"
+     ],
+     [
+      "③",
+      "« Lors d'un test interne en juin, la restauration a pris 9 heures (un seul essai) ; à confirmer par plusieurs mesures. »"
+     ],
+     [
+      "④ votre sujet",
+      "L'enseignant vérifie une phrase par équipe : la source est-elle ouverte et lue ? Le chiffre est-il bien celui de la source ? La limite est-elle dite ?"
+     ],
+     [
+      "IA · plus percutant",
+      "Une IA enlève souvent la limite et durcit le verbe (« prouve »). Remettez la limite : une phrase honnête est plus crédible qu'une phrase forte."
+     ]
+    ],
+    "erreurs": [
+     "Donner le chiffre sans dire ce qu'il mesure.",
+     "Oublier l'auteur ou son intérêt (éditeur, fournisseur).",
+     "Écrire « prouve » là où la source dit « suggère »."
+    ],
+    "retenir": "Une phrase d'état de l'art = source + chiffre + limite."
+   }
+  },
+  "M4": {
+   "id": "M4",
+   "titre": "Défi chrono : que disait la page avant ?",
+   "mode": "Binômes, ordinateur",
+   "duree": 10,
+   "chap": "Carnet · chapitre 4",
+   "outil": "Wayback Machine (web.archive.org)",
+   "situation": [
+    "Une page peut être modifiée ou supprimée sans prévenir : le chiffre que vous avez cité a peut-être changé. La Wayback Machine (web.archive.org) conserve des copies datées de pages web.",
+    "Prenez l'adresse d'une page de vos sources (EX12), ou à défaut la page d'accueil d'un fournisseur de sauvegarde."
+   ],
+   "taches": [
+    "Collez l'adresse dans web.archive.org. Combien de copies datées existent ? (ordre de grandeur : aucune, quelques-unes, des centaines)",
+    "Ouvrez la copie la plus ancienne et la plus récente : qu'est-ce qui a changé (chiffre, offre, texte) ?",
+    "Votre page est-elle modifiée depuis que vous l'avez citée ?",
+    "Écrivez comment vous citez la page : adresse, date de consultation, et au besoin l'adresse de la copie archivée."
+   ],
+   "types": [
+    [
+     "Aucune",
+     "Quelques-unes",
+     "Des centaines"
+    ],
+    null,
+    "on",
+    null
+   ],
+   "livrable": "La référence complète d'une page, avec date de consultation → Dossier, section 6.",
+   "corr": {
+    "methode": [
+     "Coller l'adresse exacte de la page dans web.archive.org.",
+     "Comparer deux dates avec le calendrier.",
+     "Citer avec la date de consultation ; archiver soi-même si la page est importante."
+    ],
+    "cols": [
+     "Étape",
+     "Ce que vous devez constater"
+    ],
+    "widths": [
+     1.8,
+     6.2
+    ],
+    "rows": [
+     [
+      "Copies",
+      "Une page très consultée a souvent des centaines de copies ; une page récente ou peu visible peut n'en avoir aucune."
+     ],
+     [
+      "Comparaison",
+      "Les chiffres, les prix, les promesses (« −70 % ») et la date de mise à jour changent souvent : c'est la preuve que citer sans date est fragile."
+     ],
+     [
+      "Page modifiée ?",
+      "Si oui, citez la version que vous avez lue, avec sa date."
+     ],
+     [
+      "Citation modèle",
+      "« Nom de l'organisme, titre de la page, adresse, consulté le jj/mm/aaaa (copie archivée : adresse web.archive.org). »"
+     ]
+    ],
+    "erreurs": [
+     "Citer une page sans date de consultation.",
+     "Croire qu'une page en ligne est stable.",
+     "Ne pas archiver une page clé pour votre argument."
+    ],
+    "retenir": "Une page sans date de consultation ne se vérifie pas : datez, et archivez ce qui compte."
+   }
   }
  },
  "quiz": [
@@ -5960,25 +6258,26 @@ window.DATA = {
   "F0",
   "EX0",
   "EX1",
-  "EX2",
-  "EX3",
+  "EX5",
+  "EX6",
   "EX4",
   "EX7",
+  "M1",
   "EX8",
   "EX9",
+  "M2",
   "EX10",
   "V4",
   "EX11b",
   "EX12",
   "EX13",
+  "M4",
   "EX14",
   "F6",
   "EX15",
   "EX16",
-  "V1",
   "EX17",
   "EX18",
-  "V2",
   "EX19",
   "EX20",
   "V7",
@@ -5986,6 +6285,7 @@ window.DATA = {
   "EX21",
   "EX22",
   "EX23",
+  "M3",
   "EX24",
   "EX25",
   "EX26",
@@ -5994,26 +6294,42 @@ window.DATA = {
   "F9"
  ],
  "annexe": [
+  "EX11",
+  "F5",
+  "F7",
+  "EX28",
+  "EX2",
+  "F1",
+  "EX3",
+  "AX2",
+  "AX3",
+  "AX5",
   "AX7",
-  "AF3",
   "AX8",
+  "AF2",
+  "AF3",
   "AX9",
+  "AX10",
   "AX12",
   "AX13",
   "AX14",
-  "AX10",
+  "AX15",
+  "AX16",
+  "AX17",
+  "AX18",
+  "AX19",
   "AF5",
+  "AX20",
+  "AX21",
   "AF7",
   "AX22",
   "AX23",
-  "EX5",
-  "EX6",
-  "EX11",
-  "F1",
-  "F5",
-  "F7",
-  "AG1",
+  "AX24",
+  "AF8",
+  "AF0",
   "V5",
-  "EX28"
+  "V1",
+  "V2",
+  "AG1"
  ]
 };
