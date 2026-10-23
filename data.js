@@ -224,7 +224,7 @@ window.DATA = {
    "id": "EX7",
    "titre": "Décomposer une question en mots-clés",
    "mode": "Binôme",
-   "duree": 20,
+   "duree": 15,
    "chap": "Carnet · chapitre 3",
    "situation": [
     "Question d'exemple : « Faut-il activer les mises à jour automatiques sur tous les postes de TransLor ? »",
@@ -557,7 +557,7 @@ window.DATA = {
    "id": "EX12",
    "titre": "Évaluer vos propres sources",
    "mode": "Individuel, ordinateur",
-   "duree": 30,
+   "duree": 25,
    "chap": "Carnet · chapitre 4",
    "situation": [
     "Reprenez les résultats de vos recherches (EX8, EX9) dans Zotero.",
@@ -1425,7 +1425,7 @@ window.DATA = {
    "id": "EX22",
    "titre": "Votre matrice de comparaison",
    "mode": "Équipes, tableur",
-   "duree": 45,
+   "duree": 40,
    "chap": "Carnet · chapitre 7",
    "situation": [
     "Votre équipe construit sa propre matrice : trois solutions, quatre critères (EX1), des scores sourcés."
@@ -1855,7 +1855,7 @@ window.DATA = {
    "id": "EX28",
    "titre": "Fiche : une vulnérabilité clé de mon organisation",
    "mode": "Individuel",
-   "duree": 25,
+   "duree": 20,
    "chap": "Carnet · chapitre 9",
    "situation": [
     "Projet tutoré : dans l'organisation où vous êtes en apprentissage, repérez une vulnérabilité clé (pas seulement technique) : dépendance à une personne, information perdue, décision sans preuve, outil mal maîtrisé, message mal compris."
@@ -1924,7 +1924,7 @@ window.DATA = {
    "id": "EX29",
    "titre": "Entraînement : questions de type examen",
    "mode": "Individuel",
-   "duree": 20,
+   "duree": 15,
    "chap": "Carnet · chapitre 10",
    "situation": [
     "Format d'examen écrit (inventé : à adapter à votre format réel). Cinq questions courtes."
@@ -4081,6 +4081,624 @@ window.DATA = {
     ],
     "retenir": "Un document réel se note comme un fictif : qui, quand, pourquoi, sur quoi, recoupé, reproductible. Et on cite l'origine, pas le relais."
    }
+  },
+  "EX0": {
+   "id": "EX0",
+   "titre": "Lire une offre d'emploi d'ingénieur : que demande-t-on vraiment ?",
+   "mode": "Individuel, ordinateur",
+   "duree": 10,
+   "chap": "Carnet · chapitre 1",
+   "situation": [
+    "Deux offres réelles, relevées en octobre 2026 (elles peuvent avoir expiré) :",
+    "ANSSI, « Analyste sécurité expert – Veille et vulnérabilités H/F » (réf. 2026-2261375, choisirleservicepublic.gouv.fr) : « assurer une veille quotidienne sur les vulnérabilités et codes d'exploitation » ; « rédiger les synthèses et les avis de sécurité » ; « participer aux échanges avec les CERT et CSIRT homologues ». Diplôme d'ingénieur ou master.",
+    "Bouygues Telecom, « Analyste Vulnérabilité Confirmé H/F » (France Travail, publiée le 6 mars 2025) : veille continue des vulnérabilités, rapports orientés risques, vulgarisation de sujets techniques, « excellentes capacités de communication et pédagogie ».",
+    "À vous : trouvez une offre réelle d'ingénieur dans le métier que vous visez (France Travail, APEC, site d'une entreprise ou talents.ssi.gouv.fr)."
+   ],
+   "taches": [
+    "Notez l'employeur, l'intitulé, la date et l'adresse de votre offre.",
+    "Soulignez les verbes qui concernent chercher ou veiller, écrire, présenter : combien de verbes de ce type trouvez-vous ?",
+    "L'offre demande-t-elle explicitement de la veille ?",
+    "Associez trois verbes aux objectifs du syllabus (O1, O2, O3, P1, P2).",
+    "Quelle compétence de cette offre ce cours vous fera-t-il travailler en priorité ?"
+   ],
+   "types": [
+    null,
+    "num",
+    "on",
+    null,
+    null
+   ],
+   "livrable": "Votre offre cible et la correspondance avec les objectifs → Dossier, section 0.",
+   "corr": {
+    "methode": [
+     "Repérer les verbes d'action : veiller, rédiger, vulgariser, présenter.",
+     "Relier chaque verbe à un objectif du syllabus.",
+     "Garder la date et l'adresse : une offre disparaît, la trace reste."
+    ],
+    "cols": [
+     "Extrait de l'offre",
+     "Objectif du syllabus"
+    ],
+    "widths": [
+     4.6,
+     4.2
+    ],
+    "rows": [
+     [
+      "ANSSI : « assurer une veille quotidienne sur les vulnérabilités »",
+      "O3 : chercher, évaluer, valider (et projet tutoré)"
+     ],
+     [
+      "ANSSI : « rédiger les synthèses et les avis de sécurité »",
+      "P2 : restituer par écrit ; O1 : un avis recommande, donc argumente"
+     ],
+     [
+      "ANSSI : échanges avec les CERT et CSIRT homologues",
+      "P1 : communiquer en posture d'ingénieur"
+     ],
+     [
+      "Bouygues Telecom : rapports orientés risques",
+      "P2 : restituer ; O1 : argumenter à partir de faits"
+     ],
+     [
+      "Bouygues Telecom : vulgariser des sujets techniques",
+      "O2 : maîtriser l'information spécialisée, puis la traduire"
+     ],
+     [
+      "Limite",
+      "Deux offres ne forment pas un échantillon : l'objectif est d'apprendre à lire une offre, pas de conclure sur « le » marché"
+     ]
+    ],
+    "erreurs": [
+     "Lister les compétences techniques et oublier les verbes de communication.",
+     "Citer une offre sans date ni adresse.",
+     "Généraliser à partir d'une seule offre."
+    ],
+    "modele": [
+     "Employeur : (exemple) un hébergeur ; intitulé : ingénieur sécurité ; offre du 12/10/2026. Verbes : surveiller les alertes (O3), rédiger une note de risque pour la direction (P2), présenter au comité de sécurité (P1) : trois verbes de communication. Veille demandée : oui. Priorité pour moi : rédiger une note courte et sourcée."
+    ],
+    "modele_titre": "Exemple de réponse (offre fictive)",
+    "retenir": "Une offre d'ingénieur demande de chercher, de rédiger et de convaincre autant que de maîtriser la technique."
+   }
+  },
+  "V4": {
+   "id": "V4",
+   "titre": "Monter sa veille en 15 minutes",
+   "mode": "Individuel, ordinateur",
+   "duree": 15,
+   "chap": "Carnet · chapitre 3",
+   "situation": [
+    "Votre question de décision (EX1) doit rester d'actualité pendant le projet. Vous mettez en place une veille minimale avec des outils gratuits.",
+    "Outils proposés (adresses et gratuité à vérifier) : Google Alerts (alerte sur une requête) ; un lecteur de flux RSS (Inoreader, plan gratuit d'environ 150 abonnements, ou Feedly) ; le flux RSS du CERT-FR (cert.cyber.gouv.fr, lien « Flux RSS »).",
+    "Aucune donnée personnelle ou confidentielle dans ces outils. Si un compte est exigé, utilisez l'adresse de l'école."
+   ],
+   "taches": [
+    "Écrivez la requête de votre alerte (guillemets, OR) et créez l'alerte : est-elle créée ?",
+    "Dans un lecteur de flux, ajoutez trois sources de types différents (institutionnelle, scientifique, presse ou éditeur) : notez-les.",
+    "Combien d'articles non lus apparaissent après 5 minutes ?",
+    "Exportez votre liste au format OPML : l'export a-t-il réussi ?",
+    "Parmi les articles, repérez un signal fort et un signal faible (peu cité mais important) : justifiez."
+   ],
+   "types": [
+    "on",
+    null,
+    "num",
+    "on",
+    null
+   ],
+   "livrable": "Votre plan de veille (requête, trois sources, fréquence) et votre journal de sources → Dossier, section 19.",
+   "corr": {
+    "methode": [
+     "Une requête précise (opérateurs vus en EX8).",
+     "Trois sources de types différents : une seule source ne se recoupe pas.",
+     "Exporter en OPML pour ne pas dépendre d'un outil.",
+     "Trier : signal fort (souvent cité) ou faible (rare, mais important)."
+    ],
+    "cols": [
+     "Point",
+     "À retenir"
+    ],
+    "widths": [
+     2.4,
+     6.4
+    ],
+    "rows": [
+     [
+      "Requête",
+      "Exemple : passkeys OR « passwordless authentication » -banque ; trop large = bruit, trop étroite = rien"
+     ],
+     [
+      "Trois sources",
+      "Une institutionnelle (CERT-FR, agence), une scientifique (flux d'un dépôt d'articles), une presse ou éditeur (à pondérer)"
+     ],
+     [
+      "Plan gratuit",
+      "Inoreader : environ 150 abonnements et 30 règles d'après sa page tarifs (23/10/2026, tableau ambigu) : largement suffisant ici"
+     ],
+     [
+      "Alerte par flux RSS",
+      "Décrite pour Google Alerts en 2013 : à tester ; sinon l'alerte arrive par e-mail"
+     ],
+     [
+      "Export OPML",
+      "Format standard de liste de flux. Pocket a fermé le 8 juillet 2025 et le service Netvibes le 2 juin 2025 : un outil peut disparaître, pas le format"
+     ],
+     [
+      "Signal faible",
+      "Information rare, ambiguë, mais qui pourrait changer la décision. Elle se vérifie avant de s'y fier"
+     ]
+    ],
+    "erreurs": [
+     "S'abonner à trente sources et ne rien lire.",
+     "Une seule source, ou trois sources du même éditeur.",
+     "Ne pas noter la date de lecture : une veille se refait et se date."
+    ],
+    "modele": [
+     "Question : « Faut-il des passkeys chez TransLor ? » Requête : passkeys OR « passwordless authentication ». Sources : flux du CERT-FR (institutionnelle), flux d'un dépôt d'articles en sécurité (scientifique), blog d'un éditeur (commerciale, à pondérer). Fréquence : 10 minutes le lundi. Signal faible : un billet isolé signale un contournement des passkeys, à recouper avant d'en tenir compte."
+    ],
+    "modele_titre": "Exemple de plan de veille (fictif)",
+    "retenir": "Une veille se réduit à : une requête, trois sources, une fréquence, une date. L'export OPML la rend portable."
+   }
+  },
+  "V5": {
+   "id": "V5",
+   "titre": "Veille vulnérabilités : croiser NVD, EUVD, KEV et EPSS",
+   "mode": "Binôme, ordinateur",
+   "duree": 15,
+   "chap": "Carnet · chapitre 9",
+   "situation": [
+    "Le CERT-FR publie des avis ; la direction de TransLor demande : faut-il traiter cette vulnérabilité cette semaine ? Choisissez une CVE récente parmi les cinq dernières ajoutées au catalogue KEV de la CISA (vulnérabilités exploitées).",
+    "Quatre sources à croiser (adresses à vérifier) : NVD (nvd.nist.gov, gravité CVSS), EUVD (base de l'ENISA, euvd.enisa.europa.eu), KEV (cisa.gov), EPSS (first.org/epss : probabilité d'exploitation dans les 30 jours).",
+    "Notez la date de consultation de chaque source : elles changent chaque jour."
+   ],
+   "taches": [
+    "Notez l'identifiant CVE, le produit concerné et la date d'ajout au KEV.",
+    "Dans NVD, quel est le score CVSS ? (le nombre)",
+    "La CVE figure-t-elle dans l'EUVD ?",
+    "Dans EPSS, quelle est la probabilité d'exploitation dans les 30 jours, en % ? (le nombre)",
+    "Décision pour TransLor (hypothèse : le produit est installé et exposé sur Internet).",
+    "Justifiez en deux phrases, avec les sources."
+   ],
+   "types": [
+    null,
+    "num",
+    "on",
+    "num",
+    [
+     "Cette semaine",
+     "Ce mois-ci",
+     "Surveiller"
+    ],
+    null
+   ],
+   "livrable": "Une fiche de veille sur une CVE : quatre sources, date, décision justifiée → Dossier, section 20 (elle alimente la section 16).",
+   "corr": {
+    "methode": [
+     "Gravité (CVSS) n'est pas risque : il faut aussi l'exploitation réelle et l'exposition.",
+     "KEV : exploitation constatée. EPSS : probabilité estimée.",
+     "Citer la source et la date de chaque valeur.",
+     "Décider avec une règle explicite, puis dire la réserve."
+    ],
+    "cols": [
+     "Source",
+     "Ce qu'elle dit, et sa limite"
+    ],
+    "widths": [
+     1.8,
+     7.0
+    ],
+    "rows": [
+     [
+      "NVD / CVE",
+      "Description de la faille et score CVSS (gravité théorique, de 0 à 10). Ne dit rien de l'exposition de TransLor"
+     ],
+     [
+      "KEV (CISA)",
+      "Liste des vulnérabilités dont l'exploitation est constatée ; formats JSON et CSV gratuits, mise à jour quasi quotidienne (source secondaire à confirmer)"
+     ],
+     [
+      "EPSS (FIRST)",
+      "Probabilité d'exploitation sous 30 jours, calculée par un modèle, mise à jour quotidienne, données libres (page FIRST lue le 23/10/2026)"
+     ],
+     [
+      "EUVD (ENISA)",
+      "Base européenne lancée officiellement le 13 mai 2025 : agrège CSIRT, KEV et programme CVE (Infosecurity Magazine) ; compare avec NVD"
+     ],
+     [
+      "Règle indicative",
+      "Dans le KEV et exposée : cette semaine. Gravité élevée sans exploitation constatée : ce mois-ci. Sinon : surveiller. (règle pédagogique, à adapter)"
+     ],
+     [
+      "Valeurs",
+      "Elles dépendent de la CVE choisie : il n'y a pas une réponse unique, mais une méthode"
+     ]
+    ],
+    "erreurs": [
+     "Prendre le score CVSS pour le risque.",
+     "Ne pas dire si le produit est réellement présent chez soi.",
+     "Recopier une valeur sans date ni adresse."
+    ],
+    "modele": [
+     "CVE choisie : (exemple) CVE-AAAA-NNNNN, produit X, ajoutée au KEV le jj/mm. NVD : CVSS 9,8. EUVD : présente. EPSS : 74 % (consulté le jj/mm). Décision : cette semaine. Justification : exploitation constatée (KEV) et probabilité élevée (EPSS) ; réserve : à confirmer que la version installée est concernée."
+    ],
+    "modele_titre": "Exemple de fiche de veille (valeurs fictives)",
+    "retenir": "Une décision de sécurité croise la gravité, l'exploitation réelle et l'exposition de l'organisation."
+   }
+  },
+  "V1": {
+   "id": "V1",
+   "titre": "Kodak « faute de veille » : le récit est-il étayé ?",
+   "mode": "Équipes",
+   "duree": 15,
+   "chap": "Carnet · chapitre 6",
+   "situation": [
+    "Un support de cours présente Kodak comme une chute « par manque de veille ». Un article reprend : « Kodak a disparu faute de veille technologique. »",
+    "Faits relevés dans deux sources (PetaPixel 2017, d'après un entretien avec l'inventeur ; NPR, janvier 2012) :",
+    "En 1975, Steven Sasson, ingénieur chez Kodak, construit le premier appareil photo numérique (environ 3,6 kg, 0,01 mégapixel, 23 secondes par image).",
+    "Selon Sasson, les dirigeants n'ont pas vu l'intérêt de l'invention et ne voulaient pas nuire à l'activité argentique, alors très rentable.",
+    "Kodak est entré en procédure de faillite en 2012 et en est sorti en 2013."
+   ],
+   "taches": [
+    "Placez le récit dans le modèle de Toulmin : affirmation, donnée, garantie.",
+    "Les faits ci-dessus montrent-ils un manque d'information chez Kodak ?",
+    "Quelle autre explication les faits soutiennent-ils ?",
+    "Réécrivez l'affirmation avec un qualificatif et une réserve."
+   ],
+   "types": [
+    null,
+    "on",
+    null,
+    null
+   ],
+   "livrable": "",
+   "corr": {
+    "methode": [
+     "Affirmation, donnée, garantie : la garantie est-elle étayée ?",
+     "Chercher dans les faits ce qui contredit le récit.",
+     "Réécrire avec qualificatif et réserve."
+    ],
+    "cols": [
+     "Case",
+     "Contenu"
+    ],
+    "widths": [
+     2.2,
+     6.6
+    ],
+    "rows": [
+     [
+      "Affirmation",
+      "« Kodak a disparu faute de veille technologique. »"
+     ],
+     [
+      "Donnée",
+      "Kodak a inventé l'appareil numérique en 1975 : l'information était chez elle"
+     ],
+     [
+      "Garantie implicite",
+      "« Qui ne veille pas échoue » : elle ne s'applique pas ici, puisque Kodak savait"
+     ],
+     [
+      "Deux erreurs",
+      "« A disparu » : Kodak est sortie de procédure en 2013. « Faute de veille » : les faits indiquent plutôt un choix de protéger l'argentique"
+     ],
+     [
+      "Réserve",
+      "Source unique pour le choix de la direction (le témoignage de l'inventeur) ; les causes de la faillite n'ont pas été étudiées ici"
+     ]
+    ],
+    "erreurs": [
+     "Reprendre un récit célèbre sans chercher d'où il vient.",
+     "Confondre information disponible et décision prise.",
+     "Remplacer une cause unique par une autre cause unique."
+    ],
+    "modele": [
+     "« Kodak connaissait la technologie numérique dès 1975, puisqu'un de ses ingénieurs l'a inventée (PetaPixel, 2017). Selon cet ingénieur, la direction a préféré protéger l'activité argentique : la difficulté semble donc venir d'une décision plutôt que d'un défaut de veille. Réserve : un seul témoignage ; les causes de la faillite de 2012 ne sont pas étudiées ici. »"
+    ],
+    "modele_titre": "Phrase honnête",
+    "retenir": "La veille apporte l'information ; il faut encore décider d'agir. Un récit célèbre se vérifie comme n'importe quelle source."
+   }
+  },
+  "V2": {
+   "id": "V2",
+   "titre": "Même chiffre, deux lectures : le chiffre d'affaires d'Inditex",
+   "mode": "Binôme",
+   "duree": 10,
+   "chap": "Carnet · chapitre 6",
+   "situation": [
+    "Deux phrases exactes sur le même groupe (Inditex, première moitié de l'exercice 2025, d'après Retail Gazette, septembre 2025) :",
+    "« Le chiffre d'affaires a augmenté de 1,6 %. » (données publiées, 18,4 milliards d'euros)",
+    "« Le chiffre d'affaires a augmenté de 5,1 %. » (à taux de change constants)",
+    "Un support de cours écrit seulement « 1,6 %, bien en dessous des attentes » : cette dernière partie n'est pas confirmée par l'article lu."
+   ],
+   "taches": [
+    "Quelle phrase correspond aux données publiées ?",
+    "Quel est l'écart entre les deux chiffres, en points de pourcentage ? (le nombre)",
+    "Pour juger la dynamique commerciale hors effet des devises, quel chiffre citez-vous ?",
+    "Écrivez une phrase honnête qui donne les deux chiffres et la source."
+   ],
+   "types": [
+    [
+     "La phrase à 1,6 %",
+     "La phrase à 5,1 %"
+    ],
+    "num",
+    [
+     "Données publiées",
+     "Taux de change constants"
+    ],
+    null
+   ],
+   "livrable": "",
+   "corr": {
+    "methode": [
+     "Demander : par rapport à quoi, mesuré comment ?",
+     "Distinguer chiffre publié et chiffre à taux de change constants.",
+     "Citer les deux, avec la source."
+    ],
+    "cols": [
+     "Question",
+     "Réponse"
+    ],
+    "widths": [
+     3.0,
+     5.8
+    ],
+    "rows": [
+     [
+      "Publié",
+      "Chiffre en euros, avec l'effet des variations de change : +1,6 %"
+     ],
+     [
+      "Taux de change constants",
+      "Même activité, sans l'effet des devises : +5,1 %"
+     ],
+     [
+      "Écart",
+      "3,5 points : c'est l'effet des devises, pas une erreur"
+     ],
+     [
+      "Quel chiffre citer ?",
+      "Pour la dynamique commerciale, le chiffre à taux de change constants (indicatif) ; pour les comptes en euros, le chiffre publié. Dans tous les cas, dire lequel"
+     ],
+     [
+      "Contrôle",
+      "L'article lu ne confirme pas « bien en dessous des attentes » : ne pas le reprendre sans source"
+     ]
+    ],
+    "erreurs": [
+     "Citer 1,6 % sans dire « publié ».",
+     "Comparer un chiffre publié à un chiffre à taux constants.",
+     "Ajouter « attentes » sans source."
+    ],
+    "modele": [
+     "« Selon Retail Gazette (septembre 2025), le chiffre d'affaires d'Inditex au premier semestre a progressé de 1,6 % en données publiées (18,4 milliards d'euros) et de 5,1 % à taux de change constants. »"
+    ],
+    "modele_titre": "Phrase honnête",
+    "retenir": "Un pourcentage sans base ni mode de mesure n'est pas un fait. Deux chiffres peuvent être vrais en même temps."
+   }
+  },
+  "V7": {
+   "id": "V7",
+   "titre": "Critiquer un classement ou un comparateur",
+   "mode": "Binôme, ordinateur",
+   "duree": 10,
+   "chap": "Carnet · chapitre 7",
+   "situation": [
+    "Les benchmarks s'appuient souvent sur des classements ou des sites d'avis. Qui les finance, et comment sont-ils construits ?",
+    "Choisissez une page de classement ou de comparaison dans votre domaine (« meilleur gestionnaire de mots de passe », « comparatif de solutions de sauvegarde », résumé public d'un classement d'analystes, site d'avis).",
+    "Exemple connu : le témoignage de Colas publié par le fournisseur Sindup (fr.sindup.com, page non datée) ne donne aucun chiffre de retour sur investissement : c'est une position du fournisseur."
+   ],
+   "taches": [
+    "Notez l'adresse, la date et l'auteur de la page.",
+    "Qui finance le classement ?",
+    "La méthode (critères, mesures, nombre d'avis) est-elle publiée ?",
+    "Combien de critères sont réellement mesurables ? (le nombre)",
+    "Comment citeriez-vous ce classement dans votre état de l'art ?"
+   ],
+   "types": [
+    null,
+    [
+     "Publicité ou affiliation",
+     "Un éditeur évalué",
+     "Indépendant déclaré",
+     "Non indiqué"
+    ],
+    "on",
+    "num",
+    null
+   ],
+   "livrable": "",
+   "corr": {
+    "methode": [
+     "Identifier l'auteur et celui qui finance.",
+     "Chercher la méthode : critères, données, nombre d'avis.",
+     "Classer : fait, position, publicité.",
+     "Citer avec sa nature."
+    ],
+    "cols": [
+     "Type de page",
+     "Comment la traiter"
+    ],
+    "widths": [
+     3.0,
+     5.8
+    ],
+    "rows": [
+     [
+      "Témoignage client publié par le fournisseur",
+      "Position du fournisseur ; sans chiffre vérifiable (cas Colas / Sindup lu le 23/10/2026)"
+     ],
+     [
+      "Comparatif avec liens d'affiliation",
+      "Le revenu dépend du clic : à pondérer, chercher une autre source"
+     ],
+     [
+      "Classement d'un cabinet d'analystes",
+      "Vérifier qui l'a commandé et si la méthode est publiée (à vérifier selon le classement choisi)"
+     ],
+     [
+      "Site d'avis d'utilisateurs",
+      "Nombre d'avis, avis vérifiés ou non, biais de sélection"
+     ],
+     [
+      "Phrase possible",
+      "« Selon <site> (date), <produit> est classé premier ; la méthode n'est pas publiée et le site perçoit une commission : position à recouper. »"
+     ]
+    ],
+    "erreurs": [
+     "Prendre un classement pour une mesure.",
+     "Ignorer le financement.",
+     "Ne pas citer la date."
+    ],
+    "modele": [
+     "« Le comparatif de <site> (consulté le jj/mm) classe l'outil A premier selon 5 critères, dont 2 seulement mesurables ; le site perçoit une commission d'affiliation. Je le cite comme position, après recoupement avec la documentation de l'éditeur et un rapport indépendant. »"
+    ],
+    "modele_titre": "Exemple de citation prudente",
+    "retenir": "Un classement est une source comme une autre : on cherche qui l'a écrit, qui le finance et comment il est construit."
+   }
+  },
+  "V8": {
+   "id": "V8",
+   "titre": "Écart réel ou bruit ? Deux comparaisons de mesures",
+   "mode": "Individuel, tableur",
+   "duree": 15,
+   "chap": "Carnet · chapitre 7",
+   "situation": [
+    "Cinq mesures du temps de restauration (en minutes), faites sur chaque outil de sauvegarde (valeurs fictives) :",
+    "Outil A : 41, 38, 45, 40, 36.   Outil B : 37, 44, 35, 43, 39.",
+    "Outil C : 52, 50, 53, 51, 54.   Outil D : 41, 43, 40, 42, 44.",
+    "Dans un tableur : =MOYENNE(...) pour la moyenne, =ECARTYPE(...) pour la dispersion (selon la version : ECARTYPE ou ECARTYPE.STANDARD)."
+   ],
+   "taches": [
+    "Écart entre les moyennes de A et de B, en minutes. (le nombre)",
+    "Écart-type de A, arrondi à 0,1. (le nombre)",
+    "L'écart entre A et B est-il grand par rapport à la dispersion des mesures ?",
+    "L'écart entre C et D est-il grand par rapport à la dispersion des mesures ?",
+    "Écrivez une phrase pour la comparaison A–B et une pour C–D."
+   ],
+   "types": [
+    "num",
+    "num",
+    "on",
+    "on",
+    null
+   ],
+   "livrable": "Un tableau de mesures avec moyennes et dispersion, et votre phrase de conclusion → Dossier, section 21.",
+   "corr": {
+    "methode": [
+     "Calculer la moyenne et la dispersion de chaque outil.",
+     "Comparer l'écart des moyennes à la dispersion.",
+     "Conclure avec prudence : cinq mesures, c'est peu."
+    ],
+    "cols": [
+     "Comparaison",
+     "Résultat"
+    ],
+    "widths": [
+     2.6,
+     6.2
+    ],
+    "rows": [
+     [
+      "A et B",
+      "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9. L'écart est bien plus petit que la dispersion : probablement du bruit"
+     ],
+     [
+      "C et D",
+      "Moyennes 52,0 et 42,0 : écart 10 ; écarts-types 1,6 et 1,6. L'écart dépasse largement la dispersion : probablement réel"
+     ],
+     [
+      "Test statistique (facultatif)",
+      "Un test de Student (TEST.STUDENT dans un tableur en français, à vérifier) donne environ 0,87 pour A–B et 0,00001 pour C–D (calcul fait à la construction). Plus ce nombre est petit, moins l'écart s'explique par le hasard"
+     ],
+     [
+      "t-test et ANOVA",
+      "À connaître de nom : le t-test compare deux groupes, l'ANOVA plus de deux. Pour les utiliser, demandez conseil à un statisticien"
+     ],
+     [
+      "Phrases possibles",
+      "A–B : « l'écart observé (0,4 min) est inférieur à la dispersion des mesures ; aucune différence n'est établie. » C–D : « D est plus rapide d'environ 10 min sur ces cinq mesures ; à confirmer avec plus de mesures. »"
+     ]
+    ],
+    "erreurs": [
+     "Conclure « B est meilleur » avec 0,4 minute d'écart.",
+     "Oublier de dire le nombre de mesures.",
+     "Croire qu'un test remplace la réflexion sur la façon de mesurer."
+    ],
+    "retenir": "Avant de classer deux solutions, comparer l'écart à la dispersion et dire le nombre de mesures."
+   }
+  },
+  "AG1": {
+   "id": "AG1",
+   "titre": "Annexe G · SWOT appliqué à un choix de TransLor",
+   "mode": "Individuel",
+   "duree": 20,
+   "chap": "Annexe G",
+   "situation": [
+    "TransLor envisage de passer à une sauvegarde hybride (copie locale et copie dans le cloud) : coût d'environ 1 800 € par an (fictif), restauration de 9 h à 3 h (fictif).",
+    "Dressez un SWOT : forces et faiblesses (internes à TransLor), opportunités et menaces (externes)."
+   ],
+   "taches": [
+    "Écrivez deux forces et deux faiblesses internes.",
+    "Écrivez deux opportunités et deux menaces externes.",
+    "Combien de vos éléments sont réellement internes ou externes à TransLor ? (le nombre)",
+    "Formulez une action « force × opportunité » et une action « faiblesse × menace »."
+   ],
+   "types": [
+    null,
+    null,
+    "num",
+    null
+   ],
+   "livrable": "",
+   "corr": {
+    "methode": [
+     "Interne : sous le contrôle de TransLor. Externe : on ne le contrôle pas.",
+     "Un élément = un fait, avec sa source si possible.",
+     "Croiser pour passer du constat à l'action."
+    ],
+    "cols": [
+     "Case",
+     "Exemple"
+    ],
+    "widths": [
+     2.0,
+     6.8
+    ],
+    "rows": [
+     [
+      "Forces (interne)",
+      "Équipe informatique de trois personnes ; test de restauration déjà fait en juin"
+     ],
+     [
+      "Faiblesses (interne)",
+      "Un seul disque de trois ans ; compétence cloud limitée"
+     ],
+     [
+      "Opportunités (externe)",
+      "Offres de stockage à prix décroissant (à sourcer) ; guide d'un organisme public sur la règle 3-2-1"
+     ],
+     [
+      "Menaces (externe)",
+      "Rançongiciels visant les PME (à sourcer) ; dépendance à un fournisseur"
+     ],
+     [
+      "Force × opportunité",
+      "S'appuyer sur le test de juin pour négocier une offre cloud"
+     ],
+     [
+      "Faiblesse × menace",
+      "Remplacer le disque unique avant la prochaine campagne de rançongiciels"
+     ]
+    ],
+    "erreurs": [
+     "Classer « le prix du cloud baisse » dans les forces : c'est externe.",
+     "Lister sans chiffre ni source.",
+     "S'arrêter au tableau, sans action."
+    ]
+   },
+   "notes_extra": ""
   }
  },
  "quiz": [
@@ -4969,31 +5587,31 @@ window.DATA = {
  ],
  "ordre": [
   "F0",
+  "EX0",
   "EX1",
   "EX2",
-  "F1",
   "EX3",
   "EX4",
-  "EX5",
-  "EX6",
   "EX7",
   "EX8",
   "EX9",
   "EX10",
-  "EX11",
+  "V4",
   "EX11b",
   "EX12",
   "EX13",
-  "F5",
   "EX14",
   "F6",
   "EX15",
   "EX16",
+  "V1",
   "EX17",
   "EX18",
+  "V2",
   "EX19",
   "EX20",
-  "F7",
+  "V7",
+  "V8",
   "EX21",
   "EX22",
   "EX23",
@@ -5001,6 +5619,7 @@ window.DATA = {
   "EX25",
   "EX26",
   "EX27",
+  "V5",
   "EX28",
   "EX29",
   "F9"
@@ -5017,6 +5636,13 @@ window.DATA = {
   "AF5",
   "AF7",
   "AX22",
-  "AX23"
+  "AX23",
+  "EX5",
+  "EX6",
+  "EX11",
+  "F1",
+  "F5",
+  "F7",
+  "AG1"
  ]
 };

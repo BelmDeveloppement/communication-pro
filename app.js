@@ -479,14 +479,14 @@
   }
 
   function dossierPage() {
-    var SEC = [["1", "Question de décision", "EX1"], ["2", "Besoin du commanditaire", "EX4"], ["3", "Stratégie de recherche", "EX7, EX8"], ["4", "Sources institutionnelles", "EX9"], ["5", "Sources enregistrées et évaluées", "EX10, EX11b, EX12"], ["6", "Origine d'un chiffre", "EX13"],
+    var SEC = [["0", "Mon offre cible", "EX0"], ["1", "Question de décision", "EX1"], ["2", "Besoin du commanditaire", "EX4"], ["3", "Stratégie de recherche", "EX7, EX8"], ["4", "Sources institutionnelles", "EX9"], ["5", "Sources enregistrées et évaluées", "EX10, EX11b, EX12"], ["6", "Origine d'un chiffre", "EX13"],
       ["7", "Fiche de lecture", "EX14"], ["8", "Références vérifiées (IA)", "EX15"], ["9", "Argument de Toulmin", "EX16, EX19"], ["10", "Chiffre de fournisseur et objections", "EX18, EX20"], ["11", "Matrice pondérée", "EX21, EX22"], ["12", "Plan et chapô", "EX23"],
-      ["13", "État de l'art (2 pages)", "EX24"], ["14", "Retours de relecture", "EX25"], ["15", "Pitch et jury", "EX26, EX27"], ["16", "Fiche de vulnérabilité", "EX28"], ["17", "Bibliographie (Zotero)", "EX10"], ["18", "Déclaration d'usage de l'IA", "tout le cours"]];
+      ["13", "État de l'art (2 pages)", "EX24"], ["14", "Retours de relecture", "EX25"], ["15", "Pitch et jury", "EX26, EX27"], ["16", "Fiche de vulnérabilité", "EX28"], ["17", "Bibliographie (Zotero)", "EX10"], ["18", "Déclaration d'usage de l'IA", "tout le cours"], ["19", "Plan de veille et journal de sources", "V4"], ["20", "Fiche de veille d'une vulnérabilité (CVE)", "V5"], ["21", "Benchmark : mesures et écarts", "V8"]];
     mount(h("h1", {}, "Dossier d'état de l'art"),
-      h("div", { class: "card" }, h("p", {}, "Un seul fichier PowerPoint (une diapositive par section), rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
+      h("div", { class: "card" }, h("p", {}, "Un seul fichier PowerPoint (une diapositive par section, précédée d'un exemple fictif à supprimer), rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
         h("a", { class: "btn", href: "modele-dossier-etat-de-l-art.pptx", download: "modele-dossier-etat-de-l-art.pptx" }, "Télécharger le modèle (PowerPoint)"),
         h("p", { class: "meta" }, "Ouvrir avec PowerPoint ou LibreOffice Impress, ou importer dans Google Slides. Aucune donnée confidentielle ni personnelle.")),
-      h("div", { class: "card" }, h("h2", {}, "Les 18 sections"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
+      h("div", { class: "card" }, h("h2", {}, "Les 22 sections (0 à 21)"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
         SEC.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); }))),
       h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés."));
   }
@@ -506,7 +506,10 @@
       ["doi.org", "https://doi.org/", "Ouvrir un DOI : vérifier qu'il mène au bon article (EX15)."], ["Légifrance", "https://www.legifrance.gouv.fr/", "Textes de loi et décrets (F0)."], ["service-public.fr", "https://www.service-public.fr/", "Informations officielles pour les particuliers et les agents (F0)."],
       ["Questions écrites, Assemblée nationale", "https://questions.assemblee-nationale.fr/", "Questions et réponses ministérielles (F0)."], ["NIST, publications", "https://csrc.nist.gov/publications", "SP 800-63B-4 (EX11b)."], ["ANSSI / cyber.gouv.fr", "https://cyber.gouv.fr/", "Guides et recommandations (EX9, EX11b)."], ["ENISA", "https://www.enisa.europa.eu/publications", "Rapports européens (EX11b)."],
       ["Perplexity (IA)", "https://www.perplexity.ai/", "Réponses avec liens vers les sources : ouvrir chaque lien. Aucune donnée confidentielle."], ["Elicit (IA)", "https://elicit.com/", "Recherche et extraction dans des articles scientifiques."], ["Consensus (IA)", "https://consensus.app/", "Moteur de recherche académique assisté par IA."],
-      ["NotebookLM (IA)", "https://notebooklm.google.com/", "Interroger vos propres documents publics."], ["Scite (IA)", "https://scite.ai/", "Citations qui soutiennent ou contredisent (payant)."]];
+      ["NotebookLM (IA)", "https://notebooklm.google.com/", "Interroger vos propres documents publics."], ["Scite (IA)", "https://scite.ai/", "Citations qui soutiennent ou contredisent (payant)."],
+      ["Google Alerts", "https://www.google.com/alerts", "Alertes sur une requête (V4) ; option flux RSS à tester."], ["Inoreader", "https://www.inoreader.com/", "Lecteur de flux RSS, plan gratuit limité (V4) ; exporter en OPML."],
+      ["CERT-FR", "https://cert.cyber.gouv.fr/", "Avis et alertes de sécurité ; lien « Flux RSS » (V4, V5)."], ["NVD", "https://nvd.nist.gov/", "Vulnérabilités (CVE) et score CVSS (V5)."], ["EUVD (ENISA)", "https://euvd.enisa.europa.eu/", "Base européenne de vulnérabilités ; adresse à vérifier (V5)."],
+      ["KEV (CISA)", "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", "Vulnérabilités exploitées ; adresse à vérifier (V5)."], ["EPSS (FIRST)", "https://www.first.org/epss/", "Probabilité d'exploitation à 30 jours (V5)."], ["Retraction Watch Database", "https://retractiondatabase.org/", "Articles rétractés (EX15)."]];
     mount(h("h1", {}, "Boîte à outils"), h("p", { class: "meta" }, "Concepts et modèles à copier-coller, calculettes, outils réels. Les calculettes « coût de la non-communication » et « réunion » servent à l'annexe. Cas fictif TransLor ; chiffres inventés. Adresses des outils réels à vérifier avant le cours."),
       h("h2", {}, "Calculettes"), evaluateurSource(), matrice(), calcs[0], calcs[1],
       h("h2", {}, "Outils réels"), h("div", { class: "card" }, ref.map(function (r) { return h("p", {}, h("a", { href: r[1], target: "_blank", rel: "noopener" }, r[0]), " : " + r[2]); })),
