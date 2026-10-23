@@ -24,3 +24,12 @@ check(c.teams[a.id].score === 30 && c.phase === "end", "score parfait 30"); chec
 // répartition des bonnes réponses crise et quiz
 const rc = [0,0,0,0]; ci.forEach(i => rc[i.bonne]++); const rq = [0,0,0,0]; D.quiz.forEach(q => rq[q.bonne]++);
 console.log("bonnes réponses crise A-D:", rc.join("/"), "| quiz A-D:", rq.join("/"), "| tests ok:", ok);
+
+/* --- sujets : premier arrivé, premier servi --- */
+(function(){ var E=require("./engine.js"), assert=require("assert"), c={};
+ assert.strictEqual(E.claim(c,"a","Ana","S1").ok,true);
+ var r=E.claim(c,"b","Bob","S1"); assert.strictEqual(r.ok,false); assert.strictEqual(r.reason,"pris"); assert.strictEqual(r.par,"Ana");
+ r=E.claim(c,"a","Ana","S2"); assert.strictEqual(r.ok,false); assert.strictEqual(r.reason,"un_seul");
+ assert.strictEqual(E.claim(c,"a","Ana","S1").ok,true);
+ E.release(c,"S1"); assert.strictEqual(E.claim(c,"b","Bob","S1").ok,true);
+ console.log("sujets OK"); })();

@@ -52,7 +52,7 @@
   function LSget(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
   function LSset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   var Sess = window.__sess = {
-    peer: null, conn: null, ok: false, unlocked: [], onchange: null, retry: null,
+    peer: null, conn: null, ok: false, unlocked: [], claims: {}, claimMsg: "", onchange: null, retry: null,
     info: function () { return LSget("sess"); },
     answers: function () { return LSget("rep") || {}; },
     get: function (ex) { return this.answers()[ex] || { a: [], done: false, ts: 0 }; },
@@ -72,11 +72,20 @@
         this.peer.on("open", function () {
           var c = self.peer.connect("cpro-s-" + i.salle, { reliable: true }); self.conn = c;
           c.on("open", function () { self.ok = true; c.send({ t: "hello", sid: i.sid, nom: i.nom, rep: self.answers() }); self.notify(); });
-          c.on("data", function (m) { if (m.t === "unlock") { self.unlocked = m.list || []; self.notify(); } });
+          c.on("data", function (m) {
+            if (m.t === "unlock") { self.unlocked = m.list || []; self.notify(); }
+            else if (m.t === "claims") { self.claims = m.claims || {}; self.notify(); }
+            else if (m.t === "claimres") { if (m.ok) LSset("sujet", m.sujet); self.claimMsg = m.ok ? "" : (m.reason === "pris" ? "Trop tard : ce sujet est déjà pris par " + m.par + "." : "Vous avez déjà choisi un sujet (" + m.mine + "). Un seul choix est possible."); self.notify(); }
+          });
           c.on("close", function () { again(4000); }); c.on("error", function () { again(6000); });
         });
         this.peer.on("error", function () { again(8000); }); this.peer.on("disconnected", function () { again(6000); });
       } catch (e) { again(8000); }
+    },
+    claim: function (sujet) {
+      var i = this.info(); this.claimMsg = "";
+      if (!i || !this.ok) { this.claimMsg = "Pas connecté à la session : choix impossible. Rejoignez la session du cours pour que le premier arrivé soit servi."; this.notify(); return; }
+      try { this.conn.send({ t: "claim", sid: i.sid, nom: i.nom, sujet: sujet }); } catch (e) {}
     },
     send: function (ex) {
       var i = this.info(); if (!i || !this.ok) return; var o = this.get(ex);
@@ -121,6 +130,13 @@
         var paint = function () { bs.forEach(function (b) { b.className = "choice" + (b.getAttribute("data-v") === f.value ? " on" : ""); }); };
         opts.forEach(function (o) { var b = h("button", { class: "choice", "data-v": o, type: "button", onclick: function () { f.value = f.value === o ? "" : o; paint(); flush(); } }, o); bs.push(b); });
         paint(); f.el = h("div", { class: "choices" }, bs); return f;
+      }
+      if (ty === "toulmin6") {
+        var LAB = ["Affirmation (ce que je défends)", "Données (faits, chiffres, sources)", "Garantie (le lien logique)", "Fondement (ce qui soutient la garantie)", "Réfutation (l'objection prévue)", "Qualificatif (probablement, dans la plupart des cas…)"], tas = [], parts0 = (state.a[i] || "").split("\n§\n");
+        f = { value: state.a[i] || "" };
+        var upd = function () { f.value = tas.map(function (t, k) { return t.value; }).join("\n§\n"); clearTimeout(tmr); tmr = setTimeout(flush, 500); };
+        f.el = h("div", { class: "card" }, LAB.map(function (l, k) { var t = h("textarea", { placeholder: l, rows: 2 }); t.value = parts0[k] || ""; t.addEventListener("input", upd); tas.push(t); return h("div", {}, h("label", { class: "meta" }, (k + 1) + ". " + l), t); }));
+        return f;
       }
       if (ty === "num") { f = h("input", { type: "text", inputmode: "decimal", pattern: "[0-9]*[.,]?[0-9]*", placeholder: "Un nombre", class: "num" }); f.value = state.a[i] || ""; f.addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(flush, 500); }); f.el = f; return f; }
       f = h("textarea", { placeholder: "Votre réponse à la tâche " + (i + 1) }); f.value = state.a[i] || ""; f.addEventListener("input", function () { clearTimeout(tmr); tmr = setTimeout(flush, 500); }); f.el = f; return f;
@@ -194,6 +210,8 @@
       var s = P.data[sid] = P.data[sid] || { nom: nom, rep: {} }; s.nom = nom || s.nom;
       Object.keys(rep || {}).forEach(function (ex) { var o = rep[ex]; if (!s.rep[ex] || (o.ts || 0) >= (s.rep[ex].ts || 0)) s.rep[ex] = { a: o.a || [], done: !!o.done, ts: o.ts || 0 }; });
     }
+    P.claims = P.claims || {};
+    function broadcastClaims() { Object.keys(online).forEach(function (sid) { try { online[sid].send({ t: "claims", claims: P.claims }); } catch (e) {} }); }
     function broadcastUnlock() { Object.keys(online).forEach(function (sid) { try { online[sid].send({ t: "unlock", list: P.unlocked }); } catch (e) {} }); }
     function open(code) {
       P.salle = code; persist(); if (peer) { try { peer.destroy(); } catch (e) {} }
@@ -203,7 +221,8 @@
       peer.on("connection", function (c) {
         var sid = null;
         c.on("data", function (m) {
-          if (m.t === "hello") { sid = m.sid; online[sid] = c; mergeRep(sid, m.nom, m.rep); c.send({ t: "unlock", list: P.unlocked }); }
+          if (m.t === "hello") { sid = m.sid; online[sid] = c; mergeRep(sid, m.nom, m.rep); c.send({ t: "unlock", list: P.unlocked }); c.send({ t: "claims", claims: P.claims }); }
+          else if (m.t === "claim") { sid = m.sid; online[sid] = c; var r0 = E.claim(P.claims, m.sid, m.nom, m.sujet); c.send({ t: "claimres", ok: r0.ok, reason: r0.reason, sujet: m.sujet, par: r0.par, mine: r0.mine }); if (r0.ok) broadcastClaims(); }
           else if (m.t === "ans") { sid = m.sid; online[sid] = c; var r = {}; r[m.ex] = { a: m.a, done: m.done, ts: m.ts }; mergeRep(sid, m.nom, r); P.last = m.ex; }
           persist(); dirty = true;
         });
@@ -225,7 +244,7 @@
     var bar = h("div", { class: "card" });
     function tabs() {
       bar.innerHTML = "";
-      [["avancement", "Avancement"], ["exercice", "Réponses d'un exercice"]].forEach(function (t) { bar.appendChild(h("button", { class: view === t[0] ? "" : "sec", onclick: function () { view = t[0]; tabs(); draw(); } }, t[1])); });
+      [["avancement", "Avancement"], ["exercice", "Réponses d'un exercice"], ["sujets", "Sujets choisis"]].forEach(function (t) { bar.appendChild(h("button", { class: view === t[0] ? "" : "sec", onclick: function () { view = t[0]; tabs(); draw(); } }, t[1])); });
       var s = h("select", { style: "max-width:380px;display:inline-block" }, [h("option", { value: "" }, "Choisir un exercice")].concat(exOrder().map(function (i) { return h("option", { value: i }, i + " · " + D.exo[i].titre.slice(0, 50)); })));
       s.value = sel; s.addEventListener("change", function () { sel = s.value; follow = false; view = "exercice"; tabs(); draw(); });
       var fl = h("input", { type: "checkbox", style: "width:auto" }); fl.checked = follow; fl.addEventListener("change", function () { follow = fl.checked; draw(); });
@@ -247,6 +266,12 @@
             var s = status3(r, c); return h("td", { style: "text-align:center;background:" + ["#fff", "#FFE9A8", "#BFE8D0"][s], title: ["vide", "en cours", "terminé"][s] }, ["", "…", "✓"][s]); }))));
         });
         content.appendChild(tb); content.appendChild(h("p", { class: "meta" }, "● en ligne · ○ hors ligne ; … en cours, ✓ terminé. Colonnes F0 à F9 = flashs, 1 à 24 = EX."));
+      } else if (view === "sujets") {
+        var ks = Object.keys(P.claims);
+        content.appendChild(h("div", { class: "card" }, h("h2", {}, "Sujets choisis (premier arrivé, premier servi)"), ks.length ? null : h("p", { class: "meta" }, "Aucun sujet choisi pour l'instant."),
+          D.sujets.map(function (s, i) { var c = P.claims[s[0]]; return h("p", {}, (i + 1) + ". " + s[0] + " — ", c ? h("b", {}, c.nom) : h("span", { class: "meta" }, "libre"), " ",
+            c ? h("button", { class: "sec", onclick: function () { E.release(P.claims, s[0]); persist(); broadcastClaims(); draw(); } }, "Libérer") : null); }),
+          h("button", { class: "sec", onclick: function () { if (confirm("Libérer tous les sujets ?")) { P.claims = {}; persist(); broadcastClaims(); draw(); } } }, "Libérer tous les sujets")));
       } else {
         var ex = follow && P.last ? P.last : sel; if (!ex || !D.exo[ex]) { content.appendChild(h("p", { class: "warn" }, "Choisissez un exercice dans la liste.")); return; }
         var e = D.exo[ex], unl = P.unlocked.indexOf(ex) >= 0, rep = sids.filter(function (s) { return status3(P.data[s], ex) > 0; }).length;
@@ -255,7 +280,7 @@
         sids.forEach(function (sid) {
           var o = P.data[sid].rep[ex]; if (!o) return;
           content.appendChild(h("div", { class: "card" }, h("b", {}, (online[sid] ? "● " : "○ ") + P.data[sid].nom + (o.done ? "  ✓ terminé" : "")),
-            e.taches.map(function (t, i) { return o.a[i] && o.a[i].trim() ? h("div", {}, h("div", { class: "meta" }, (i + 1) + ". " + t), h("p", { class: "pre" }, o.a[i])) : null; })));
+            e.taches.map(function (t, i) { return o.a[i] && o.a[i].trim() ? h("div", {}, h("div", { class: "meta" }, (i + 1) + ". " + t), h("p", { class: "pre" }, String(o.a[i]).split("\n§\n").map(function (x, k) { return /\n§\n/.test(o.a[i]) ? ["Affirmation","Données","Garantie","Fondement","Réfutation","Qualificatif"][k] + " : " + x : x; }).join("\n"))) : null; })));
         });
       }
     }
@@ -410,10 +435,17 @@
 
   /* ---------- Sujets ---------- */
   function sujetsPage() {
-    var mine = store("sujet");
-    mount(h("h1", {}, "Sujets de l'état de l'art"), h("p", { class: "meta" }, "Choisissez un sujet avec votre équipe, puis formulez votre question de décision (EX1). Sujets proposés par l'enseignant, à valider : vérifiez qu'il existe au moins cinq sources sérieuses."),
-      h("div", {}, D.sujets.map(function (s, i) { var b = h("button", { class: "sec", onclick: function () { store("sujet", s[0]); sujetsPage(); } }, mine === s[0] ? "Choisi ✓" : "Choisir");
-        return h("div", { class: "card" }, h("b", {}, (i + 1) + ". " + s[0]), h("p", {}, s[1]), b); })),
+    var mine = store("sujet"), cl = Sess.claims || {}, info = Sess.info();
+    Sess.onchange = sujetsPage; Sess.connect();
+    var myK = null; Object.keys(cl).forEach(function (k) { if (info && cl[k].sid === info.sid) myK = k; }); if (Sess.ok) mine = myK; else if (myK) mine = myK;
+    mount(h("h1", {}, "Sujets de l'état de l'art"), sessionBar(),
+      h("p", { class: "meta" }, "Chaque étudiant choisit un seul sujet, et un sujet ne peut être pris que par un seul étudiant : le premier qui appuie est servi. Ensuite, formulez votre question de décision (EX1)."),
+      Sess.claimMsg ? h("p", { class: "warn" }, Sess.claimMsg) : null,
+      h("div", {}, D.sujets.map(function (s, i) {
+        var c = cl[s[0]], prisAutre = c && !(info && c.sid === info.sid), isMine = mine === s[0];
+        var b = h("button", { class: isMine ? "ok" : "sec", onclick: function () { Sess.claim(s[0]); } }, isMine ? "Votre sujet ✓" : prisAutre ? "Pris par " + c.nom : "Choisir");
+        if (prisAutre || (mine && !isMine)) { b.setAttribute("disabled", "disabled"); b.disabled = true; }
+        return h("div", { class: "card", style: prisAutre ? "opacity:.55" : "" }, h("b", {}, (i + 1) + ". " + s[0]), h("p", {}, s[1]), b); })),
       h("p", {}, h("a", { href: "#/ex/EX1" }, "→ Exercice EX1 : formuler la question")), h("p", {}, h("a", { href: "#/" }, "← Retour à l'accueil")));
   }
 
@@ -421,7 +453,7 @@
   var MODELES = [
     ["Requête de recherche (Scholar)", "Outil réel", "Concepts : …, …, …\nSynonymes FR : … OR …\nSynonymes EN : … OR …\nRequête : (\"…\" OR \"…\") (\"…\" OR \"…\") -mot-exclu\nFiltre de dates : depuis 20XX\nDate de la recherche : …  Nombre de résultats : …"],
     ["Fiche de lecture d'un article", "Modèle", "Référence : …\nQuestion de l'article : …\nMéthode (échantillon, durée, groupe témoin ?) : …\nRésultat principal (avec chiffre) : …\nLimites : … / … / …\nFinancement et conflits d'intérêts : …\nCe que je peux écrire honnêtement : « … »"],
-    ["Plan de l'état de l'art (2 pages)", "Modèle", "Chapô (3 lignes) : question, méthode, conclusion\n1. Question et contexte (10 %)\n2. Méthode de recherche : requêtes, bases, période, sources retenues et écartées (15 %)\n3. Panorama des solutions, avec sources (25 %)\n4. Comparaison : matrice, test de sensibilité (25 %)\n5. Discussion et limites (15 %)\n6. Conclusion : recommandation, qualificatif, réserve (10 %)\nRéférences (Zotero)"],
+    ["Plan de l'état de l'art (2 pages)", "Modèle", "Résumé d'ouverture (3 lignes) : question, méthode, conclusion\n1. Question et contexte (10 %)\n2. Méthode de recherche : requêtes, bases, période, sources retenues et écartées (15 %)\n3. Panorama des solutions, avec sources (25 %)\n4. Comparaison : matrice, test de sensibilité (25 %)\n5. Discussion et limites (15 %)\n6. Conclusion : recommandation, qualificatif, réserve (10 %)\nRéférences (Zotero)"],
     ["Grille de notation de l'état de l'art (20 points)", "Modèle", "Question et contexte : /2\nMéthode de recherche : /3\nQualité des sources : /4\nComparaison : /4\nArgumentation : /4\nClarté et références : /3\nTotal : /20"],
     ["Grille de jury (pitch, 20 points)", "Modèle", "Message clé : /3\nStructure : /3\nClarté et vulgarisation : /3\nPreuves et sources : /4\nRéponse aux questions : /4\nVoix et posture : /3\nTotal : /20\nFeedback SBI : S … B … I …"],
     ["Fiche : vulnérabilité clé de mon organisation", "Modèle", "Vulnérabilité : …\nQui, quoi, quand, impact : …\nPreuve (donnée, observation, source) : …\nArgument : affirmation … ; données … ; garantie … ; réfutation …\nRecommandation (qualificatif, réserve) : …\nComment la vérifier avec le tuteur, et quand : …"],
@@ -480,7 +512,7 @@
 
   function dossierPage() {
     var SEC = [["0", "Mon offre cible", "EX0"], ["1", "Question de décision", "EX1"], ["2", "Besoin du commanditaire", "EX4"], ["3", "Stratégie de recherche", "EX7, EX8"], ["4", "Sources institutionnelles", "EX9"], ["5", "Sources enregistrées et évaluées", "EX10, EX11b, EX12"], ["6", "Origine d'un chiffre", "EX13"],
-      ["7", "Fiche de lecture", "EX14"], ["8", "Références vérifiées (IA)", "EX15"], ["9", "Argument de Toulmin", "EX16, EX19"], ["10", "Chiffre de fournisseur et objections", "EX18, EX20"], ["11", "Matrice pondérée", "EX21, EX22"], ["12", "Plan et chapô", "EX23"],
+      ["7", "Fiche de lecture", "EX14"], ["8", "Références vérifiées (IA)", "EX15"], ["9", "Argument de Toulmin", "EX16, EX19"], ["10", "Chiffre de fournisseur et objections", "EX18, EX20"], ["11", "Matrice pondérée", "EX21, EX22"], ["12", "Plan et résumé d'ouverture", "EX23"],
       ["13", "État de l'art (2 pages)", "EX24"], ["14", "Retours de relecture", "EX25"], ["15", "Pitch et jury", "EX26, EX27"], ["16", "Fiche de vulnérabilité", "EX28"], ["17", "Bibliographie (Zotero)", "EX10"], ["18", "Déclaration d'usage de l'IA", "tout le cours"], ["19", "Plan de veille et journal de sources", "V4"], ["20", "Fiche de veille d'une vulnérabilité (CVE)", "V5"], ["21", "Benchmark : mesures et écarts", "V8"]];
     mount(h("h1", {}, "Dossier d'état de l'art"),
       h("div", { class: "card" }, h("p", {}, "Un seul fichier PowerPoint (une diapositive par section, précédée d'un exemple fictif à supprimer), rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
@@ -488,7 +520,7 @@
         h("p", { class: "meta" }, "Ouvrir avec PowerPoint ou LibreOffice Impress, ou importer dans Google Slides. Aucune donnée confidentielle ni personnelle.")),
       h("div", { class: "card" }, h("h2", {}, "Les 22 sections (0 à 21)"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
         SEC.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); }))),
-      h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés."));
+      h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur."));
   }
   function outilsPage() {
     var calcs = [

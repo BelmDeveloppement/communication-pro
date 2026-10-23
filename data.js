@@ -5,7 +5,7 @@ window.DATA = {
    "id": "F0",
    "titre": "Débat, puis vérification : deux phrases entendues",
    "mode": "Binômes, ordinateur",
-   "duree": 15,
+   "duree": 12,
    "chap": "Carnet · chapitre 1",
    "situation": [
     "Deux phrases entendues à la machine à café, que vous venez de débattre :",
@@ -17,7 +17,8 @@ window.DATA = {
     "Phrase 1 (retraite à vie des ministres) : d'après la meilleure source trouvée, la phrase est-elle exacte ?",
     "Phrase 2 (paiement des jours de grève) : d'après la meilleure source trouvée, la phrase est-elle exacte ?",
     "Citez la source de chaque phrase (organisme, titre, date).",
-    "En combien de minutes avez-vous trouvé votre première source solide ?"
+    "En combien de minutes avez-vous trouvé votre première source solide ?",
+    "Avec une IA : posez-lui la phrase 1 telle quelle. Cite-t-elle un texte officiel que vous pouvez ouvrir ?"
    ],
    "types": [
     [
@@ -31,7 +32,8 @@ window.DATA = {
      "À nuancer"
     ],
     null,
-    "num"
+    "num",
+    "on"
    ],
    "livrable": "",
    "corr": {
@@ -64,7 +66,7 @@ window.DATA = {
      ],
      [
       "1 · verdict prudent",
-      "À nuancer : pas de régime spécial décrit dans le texte officiel lu ; à confirmer sur Légifrance."
+      "À nuancer : le texte officiel lu (réponse ministérielle de 2019) ne décrit pas de régime spécial ; la Retraite en Clair (2022, mise à jour en 2025) le confirme."
      ],
      [
       "2 · mots flous",
@@ -80,12 +82,16 @@ window.DATA = {
      ],
      [
       "2 · verdict prudent",
-      "Inexacte pour l'État d'après ces sources ; à vérifier depuis 2004 et 2023. Le débat sur la règle est politique : on le rapporte, on ne le tranche pas."
+      "Inexacte pour l'État d'après ces sources (retenue confirmée par la cour administrative d'appel de Versailles, 24/07/2018, n° 16VE03343, d'après Le Monde du Droit). Le débat sur la règle est politique : on le rapporte, on ne le tranche pas."
+     ],
+     [
+      "IA · réponse de l'IA",
+      "Souvent non, ou une référence vague. Une IA répond de façon fluide : seule une source officielle ouverte et lue vaut preuve. Comparez avec votre propre source."
      ]
     ],
     "modele": [
-     "Phrase 1 : à nuancer. Selon la réponse du Premier ministre à la question écrite n° 16295 (Assemblée nationale, JO du 10/09/2019), les membres du Gouvernement cotisent à la CNAV et à l'IRCANTEC comme les autres salariés ; je n'ai pas trouvé de régime spécial dans ce texte. Réserve : texte de 2019, à confirmer sur Légifrance.",
-     "Phrase 2 : inexacte pour l'État. Selon la réponse ministérielle du 25/05/2004 (question n° 28642), une absence pour fait de grève entraîne une retenue d'un trentième du traitement. Réserve : à vérifier pour la territoriale et l'hospitalière, et pour une évolution depuis 2004.",
+     "Phrase 1 : à nuancer. Selon la réponse du Premier ministre à la question écrite n° 16295 (Assemblée nationale, JO du 10/09/2019), les membres du Gouvernement cotisent à la CNAV et à l'IRCANTEC comme les autres salariés ; je n'ai pas trouvé de régime spécial dans ce texte. Réserve : texte de 2019.",
+     "Phrase 2 : inexacte pour l'État. Selon la réponse ministérielle du 25/05/2004 (question n° 28642), une absence pour fait de grève entraîne une retenue d'un trentième du traitement. Réserve : la règle du trentième indivisible vaut pour l'État ; elle ne s'applique pas de la même façon à la territoriale ni à l'hospitalière (Maire-info, 2023).",
      "Erreurs fréquentes : débattre de ses opinions avant de définir les mots ; s'arrêter au premier site trouvé ; confondre le texte officiel et le site qui le commente ; conclure « vrai » ou « faux » sans préciser le périmètre."
     ],
     "modele_titre": "Exemple de réponse rédigée, avec source et réserve",
@@ -100,13 +106,14 @@ window.DATA = {
    "chap": "Carnet · chapitre 1",
    "situation": [
     "La directrice de TransLor (PME de 120 salariés, fictive) vous confie un état de l'art pour éclairer une décision informatique.",
-    "Choisissez un sujet dans la liste (page « Sujets », QR) : vous le défendrez devant un jury à la fin du cours."
+    "Choisissez un sujet dans la liste (page « Sujets », QR) : vous le défendrez devant un jury à la fin du cours. Règle : un seul sujet par personne, et un sujet n'est attribué qu'à une seule personne, la première qui le choisit dans l'application."
    ],
    "taches": [
     "Choisissez un sujet et reformulez-le : « Faut-il … chez TransLor, selon quels critères ? »",
     "Écrivez 4 critères de comparaison (coût, sécurité, facilité d'usage, délai…).",
     "Écrivez 3 mots-clés en français et leur traduction en anglais.",
-    "Tapez-les dans Google Scholar : combien de résultats environ ?"
+    "Tapez-les dans Google Scholar : combien de résultats environ ?",
+    "Avec une IA : demandez 5 formulations de question de décision pour votre sujet. Gardez-en une ou écrivez la vôtre, et dites pourquoi en une phrase."
    ],
    "livrable": "Votre question de décision, 4 critères et 3 mots-clés → Dossier, section 1.",
    "corr": {
@@ -139,6 +146,10 @@ window.DATA = {
      [
       "Mots-clés : « sécurité »",
       "« passkeys » OR « passwordless », « authentification » OR « authentication »"
+     ],
+     [
+      "IA · formulations",
+      "Gardez la formulation qui contient une décision, des critères comparables et un périmètre (TransLor). Une IA propose souvent des questions trop larges : resserrez."
      ]
     ],
     "erreurs": [
@@ -151,7 +162,8 @@ window.DATA = {
     null,
     null,
     null,
-    "num"
+    "num",
+    null
    ]
   },
   "EX6": {
@@ -228,19 +240,22 @@ window.DATA = {
    "chap": "Carnet · chapitre 3",
    "situation": [
     "Question d'exemple : « Faut-il activer les mises à jour automatiques sur tous les postes de TransLor ? »",
-    "Un moteur de recherche ne comprend pas une phrase : il cherche des mots. Il faut les choisir."
+    "Aujourd'hui, beaucoup d'entre vous interrogent d'abord une IA. Elle comprend une phrase, mais vous devez pouvoir refaire et citer votre recherche : les mots-clés servent dans un moteur comme dans une IA (on les donne à l'IA pour qu'elle cherche mieux)."
    ],
    "taches": [
     "Soulignez les 3 concepts clés de la question.",
     "Écrivez les synonymes français et anglais de chaque concept.",
-    "Assemblez une requête avec guillemets et OR, puis faites de même pour votre question (EX1)."
+    "Demandez à une IA : « Propose-moi des mots-clés français et anglais et une requête de recherche pour : <la question> ». Combien de mots-clés proposés n'étaient pas dans votre liste ?",
+    "Parmi les propositions de l'IA, combien sont hors sujet ou trompeurs ?",
+    "Assemblez votre requête finale (guillemets, OR), puis faites de même pour votre question (EX1)."
    ],
    "livrable": "Un tableau : concepts, synonymes français et anglais, requête. → Dossier, section 3.",
    "corr": {
     "methode": [
      "Un concept = un mot ou une expression.",
      "Un synonyme par ligne, en français et en anglais.",
-     "Guillemets pour les expressions, OR entre synonymes."
+     "Guillemets pour les expressions, OR entre synonymes.",
+     "Donner à l'IA le contexte, la langue et le format attendu, puis trier ses propositions."
     ],
     "cols": [
      "Concept",
@@ -264,6 +279,10 @@ window.DATA = {
       "« poste de travail » OR « endpoint » OR « workstation »"
      ],
      [
+      "Avec une IA",
+      "L'IA propose en général 2 à 4 mots-clés de plus (par exemple « patch management », « endpoint ») et 1 à 2 hors sujet. Elle aide à élargir le vocabulaire ; c'est vous qui triez, puis la requête finale est testée dans un moteur ou une base : on peut la refaire et la citer, pas la conversation avec l'IA."
+     ],
+     [
       "Requête assemblée",
       "(« mise à jour automatique » OR « automatic update ») (« poste de travail » OR « endpoint ») sécurité OR security"
      ]
@@ -277,6 +296,8 @@ window.DATA = {
    "types": [
     null,
     null,
+    "num",
+    "num",
     null
    ]
   },
@@ -294,7 +315,8 @@ window.DATA = {
     "Lancez une requête simple dans Google Scholar : combien de résultats ?",
     "Précisez avec guillemets, OR, tiret et filtre de dates (5 ans) : écrivez la requête finale.",
     "Combien de résultats après précision ?",
-    "Relevez 5 résultats utiles : titre, auteurs, année, type de document."
+    "Relevez 5 résultats utiles : titre, auteurs, année, type de document.",
+    "Posez la même question à un assistant de recherche IA (Semantic Scholar, Consensus, Elicit, Perplexity…) : combien de ses 5 références retrouvez-vous réellement dans Google Scholar ?"
    ],
    "livrable": "La requête finale, la date, et 5 résultats notés. → Dossier, section 3.",
    "corr": {
@@ -331,6 +353,10 @@ window.DATA = {
      [
       "Trace",
       "Requête, date, nombre de résultats : une recherche doit pouvoir être refaite"
+     ],
+     [
+      "IA · références retrouvées",
+      "Souvent 3 ou 4 sur 5. Une référence qu'on ne retrouve pas par son titre exact est à écarter (voir EX15). L'IA donne des pistes, la base permet de refaire la recherche."
      ]
     ],
     "erreurs": [
@@ -343,7 +369,8 @@ window.DATA = {
     "num",
     null,
     "num",
-    null
+    null,
+    "num"
    ]
   },
   "EX9": {
@@ -353,13 +380,15 @@ window.DATA = {
    "duree": 15,
    "chap": "Carnet · chapitre 3",
    "situation": [
-    "Pour votre question, cherchez deux documents publiés par des organismes publics ou de normalisation.",
-    "Pistes : ANSSI et CNIL (France), ENISA (Europe), NIST (États-Unis), ISO et AFNOR (normes, parfois payantes)."
+    "Pour votre question, cherchez deux documents : au moins un publié par un organisme public ou de normalisation ; l'autre peut venir d'un expert reconnu du domaine.",
+    "Pistes institutionnelles : ANSSI et CNIL (France), ENISA (Europe), NIST (États-Unis), ISO et AFNOR (normes, parfois payantes).",
+    "Pistes d'experts en cybersécurité : blogs et centres d'alerte tenus par des spécialistes reconnus (par exemple Krebs on Security, Schneier on Security, SANS Internet Storm Center, Google Project Zero). Un expert n'est pas une institution : regardez qui il est, qui le finance et si d'autres sources le recoupent."
    ],
    "taches": [
-    "Trouvez deux documents d'organismes publics utiles à votre question.",
-    "Notez pour chacun : organisme, titre, date, version, adresse.",
-    "Recommandation, norme, loi ou rapport ? Une phrase de synthèse par document."
+    "Trouvez deux documents utiles à votre question (au moins un d'un organisme public).",
+    "Notez pour chacun : auteur ou organisme, titre, date, version, adresse.",
+    "Recommandation, norme, loi, rapport ou avis d'expert ? Une phrase de synthèse par document.",
+    "Avec une IA : demandez les organismes et experts qui ont publié sur votre sujet. Combien de ses noms existent vraiment et ont publié sur le sujet (vérifiez sur leur site) ?"
    ],
    "livrable": "Deux références complètes avec une phrase de synthèse chacune. → Dossier, section 4.",
    "corr": {
@@ -392,6 +421,14 @@ window.DATA = {
      [
       "Rapport d'étude",
       "Observations ou statistiques : à lire avec la méthode et la date"
+     ],
+     [
+      "Expert reconnu",
+      "Spécialiste identifiable, travaux cités par d'autres : à lire avec la grille (qui le finance, lien avec un éditeur, recoupement). Il appuie un argument mais ne remplace pas un texte officiel pour établir un fait."
+     ],
+     [
+      "IA · organismes cités",
+      "L'IA cite souvent des organismes réels mais leur attribue parfois des documents qu'ils n'ont pas publiés : ouvrez le site de l'organisme et cherchez le titre."
      ]
     ],
     "erreurs": [
@@ -403,7 +440,8 @@ window.DATA = {
    "types": [
     null,
     null,
-    null
+    null,
+    "num"
    ]
   },
   "EX10": {
@@ -414,12 +452,14 @@ window.DATA = {
    "chap": "Carnet · chapitre 3",
    "situation": [
     "Zotero est un outil gratuit de gestion de références. Version de bureau avec extension de navigateur (Zotero Connector).",
-    "Si l'installation est impossible sur votre poste, utilisez un tableur : auteur, année, titre, lien."
+    "Si l'installation est impossible sur votre poste, utilisez un tableur : auteur, année, titre, lien.",
+    "Attention : l'extension de navigateur peut déclencher le contrôle anti-robot de Google Scholar (CAPTCHA) et gêner la consultation ; des utilisateurs le signalent sur le forum de Zotero. Terminez d'abord vos recherches Scholar (EX8). Si Scholar se bloque, désactivez l'extension sur ce site, ou enregistrez les références depuis la page de l'éditeur ou par leur DOI."
    ],
    "taches": [
     "Installez Zotero et son extension (ou ouvrez la version web).",
     "Enregistrez 5 références depuis Google Scholar et vérifiez auteurs, année, titre.",
-    "Générez une bibliographie dans un style au choix."
+    "Générez une bibliographie dans un style au choix.",
+    "Avec une IA : demandez-lui de mettre vos 2 premières références au format APA. Comparez avec la bibliographie de Zotero : combien de différences ?"
    ],
    "livrable": "Votre bibliographie de 5 références générée par Zotero. → Dossier, section 17.",
    "corr": {
@@ -447,7 +487,7 @@ window.DATA = {
      ],
      [
       "Classer",
-      "Un dossier par question, des étiquettes pour l'état (retenue, à vérifier)"
+      "Un dossier par question, des étiquettes pour l'état (retenue, à recouper)"
      ],
      [
       "Bibliographie",
@@ -456,6 +496,10 @@ window.DATA = {
      [
       "Sans Zotero",
       "Tableur : auteur, année, titre, lien, note sur 12"
+     ],
+     [
+      "IA · mise en forme",
+      "Quelques différences (ponctuation, initiales, majuscules). Zotero tire les données de la page ou du DOI : plus fiable qu'une IA, qui peut déformer un nom ou une année."
      ]
     ],
     "erreurs": [
@@ -467,7 +511,8 @@ window.DATA = {
    "types": [
     null,
     null,
-    null
+    null,
+    "num"
    ]
   },
   "EX11": {
@@ -557,16 +602,18 @@ window.DATA = {
    "id": "EX12",
    "titre": "Évaluer vos propres sources",
    "mode": "Individuel, ordinateur",
-   "duree": 25,
+   "duree": 30,
    "chap": "Carnet · chapitre 4",
    "situation": [
     "Reprenez les résultats de vos recherches (EX8, EX9) dans Zotero.",
-    "Grille en six questions, 0 à 2 points chacune : Qui ? Quand ? Pourquoi ? Sur quoi ? Recoupé ? Reproductible ? (maximum 12)."
+    "Grille en six questions, chacune notée 0 (non), 1 (en partie) ou 2 (oui) : Qui ? auteur identifié, compétent, indépendant. Quand ? date adaptée au sujet. Pourquoi ? informer plutôt que vendre. Sur quoi ? données et méthode visibles. Recoupé ? d'autres sources indépendantes concordent. Reproductible ? la méthode peut être refaite.",
+    "Total sur 12 : 9 et plus = fiable ; 5 à 8 = à recouper ; 4 et moins = à écarter ou à citer avec prudence."
    ],
    "taches": [
     "Choisissez 5 sources de votre question et notez-les avec la grille.",
     "Gardez-en 3 au moins et justifiez chaque décision en une phrase.",
-    "Dans Zotero, étiquetez-les « retenue » ou « écartée »."
+    "Dans Zotero, étiquetez-les « retenue » ou « écartée ».",
+    "Avec une IA : donnez-lui une de vos sources et la grille, demandez une note sur 12. Quel écart avec votre note, en points ?"
    ],
    "livrable": "La grille de 5 sources remplie et 3 sources retenues dans Zotero. → Dossier, section 5.",
    "corr": {
@@ -599,6 +646,10 @@ window.DATA = {
      [
       "Page de presse reprenant la brochure",
       "1 / 2 / 1 / 0 / 0 / 0 = 4 : écartée (source circulaire)"
+     ],
+     [
+      "IA · écart de notation",
+      "Souvent 2 à 4 points : l'IA surestime « Recoupé » et « Reproductible » qu'elle ne peut pas vérifier. Votre note, sourcée, fait foi."
      ]
     ],
     "erreurs": [
@@ -610,23 +661,25 @@ window.DATA = {
    "types": [
     null,
     null,
-    null
+    null,
+    "num"
    ]
   },
   "EX13": {
    "id": "EX13",
    "titre": "Remonter à la source d'un chiffre",
    "mode": "Binôme, ordinateur",
-   "duree": 15,
+   "duree": 20,
    "chap": "Carnet · chapitre 4",
    "situation": [
     "Un article de presse (fictif) écrit : « 60 % des PME victimes d'une cyberattaque disparaissent dans les six mois. »",
-    "Ce chiffre est souvent répété ; sa source n'est pas indiquée dans l'article. À vérifier par vos soins."
+    "Ce chiffre est souvent répété ; sa source n'est pas indiquée dans l'article. Retrouvez son origine par vos recherches."
    ],
    "taches": [
     "Cherchez l'origine du chiffre et notez le chemin : article, article, origine.",
     "La source d'origine existe-t-elle ? Que mesure-t-elle exactement ?",
-    "Que répondez-vous à la directrice qui veut le citer ?"
+    "Que répondez-vous à la directrice qui veut le citer ?",
+    "Avec une IA : demandez l'origine du chiffre « 60 % ». Donne-t-elle une source que vous retrouvez ?"
    ],
    "livrable": "Le chemin de vos recherches et votre phrase de réponse. → Dossier, section 6.",
    "corr": {
@@ -659,6 +712,10 @@ window.DATA = {
      [
       "Phrase de réponse à la directrice",
       "« Je n'ai pas pu retrouver l'étude d'origine : je propose de citer le chiffre comme non sourcé, ou de ne pas l'utiliser. »"
+     ],
+     [
+      "IA · origine du chiffre",
+      "Souvent non : l'IA cite une étude plausible mais introuvable. Un chiffre sans source retrouvable ne se cite pas comme un fait."
      ]
     ],
     "erreurs": [
@@ -670,7 +727,8 @@ window.DATA = {
    "types": [
     null,
     null,
-    null
+    null,
+    "on"
    ]
   },
   "F5": {
@@ -705,14 +763,16 @@ window.DATA = {
     "Quelles sont la méthode et le résultat principal (avec son chiffre) ?",
     "Combien de limites l'article reconnaît-il lui-même ?",
     "Une déclaration de financement ou de conflit d'intérêts est-elle indiquée ?",
-    "Écrivez la phrase honnête qui citerait ce résultat dans votre état de l'art."
+    "Écrivez la phrase honnête qui citerait ce résultat dans votre état de l'art.",
+    "Avec une IA (document public seulement) : demandez un résumé de l'article. Le résumé contient-il une erreur ou oublie-t-il une limite ?"
    ],
    "types": [
     null,
     null,
     "num",
     "on",
-    null
+    null,
+    "on"
    ],
    "livrable": "Une fiche de lecture de 7 lignes → Dossier, section 7.",
    "corr": {
@@ -753,6 +813,10 @@ window.DATA = {
      [
       "Sur votre article",
       "Mêmes questions, mêmes réponses à chercher : l'enseignant circule et vérifie une fiche par équipe."
+     ],
+     [
+      "IA · résumé de l'article",
+      "Souvent oui : limites réduites ou chiffre déformé. Comparez avec votre fiche de lecture, rédigée à partir du texte."
      ]
     ],
     "erreurs": [
@@ -846,10 +910,10 @@ window.DATA = {
    "chap": "Carnet · chapitre 5",
    "situation": [
     "Quel biais dans chaque situation ?",
-    "1. Vous ne gardez que les articles qui disent que votre solution préférée est la meilleure.",
-    "2. Seules les entreprises qui ont réussi publient leur retour d'expérience.",
-    "3. Les études sans résultat marquant ne sont jamais publiées.",
-    "4. L'étude est financée par le fabricant du produit testé."
+    "1. Les études sans résultat marquant ne sont jamais publiées.",
+    "2. L'étude est financée par le fabricant du produit testé.",
+    "3. Vous ne gardez que les articles qui disent que votre solution préférée est la meilleure.",
+    "4. Seules les entreprises qui ont réussi publient leur retour d'expérience."
    ],
    "taches": [
     "Situation 1 : quel biais ?",
@@ -860,27 +924,27 @@ window.DATA = {
    "types": [
     [
      "Confirmation",
-     "Survivant",
+     "Financement",
      "Publication",
-     "Financement"
+     "Survivant"
     ],
     [
      "Confirmation",
-     "Survivant",
+     "Financement",
      "Publication",
-     "Financement"
+     "Survivant"
     ],
     [
      "Confirmation",
-     "Survivant",
+     "Financement",
      "Publication",
-     "Financement"
+     "Survivant"
     ],
     [
      "Confirmation",
-     "Survivant",
+     "Financement",
      "Publication",
-     "Financement"
+     "Survivant"
     ]
    ],
    "livrable": "",
@@ -892,19 +956,19 @@ window.DATA = {
     "rows": [
      [
       "1",
-      "Biais de confirmation : chercher activement des sources qui contredisent"
-     ],
-     [
-      "2",
-      "Biais du survivant : chercher aussi les échecs"
-     ],
-     [
-      "3",
       "Biais de publication : chercher les revues systématiques et les rapports ouverts"
      ],
      [
-      "4",
+      "2",
       "Biais de financement : lire les déclarations d'intérêts, rechercher une étude indépendante"
+     ],
+     [
+      "3",
+      "Biais de confirmation : chercher activement des sources qui contredisent"
+     ],
+     [
+      "4",
+      "Biais du survivant : chercher aussi les échecs"
      ]
     ],
     "erreurs": [
@@ -931,9 +995,10 @@ window.DATA = {
     "« Il faut l'activer partout, parce que 80 % des compromissions viennent de mots de passe volés. Tout le monde le fait. Et ça coûte peu. »"
    ],
    "taches": [
-    "Placez chaque élément du propos dans le modèle de Toulmin.",
+    "Placez chaque élément du propos dans les 6 cases du modèle de Toulmin (écrivez « manquant » si la case n'a pas de contenu).",
     "Repérez ce qui manque et ce qui n'est pas un argument.",
-    "Réécrivez l'argument complet."
+    "Réécrivez l'argument complet.",
+    "Avec une IA : demandez-lui de cartographier le même propos avec Toulmin. Combien de cases diffèrent de la vôtre ?"
    ],
    "livrable": "Une carte de Toulmin complétée. → Dossier, section 9.",
    "corr": {
@@ -958,7 +1023,7 @@ window.DATA = {
      ],
      [
       "Données",
-      "« 80 % des compromissions viennent de mots de passe volés » : chiffre non sourcé, à vérifier"
+      "« 80 % des compromissions viennent de mots de passe volés » : chiffre non sourcé"
      ],
      [
       "Garantie",
@@ -979,6 +1044,10 @@ window.DATA = {
      [
       "Pas un argument",
       "« Tout le monde le fait » : appel à la popularité"
+     ],
+     [
+      "IA · cartographie",
+      "Souvent 1 à 3 cases : l'IA complète les cases manquantes avec du plausible (fondement, réfutation). Repérez ce qu'elle a inventé : une case vide est plus honnête."
      ]
     ],
     "erreurs": [
@@ -996,9 +1065,10 @@ window.DATA = {
     "retenir": "Un argument complet : affirmation, données sourcées, garantie, réfutation honnête, qualificatif."
    },
    "types": [
+    "toulmin6",
     null,
     null,
-    null
+    "num"
    ]
   },
   "EX17": {
@@ -1009,12 +1079,12 @@ window.DATA = {
    "chap": "Carnet · chapitre 6",
    "situation": [
     "Six phrases entendues en réunion :",
-    "1. « Tous les concurrents sont passés au cloud, donc nous devons y passer. »",
-    "2. « Ce consultant n'a jamais administré de serveur : ignorez son rapport. »",
-    "3. « Si on retarde la migration d'un mois, nous serons piratés. »",
-    "4. « Soit on interdit l'IA générative, soit on perd toutes nos données. »",
-    "5. « Deux utilisateurs trouvent le VPN lent : il ne marche pas. »",
-    "6. « Depuis la mise à jour de jeudi, les tickets ont augmenté : la mise à jour est la cause. »"
+    "1. « Depuis la mise à jour de jeudi, les tickets ont augmenté : la mise à jour est la cause. »",
+    "2. « Si on retarde la migration d'un mois, nous serons piratés. »",
+    "3. « Tous les concurrents sont passés au cloud, donc nous devons y passer. »",
+    "4. « Deux utilisateurs trouvent le VPN lent : il ne marche pas. »",
+    "5. « Ce consultant n'a jamais administré de serveur : ignorez son rapport. »",
+    "6. « Soit on interdit l'IA générative, soit on perd toutes nos données. »"
    ],
    "taches": [
     "Phrase 1 : quel sophisme ?",
@@ -1028,49 +1098,49 @@ window.DATA = {
     [
      "Appel à la popularité",
      "Attaque contre la personne",
-     "Pente glissante",
      "Faux dilemme",
      "Généralisation hâtive",
+     "Pente glissante",
      "Post hoc"
     ],
     [
      "Appel à la popularité",
      "Attaque contre la personne",
-     "Pente glissante",
      "Faux dilemme",
      "Généralisation hâtive",
+     "Pente glissante",
      "Post hoc"
     ],
     [
      "Appel à la popularité",
      "Attaque contre la personne",
-     "Pente glissante",
      "Faux dilemme",
      "Généralisation hâtive",
+     "Pente glissante",
      "Post hoc"
     ],
     [
      "Appel à la popularité",
      "Attaque contre la personne",
-     "Pente glissante",
      "Faux dilemme",
      "Généralisation hâtive",
+     "Pente glissante",
      "Post hoc"
     ],
     [
      "Appel à la popularité",
      "Attaque contre la personne",
-     "Pente glissante",
      "Faux dilemme",
      "Généralisation hâtive",
+     "Pente glissante",
      "Post hoc"
     ],
     [
      "Appel à la popularité",
      "Attaque contre la personne",
-     "Pente glissante",
      "Faux dilemme",
      "Généralisation hâtive",
+     "Pente glissante",
      "Post hoc"
     ]
    ],
@@ -1092,27 +1162,27 @@ window.DATA = {
     "rows": [
      [
       "1",
-      "Appel à la popularité : « Qu'est-ce qui convient à notre contexte, indépendamment des concurrents ? »"
+      "Post hoc : Hypothèse testable : si la mise à jour est la cause, les tickets doivent concerner les postes mis à jour"
      ],
      [
       "2",
-      "Attaque contre la personne : « Que dit le rapport, et ses données tiennent-elles ? »"
-     ],
-     [
-      "3",
       "Pente glissante : « Quelle preuve qu'un mois de retard mène à une attaque ? »"
      ],
      [
-      "4",
-      "Faux dilemme : « Existe-t-il une option encadrée (usages autorisés, données exclues) ? »"
+      "3",
+      "Appel à la popularité : « Qu'est-ce qui convient à notre contexte, indépendamment des concurrents ? »"
      ],
      [
-      "5",
+      "4",
       "Généralisation hâtive : « Combien d'utilisateurs ont mesuré, avec quelles valeurs ? »"
      ],
      [
+      "5",
+      "Attaque contre la personne : « Que dit le rapport, et ses données tiennent-elles ? »"
+     ],
+     [
       "6",
-      "Post hoc : hypothèse testable : « Si la mise à jour est la cause, les tickets doivent concerner les postes mis à jour »"
+      "Faux dilemme : « Existe-t-il une option encadrée (usages autorisés, données exclues) ? »"
      ]
     ],
     "erreurs": [
@@ -1125,7 +1195,7 @@ window.DATA = {
    "id": "EX18",
    "titre": "Interroger un vrai chiffre de fournisseur",
    "mode": "Binôme, ordinateur",
-   "duree": 15,
+   "duree": 20,
    "chap": "Carnet · chapitre 6",
    "situation": [
     "Cherchez sur le site d'un éditeur ou d'un fournisseur de votre domaine (sauvegarde, authentification, hébergement…) une affirmation chiffrée du type « réduit de X % » ou « Y % des entreprises… ».",
@@ -1135,13 +1205,15 @@ window.DATA = {
     "Recopiez une affirmation chiffrée d'un site de fournisseur (adresse et date).",
     "Posez les 5 questions (base, mesure, échantillon, auteur, durée) et notez les réponses de la page, ou « non indiqué ».",
     "Combien de questions restent sans réponse ?",
-    "Écrivez la phrase que vous mettriez dans votre état de l'art."
+    "Écrivez la phrase que vous mettriez dans votre état de l'art.",
+    "Avec une IA : demandez-lui les questions à poser à cette affirmation chiffrée. En oublie-t-elle une des cinq (base, mesure, échantillon, auteur, durée) ?"
    ],
    "types": [
     null,
     null,
     "num",
-    null
+    null,
+    "on"
    ],
    "livrable": "L'affirmation, les cinq questions et la phrase d'état de l'art → Dossier, section 10.",
    "corr": {
@@ -1186,6 +1258,10 @@ window.DATA = {
      [
       "Phrase d'état de l'art",
       "« Selon Microsoft (2019, relayé par Slaw.ca), l'authentification multifacteur bloquerait 99,9 % des tentatives de connexion frauduleuses automatisées ; la méthode n'est pas publiée dans l'article, ce chiffre est une position de l'éditeur. »"
+     ],
+     [
+      "IA · questions à poser",
+      "Souvent oui : l'IA oublie l'auteur ou la durée. Vous gardez les cinq questions du cours comme liste de contrôle."
      ]
     ],
     "erreurs": [
@@ -1209,7 +1285,8 @@ window.DATA = {
     "Écrivez l'affirmation provisoire (votre recommandation).",
     "Choisissez deux données, chacune avec sa source.",
     "Écrivez la garantie et le fondement.",
-    "Cherchez une réfutation et choisissez un qualificatif."
+    "Cherchez une réfutation et choisissez un qualificatif.",
+    "Avec une IA : demandez-lui 2 données possibles pour votre argument. Combien sont retrouvables dans une source réelle ?"
    ],
    "livrable": "Votre fiche de Toulmin dans le carnet. → Dossier, section 9.",
    "corr": {
@@ -1251,6 +1328,10 @@ window.DATA = {
      [
       "Qualificatif",
       "Probablement, pour les données d'exploitation ; sous réserve de tester la restauration depuis le cloud"
+     ],
+     [
+      "IA · données proposées",
+      "Souvent 0 ou 1 : des chiffres plausibles mais sans source. Une donnée utilisable porte une référence que vous avez ouverte."
      ]
     ],
     "erreurs": [
@@ -1263,7 +1344,8 @@ window.DATA = {
     null,
     null,
     null,
-    null
+    null,
+    "num"
    ]
   },
   "EX20": {
@@ -1352,16 +1434,17 @@ window.DATA = {
    "duree": 30,
    "chap": "Carnet · chapitre 7",
    "situation": [
-    "TransLor hésite sur la sauvegarde. Trois solutions (scores fictifs de 1 à 5, 5 = meilleur) :",
-    "Disque local seul : coût 5, sécurité 2, restauration 2, simplicité 5.",
-    "Cloud seul : coût 3, sécurité 4, restauration 4, simplicité 4.",
-    "Hybride (local et cloud) : coût 2, sécurité 5, restauration 5, simplicité 3.",
-    "Pondérations de départ : coût 30 %, sécurité 30 %, restauration 25 %, simplicité 15 %."
+    "TransLor hésite sur la sauvegarde. Méthode de la matrice pondérée : on note chaque solution de 1 à 5 sur chaque critère (5 = meilleur), on multiplie chaque note par le poids du critère, puis on additionne. Le total classe les solutions ; les poids traduisent les priorités de la directrice.",
+    "Exemple pour le disque local (coût 5, sécurité 2, restauration 2, simplicité 5) avec les poids de départ coût 30 %, sécurité 30 %, restauration 25 %, simplicité 15 % : 5×0,30 + 2×0,30 + 2×0,25 + 5×0,15 = 3,35.",
+    "À vous : Cloud seul : coût 3, sécurité 4, restauration 4, simplicité 4. Hybride (local et cloud) : coût 2, sécurité 5, restauration 5, simplicité 3.",
+    "Test de sensibilité : refaire le calcul avec d'autres poids pour voir si le classement tient. Poids n° 2 : coût 50 %, sécurité 20 %, restauration 20 %, simplicité 10 %."
    ],
    "taches": [
-    "Saisissez scores et poids dans un tableur ; calculez avec =SOMMEPROD.",
-    "Test de sensibilité : coût 50 %, sécurité 20 %, restauration 20 %, simplicité 10 %. Le classement change-t-il ?",
-    "Rédigez la conclusion en 3 phrases, avec un qualificatif et une réserve."
+    "Dans un tableur, saisissez scores et poids (une ligne par solution). Vérifiez que vous retrouvez 3,35 pour le disque local, puis calculez les deux autres avec =SOMMEPROD.",
+    "Avec les poids de départ, quelle solution a le meilleur total ?",
+    "Avec les poids n° 2 (coût 50 %), le classement change-t-il ?",
+    "Rédigez la conclusion en 3 phrases, avec un qualificatif et une réserve.",
+    "Avec une IA : demandez-lui de calculer les trois totaux sans tableur. Trouve-t-elle exactement 3,35, 3,70 et 3,80 ?"
    ],
    "livrable": "Votre tableur et la conclusion. → Dossier, section 11.",
    "corr": {
@@ -1405,6 +1488,11 @@ window.DATA = {
       "Formule",
       "=SOMMEPROD(B2:E2;$B$7:$E$7), poids dans des cellules séparées",
       ""
+     ],
+     [
+      "IA · calcul sans tableur",
+      "Les modèles de langage se trompent parfois sur les calculs, surtout enchaînés : refaites toujours le calcul dans le tableur. L'IA peut en revanche proposer la formule.",
+      ""
      ]
     ],
     "erreurs": [
@@ -1413,12 +1501,18 @@ window.DATA = {
      "Conclure sans réserve."
     ],
     "modele": "« Avec les pondérations de départ, la solution hybride paraît la plus adaptée (3,80 contre 3,70 et 3,35), mais l'écart avec le cloud est faible. Si le coût devient prioritaire (50 %), le classement s'inverse : disque local 3,80, cloud 3,50, hybride 3,30. Avant de décider, il faut sourcer les scores (coûts réels, tests de restauration) ; ces notes sont fictives. »",
-    "retenir": "Un état de l'art honnête : critères explicites, test de sensibilité, réserve, sources à vérifier."
+    "retenir": "Un état de l'art honnête : critères explicites, test de sensibilité, réserve, sources à citer."
    },
    "types": [
     null,
+    [
+     "Disque local",
+     "Cloud seul",
+     "Hybride"
+    ],
     "on",
-    null
+    null,
+    "on"
    ]
   },
   "EX22": {
@@ -1434,7 +1528,8 @@ window.DATA = {
     "Choisissez 3 solutions et 4 critères pondérés (total 100 %), selon les priorités de la directrice.",
     "Remplissez les scores en citant la source (référence Zotero) pour chacun.",
     "Calculez avec =SOMMEPROD et classez.",
-    "Test de sensibilité sur le critère le plus discutable : le classement change-t-il ?"
+    "Test de sensibilité sur le critère le plus discutable : le classement change-t-il ?",
+    "Avec une IA : demandez-lui 3 critères qui manquent à votre matrice. En gardez-vous un, et pourquoi ?"
    ],
    "livrable": "Votre matrice avec sources, le test de sensibilité et la conclusion. → Dossier, section 11.",
    "corr": {
@@ -1471,6 +1566,10 @@ window.DATA = {
      [
       "Conclusion",
       "Recommandation avec qualificatif et réserve"
+     ],
+     [
+      "IA · critères proposés",
+      "Gardez un critère s'il est mesurable, comparable et sourcé (voir « Choisir des critères mesurables »). Une IA propose souvent des critères flous (« innovation »)."
      ]
     ],
     "erreurs": [
@@ -1483,28 +1582,30 @@ window.DATA = {
     null,
     null,
     null,
-    "on"
+    "on",
+    null
    ]
   },
   "EX23": {
    "id": "EX23",
-   "titre": "Plan de l'état de l'art et chapô",
+   "titre": "Plan de l'état de l'art et résumé d'ouverture",
    "mode": "Équipes",
    "duree": 20,
    "chap": "Carnet · chapitre 7",
    "situation": [
-    "Votre état de l'art tient en deux pages. Avant d'écrire, il faut un plan et un résumé de trois lignes (chapô)."
+    "Votre état de l'art tient en deux pages. Avant d'écrire, il faut un plan et un résumé d'ouverture de trois lignes (en journalisme on dit le chapô) : la question, la méthode et la conclusion, pour que le lecteur ait la réponse tout de suite."
    ],
    "taches": [
     "Écrivez le plan : chaque partie en une ligne, avec sa longueur (en %).",
-    "Écrivez le chapô : question, méthode, conclusion.",
-    "Relisez : le lecteur a-t-il la réponse dans le chapô ?"
+    "Écrivez le résumé d'ouverture : question, méthode, conclusion.",
+    "Relisez : le lecteur a-t-il la réponse dans le résumé d'ouverture ?",
+    "Avec une IA : demandez-lui quelle décision elle comprend de votre résumé. Correspond-elle à votre conclusion ?"
    ],
-   "livrable": "Le plan et le chapô de votre état de l'art. → Dossier, section 12.",
+   "livrable": "Le plan et le résumé d'ouverture de votre état de l'art. → Dossier, section 12.",
    "corr": {
     "methode": [
      "Le plan suit la démarche.",
-     "Le chapô donne la conclusion d'abord."
+     "Le résumé d'ouverture donne la conclusion d'abord."
     ],
     "cols": [
      "Partie",
@@ -1556,22 +1657,26 @@ window.DATA = {
     "erreurs": [
      "Un panorama sans comparaison : on liste sans conclure.",
      "Une méthode absente : le lecteur ne peut pas refaire la recherche.",
-     "Un chapô qui annonce le plan au lieu de la conclusion."
+     "Un résumé d'ouverture qui annonce le plan au lieu de la conclusion."
     ],
-    "modele": "Chapô (fictif) : « Pour décider si TransLor doit ajouter une copie hors site à ses sauvegardes, nous avons comparé trois solutions à partir de neuf sources évaluées. L'option hybride est la plus adaptée sous les pondérations de départ, mais le classement s'inverse si le coût devient prioritaire. Recommandation : tester la restauration depuis le cloud avant de décider. »",
-    "retenir": "Un chapô donne la réponse : question, méthode, conclusion et réserve."
+    "modele": [
+     "Résumé d'ouverture (fictif) : « Pour décider si TransLor doit ajouter une copie hors site à ses sauvegardes, nous avons comparé trois solutions à partir de neuf sources évaluées. L'option hybride est la plus adaptée sous les pondérations de départ, mais le classement s'inverse si le coût devient prioritaire. Recommandation : tester la restauration depuis le cloud avant de décider. »"
+    ],
+    "retenir": "Un résumé d'ouverture donne la réponse : question, méthode, conclusion et réserve.",
+    "modele_titre": "Résumé d'ouverture (modèle)"
    },
    "types": [
     null,
     null,
-    null
+    "on",
+    "on"
    ]
   },
   "EX24": {
    "id": "EX24",
    "titre": "Rédiger l'état de l'art (2 pages)",
    "mode": "Équipes, document partagé",
-   "duree": 75,
+   "duree": 70,
    "chap": "Carnet · chapitre 7",
    "situation": [
     "Rédigez l'état de l'art de votre équipe en deux pages, avec le plan (EX23), la matrice (EX22) et les sources notées (EX12).",
@@ -1581,7 +1686,8 @@ window.DATA = {
     "Répartissez les parties dans l'équipe.",
     "Rédigez en pyramide inversée, avec au moins 6 sources citées.",
     "Générez la bibliographie avec Zotero.",
-    "Relisez avec la liste (question, méthode, sources, comparaison, réserve)."
+    "Relisez avec la liste (question, méthode, sources, comparaison, réserve).",
+    "Si vous avez utilisé une IA (relecture, reformulation), écrivez la phrase de déclaration à ajouter en fin de document : outil, usage, vérification."
    ],
    "livrable": "L'état de l'art de 2 pages dans un document partagé (lien) avec sa bibliographie. → Dossier, section 13.",
    "corr": {
@@ -1630,6 +1736,11 @@ window.DATA = {
       "Clarté et références",
       "3",
       "Pyramide inversée, bibliographie complète (total 20)"
+     ],
+     [
+      "IA · déclaration d'usage",
+      "Exemple : « Une IA générative a servi à relire l'orthographe et à proposer des reformulations ; chaque source a été ouverte et lue par l'équipe. » L'IA n'est jamais citée comme source.",
+      ""
      ]
     ],
     "erreurs": [
@@ -1642,6 +1753,7 @@ window.DATA = {
     "retenir": "Une méthode de recherche qu'un lecteur peut refaire vaut des points : requêtes, bases, dates, critères."
    },
    "types": [
+    null,
     null,
     null,
     null,
@@ -1660,7 +1772,8 @@ window.DATA = {
    "taches": [
     "Relisez le document de l'autre équipe avec la grille : deux points forts, deux améliorations, chacun avec un fait.",
     "Formulez un feedback en SBI : situation, comportement, impact.",
-    "Écoutez le feedback reçu sans vous justifier ; décidez deux corrections."
+    "Écoutez le feedback reçu sans vous justifier ; décidez deux corrections.",
+    "Avec une IA (document de l'autre équipe, si elle l'accepte) : demandez-lui une relecture avec la grille. Combien de ses remarques utiles n'aviez-vous pas relevées ?"
    ],
    "livrable": "Deux points forts, deux améliorations, deux corrections décidées. → Dossier, section 14.",
    "corr": {
@@ -1685,6 +1798,10 @@ window.DATA = {
      [
       "« Bien écrit. »",
       "« Dans la conclusion (S), vous donnez une réserve précise (B) : le lecteur sait jusqu'où va votre recommandation (I). »"
+     ],
+     [
+      "IA · relecture par une IA",
+      "Souvent 1 ou 2 (coquilles, redites). L'IA ne sait pas si une source existe : la vérification des références reste humaine."
      ]
     ],
     "erreurs": [
@@ -1695,7 +1812,8 @@ window.DATA = {
    "types": [
     null,
     null,
-    null
+    null,
+    "num"
    ]
   },
   "EX26": {
@@ -1711,7 +1829,8 @@ window.DATA = {
     "Écrivez le message clé en une phrase.",
     "Construisez le plan : accroche, problème, solution, preuve, appel à décision.",
     "Préparez les réponses aux 3 objections les plus probables.",
-    "Chronométrez-vous une fois."
+    "Chronométrez-vous une fois.",
+    "Avec une IA : demandez-lui de jouer la directrice non technique et de poser 3 questions sur votre pitch. Notez celle qui vous met le plus en difficulté."
    ],
    "livrable": "Votre message clé, votre plan et les trois objections préparées. → Dossier, section 15.",
    "corr": {
@@ -1752,6 +1871,10 @@ window.DATA = {
      [
       "Appel",
       "« Validez 1 800 € par an avant la fin du mois. »"
+     ],
+     [
+      "IA · jury simulé",
+      "Gardez la question la plus difficile et préparez une réponse en trois temps : reformuler, fait, réserve."
      ]
     ],
     "erreurs": [
@@ -1761,6 +1884,7 @@ window.DATA = {
     ]
    },
    "types": [
+    null,
     null,
     null,
     null,
@@ -1968,7 +2092,7 @@ window.DATA = {
      ],
      [
       "Q5",
-      "« Les passkeys sont probablement plus sûrs que les mots de passe pour l'hameçonnage ; réserve : compatibilité et coût de déploiement à vérifier. »"
+      "« Les passkeys sont probablement plus sûrs que les mots de passe pour l'hameçonnage ; réserve : compatibilité et coût de déploiement à chiffrer. »"
      ]
     ],
     "erreurs": [
@@ -2278,18 +2402,27 @@ window.DATA = {
     "Préparez 6 questions avec QQOQCCP, en entonnoir (large, précis, confirmation).",
     "Menez l'entretien (8 minutes) sans proposer de solution.",
     "Reformulez le besoin réel en une phrase.",
-    "Chiffrez le coût annuel actuel, en euros (45 min par jour et par gestionnaire, 225 jours, 15 gestionnaires, 32 € de l'heure)."
+    "Chiffrez le coût annuel actuel, en euros (45 min par jour et par gestionnaire, 225 jours, 15 gestionnaires, 32 € de l'heure).",
+    "Après l'entretien, demandez à une IA 6 questions QQOQCCP pour la demande de Marc. Combien de ses questions auraient apporté une information que vous n'avez pas obtenue ?"
    ],
    "livrable": "Besoin reformulé, coût annuel, critère de réussite. → Dossier, section 2.",
    "fiche_role": "FICHE DE MARC (secrète). Demande affichée : un export Excel des tournées. Besoin réel : savoir avant 7 h quelles tournées risquent un retard pour prévenir les clients. À dévoiler seulement si l'enquêteur pose des questions ouvertes : 20 tournées par jour, 12 % dépassent le créneau, il recopie les heures dans Excel 45 minutes par jour, 3 clients (60 % du CA) pénalisent les retards, budget maximal 2 k€, critère de réussite : une alerte au moins 30 minutes avant le créneau. Si on vous propose une solution trop vite, répondez « oui, peut-être ».",
    "corr": {
     "methode": [
-     "Questions larges : « Racontez-moi une matinée type ». Puis précises : fréquence, durée, impact.",
+     "Questions larges (« Racontez-moi une matinée type »), puis précises (fréquence, durée, impact), puis une question de confirmation : voir les 6 questions attendues.",
      "Demander à quoi servira l'export (le besoin derrière la solution).",
      "Reformuler en une phrase besoin + critère.",
      "Chiffrer l'impact avant de proposer."
     ],
     "rows": [
+     [
+      "Les 6 questions attendues (QQOQCCP, en entonnoir)",
+      "1. Racontez-moi une matinée type. (large)  2. Qui utilise ces tournées, et qui décide ensuite ? (qui)  3. À quelle fréquence et à quelle heure cherchez-vous ces données ? (quand)  4. Où se trouvent ces données aujourd'hui ? (où)  5. Combien de temps y consacrez-vous, et que coûte un retard ? (combien)  6. À quoi servira l'export ? Comment saurez-vous que c'est réussi ? (pourquoi, confirmation)"
+     ],
+     [
+      "Ce que Marc répond (fiche de rôle)",
+      "Il ressaisit chaque matin les tournées dans Excel pour repérer celles qui risquent d'être en retard (45 minutes par jour) et prévenir les clients avant 7 h."
+     ],
      [
       "Besoin réel",
       "Voir avant 7 h les tournées à risque de retard, pour prévenir les clients à temps"
@@ -2309,6 +2442,10 @@ window.DATA = {
      [
       "Phrase de reformulation",
       "« Vous voulez être alerté 30 minutes avant un retard probable pour prévenir vos clients, sans ressaisie ; l'export n'est qu'un moyen. »"
+     ],
+     [
+      "IA · questions oubliées",
+      "Souvent 1 à 3 (budget, contraintes de sécurité, qui accède aux données). Gardez celles qui servent la décision ; les questions génériques n'apportent rien."
      ]
     ],
     "erreurs": [
@@ -2321,6 +2458,7 @@ window.DATA = {
     null,
     null,
     null,
+    "num",
     "num"
    ]
   },
@@ -3011,7 +3149,7 @@ window.DATA = {
     "Pour E4 : relevez les problèmes de ton, de Cc et de Cci.",
     "Réécrivez E4 en trois phrases, vouvoiement.",
     "Pour E5 : quel est le problème ? Que proposer ?",
-    "Rappelez la règle sur le droit à la déconnexion (cadre légal à vérifier).",
+    "Rappelez la règle sur le droit à la déconnexion (cadre légal : Code du travail, art. L2242-17).",
     "Écrivez la règle de messagerie que vous proposez pour TransLor."
    ],
    "livrable": "Deux messages corrigés et une règle d'équipe.",
@@ -3040,7 +3178,7 @@ window.DATA = {
      ],
      [
       "Cadre légal",
-      "Droit à la déconnexion : les modalités se négocient dans l'entreprise (Code du travail, art. L2242-17 — à vérifier)"
+      "Droit à la déconnexion : les modalités se négocient dans l'entreprise (Code du travail, art. L2242-17)"
      ],
      [
       "Règle TransLor",
@@ -3466,7 +3604,7 @@ window.DATA = {
      "Conclure sans réserve : « le HVO est le meilleur » alors que l'écart est faible."
     ],
     "modele": "« Sous les pondérations actuelles, le HVO paraît la solution la plus adaptée (4,00 contre 3,80 et 3,25). Si les émissions deviennent la priorité (40 %), le HVO et le bioGNV sont à égalité (3,80). Avant de décider, il faut vérifier les scores sur des sources mesurées (autonomie réelle, disponibilité locale) ; ces notes sont fictives. »",
-    "retenir": "Un état de l'art honnête : critères explicites, test de sensibilité, réserve, sources à vérifier."
+    "retenir": "Un état de l'art honnête : critères explicites, test de sensibilité, réserve, sources à citer."
    }
   },
   "AX19": {
@@ -4011,27 +4149,68 @@ window.DATA = {
    "id": "EX11b",
    "titre": "Évaluer de vrais documents sur l'authentification",
    "mode": "Binôme, ordinateur",
-   "duree": 20,
+   "duree": 15,
    "chap": "Carnet · chapitre 4",
    "situation": [
-    "Cinq vrais documents (octobre 2026 ; adresses susceptibles de changer). Retrouvez-les avec leur titre dans un moteur de recherche :",
+    "Cinq vrais documents (relevés en octobre 2026). Retrouvez-les avec leur titre dans un moteur de recherche :",
     "D1 · NIST, SP 800-63B-4, Digital Identity Guidelines: Authentication and Authenticator Management (juillet 2025).",
     "D2 · ANSSI, Recommandations relatives à l'authentification multifacteur et aux mots de passe (2021).",
     "D3 · IT-Connect, « Nouveau guide ANSSI sur les mots de passe et l'authentification multifacteur » (11 octobre 2021).",
     "D4 · Slaw.ca, « Using multi-factor authentication blocks 99.9 % of account takeover attacks » (27 septembre 2019).",
-    "D5 · ENISA, ENISA Threat Landscape 2025 (plusieurs versions)."
+    "D5 · ENISA, ENISA Threat Landscape 2025 (plusieurs versions).",
+    "Grille en six questions, chacune notée 0 (non), 1 (en partie) ou 2 (oui) : Qui ? auteur identifié, compétent, indépendant. Quand ? date adaptée au sujet. Pourquoi ? informer plutôt que vendre. Sur quoi ? données et méthode visibles. Recoupé ? d'autres sources indépendantes concordent. Reproductible ? la méthode peut être refaite.",
+    "Total sur 12 : 9 et plus = fiable ; 5 à 8 = à recouper ; 4 et moins = à écarter ou à citer avec prudence."
    ],
    "taches": [
-    "Notez D1 à D5 avec la grille en six questions : écrivez les cinq totaux.",
-    "Lesquels sont des sources d'origine ? Lesquels relaient une autre source ?",
+    "Appliquez la grille de six questions à chaque document (brouillon ou dossier, section 5). D1 : quel verdict ?",
+    "D2 : quel verdict ?",
+    "D3 : quel verdict ?",
+    "D4 : quel verdict ?",
+    "D5 : quel verdict ?",
     "D4 : le chiffre « 99,9 % » renvoie-t-il à une étude précise nommée dans l'article ?",
-    "Quel document pour affirmer un fait ? Lequel pour citer une position ?"
+    "Quel document est un relais à ne pas citer à la place du guide d'origine ?",
+    "Avec une IA : demandez-lui de noter D4 avec la grille. Est-elle d'accord avec vous ?"
    ],
    "types": [
-    null,
-    null,
+    [
+     "Origine : à retenir",
+     "Relais : citer l'origine",
+     "Position d'un acteur : à citer avec réserve",
+     "À écarter"
+    ],
+    [
+     "Origine : à retenir",
+     "Relais : citer l'origine",
+     "Position d'un acteur : à citer avec réserve",
+     "À écarter"
+    ],
+    [
+     "Origine : à retenir",
+     "Relais : citer l'origine",
+     "Position d'un acteur : à citer avec réserve",
+     "À écarter"
+    ],
+    [
+     "Origine : à retenir",
+     "Relais : citer l'origine",
+     "Position d'un acteur : à citer avec réserve",
+     "À écarter"
+    ],
+    [
+     "Origine : à retenir",
+     "Relais : citer l'origine",
+     "Position d'un acteur : à citer avec réserve",
+     "À écarter"
+    ],
     "on",
-    null
+    [
+     "D1",
+     "D2",
+     "D3",
+     "D4",
+     "D5"
+    ],
+    "on"
    ],
    "livrable": "Le tableau de notation de 5 documents réels → Dossier, section 5.",
    "corr": {
@@ -4050,6 +4229,10 @@ window.DATA = {
     ],
     "rows": [
      [
+      "Verdicts attendus",
+      "D1 origine, à retenir · D2 origine, à retenir · D3 relais : citer le guide D2 · D4 position d'un acteur, à citer avec réserve · D5 origine, à retenir (noter version et date)"
+     ],
+     [
       "D1",
       "Source d'origine : organisme américain de normalisation, version finale (juillet 2025) qui remplace celle de mars 2020. Périmètre : systèmes d'identité de l'administration américaine ; référence technique mondiale. Indicatif : 10 à 11 / 12."
      ],
@@ -4067,11 +4250,15 @@ window.DATA = {
      ],
      [
       "D5",
-      "Source d'origine probable (agence européenne), non lue en détail à la construction : à noter en séance ; relever la version et la date, car plusieurs versions existent."
+      "Source d'origine (agence européenne, période du 1er juillet 2024 au 30 juin 2025 d'après sa page de présentation) : relever la version et la date, car plusieurs versions existent."
      ],
      [
       "Décision",
       "Fait : citer D1 ou D2 (d'origine). Position d'un acteur : D4, avec réserve. D3 : piste, pas une preuve."
+     ],
+     [
+      "IA · note de D4",
+      "Une IA note souvent D4 plus haut que vous : elle voit le titre et la date, pas l'absence d'étude nommée ni le financement. Elle résume ; vérifier la source reste votre travail."
      ]
     ],
     "erreurs": [
@@ -4099,14 +4286,16 @@ window.DATA = {
     "Soulignez les verbes qui concernent chercher ou veiller, écrire, présenter : combien de verbes de ce type trouvez-vous ?",
     "L'offre demande-t-elle explicitement de la veille ?",
     "Associez trois verbes aux objectifs du syllabus (O1, O2, O3, P1, P2).",
-    "Quelle compétence de cette offre ce cours vous fera-t-il travailler en priorité ?"
+    "Quelle compétence de cette offre ce cours vous fera-t-il travailler en priorité ?",
+    "Avec une IA : collez l'offre et demandez « quelles compétences de communication attend-on ? ». Combien de compétences l'IA ajoute-t-elle que vous n'aviez pas relevées ?"
    ],
    "types": [
     null,
     "num",
     "on",
     null,
-    null
+    null,
+    "num"
    ],
    "livrable": "Votre offre cible et la correspondance avec les objectifs → Dossier, section 0.",
    "corr": {
@@ -4147,6 +4336,10 @@ window.DATA = {
      [
       "Limite",
       "Deux offres ne forment pas un échantillon : l'objectif est d'apprendre à lire une offre, pas de conclure sur « le » marché"
+     ],
+     [
+      "IA · compétences ajoutées",
+      "Souvent 1 à 3 : écrire des synthèses, vulgariser, travailler avec d'autres équipes. Retenez celles que l'offre dit réellement ; rejetez celles que l'IA invente."
      ]
     ],
     "erreurs": [
@@ -4169,7 +4362,7 @@ window.DATA = {
    "chap": "Carnet · chapitre 3",
    "situation": [
     "Votre question de décision (EX1) doit rester d'actualité pendant le projet. Vous mettez en place une veille minimale avec des outils gratuits.",
-    "Outils proposés (adresses et gratuité à vérifier) : Google Alerts (alerte sur une requête) ; un lecteur de flux RSS (Inoreader, plan gratuit d'environ 150 abonnements, ou Feedly) ; le flux RSS du CERT-FR (cert.cyber.gouv.fr, lien « Flux RSS »).",
+    "Outils proposés : Google Alerts (alerte sur une requête, reçue par e-mail ou en flux RSS) ; Inoreader (lecteur de flux RSS, plan gratuit de 150 abonnements) ; le flux RSS du CERT-FR (https://cert.cyber.gouv.fr/flux-rss/).",
     "Aucune donnée personnelle ou confidentielle dans ces outils. Si un compte est exigé, utilisez l'adresse de l'école."
    ],
    "taches": [
@@ -4177,22 +4370,25 @@ window.DATA = {
     "Dans un lecteur de flux, ajoutez trois sources de types différents (institutionnelle, scientifique, presse ou éditeur) : notez-les.",
     "Combien d'articles non lus apparaissent après 5 minutes ?",
     "Exportez votre liste au format OPML : l'export a-t-il réussi ?",
-    "Parmi les articles, repérez un signal fort et un signal faible (peu cité mais important) : justifiez."
+    "Parmi les articles, repérez un signal fort et un signal faible (peu cité mais important) : justifiez.",
+    "Avec une IA : demandez-lui 5 sources à suivre sur votre question. Combien existent, publient encore et sont utiles ?"
    ],
    "types": [
     "on",
     null,
     "num",
     "on",
-    null
+    null,
+    "num"
    ],
    "livrable": "Votre plan de veille (requête, trois sources, fréquence) et votre journal de sources → Dossier, section 19.",
    "corr": {
     "methode": [
-     "Une requête précise (opérateurs vus en EX8).",
-     "Trois sources de types différents : une seule source ne se recoupe pas.",
+     "Écrire une requête précise (opérateurs vus en EX8).",
+     "Créer l'alerte Google Alerts.",
+     "Abonner un lecteur de flux à trois sources de types différents.",
      "Exporter en OPML pour ne pas dépendre d'un outil.",
-     "Trier : signal fort (souvent cité) ou faible (rare, mais important)."
+     "Trier : signal fort ou faible, puis noter date et action."
     ],
     "cols": [
      "Point",
@@ -4204,28 +4400,36 @@ window.DATA = {
     ],
     "rows": [
      [
-      "Requête",
-      "Exemple : passkeys OR « passwordless authentication » -banque ; trop large = bruit, trop étroite = rien"
+      "1 · Requête",
+      "Écrivez la requête comme à l'EX8 : passkeys OR « passwordless authentication » -banque. Trop large = du bruit ; trop étroite = rien."
      ],
      [
-      "Trois sources",
-      "Une institutionnelle (CERT-FR, agence), une scientifique (flux d'un dépôt d'articles), une presse ou éditeur (à pondérer)"
+      "2 · Google Alerts",
+      "Ouvrir google.com/alerts avec un compte Google ; saisir la requête ; « Afficher les options » : choisir la fréquence et l'envoi par e-mail ou par flux RSS ; créer l'alerte. Elle apparaît dans la liste de vos alertes."
      ],
      [
-      "Plan gratuit",
-      "Inoreader : environ 150 abonnements et 30 règles d'après sa page tarifs (23/10/2026, tableau ambigu) : largement suffisant ici"
+      "3 · Lecteur de flux",
+      "Créer un compte gratuit Inoreader ; ajouter trois flux de types différents : une institutionnelle (CERT-FR : https://cert.cyber.gouv.fr/flux-rss/), une scientifique (flux d'un dépôt d'articles), une presse ou éditeur (à pondérer)."
      ],
      [
-      "Alerte par flux RSS",
-      "Décrite pour Google Alerts en 2013 : à tester ; sinon l'alerte arrive par e-mail"
+      "4 · Plan gratuit",
+      "Inoreader : 150 abonnements, 30 règles, 50 filtres en gratuit d'après sa page tarifs (consultée le 23/10/2026) : largement suffisant ici."
      ],
      [
-      "Export OPML",
-      "Format standard de liste de flux. Pocket a fermé le 8 juillet 2025 et le service Netvibes le 2 juin 2025 : un outil peut disparaître, pas le format"
+      "5 · Lecture après 5 minutes",
+      "Le nombre d'articles non lus dépend des flux (de quelques dizaines à quelques centaines) ; ne pas tout lire : trier."
      ],
      [
-      "Signal faible",
-      "Information rare, ambiguë, mais qui pourrait changer la décision. Elle se vérifie avant de s'y fier"
+      "6 · Export OPML",
+      "L'export OPML (menu des préférences ou de l'import/export du lecteur) donne un fichier de votre liste de flux. Un outil peut disparaître (Pocket a fermé le 8 juillet 2025, Netvibes le 2 juin 2025) ; le format reste."
+     ],
+     [
+      "7 · Signal fort ou faible",
+      "Fort : cité par plusieurs sources indépendantes. Faible : rare, ambigu, mais qui pourrait changer la décision. Un signal faible se vérifie avant de s'y fier : on cherche une deuxième source."
+     ],
+     [
+      "8 · Carnet de veille",
+      "Notez date de lecture, source, une ligne de résumé et l'action (garder, recouper, écarter) : une veille se refait et se date."
      ]
     ],
     "erreurs": [
@@ -4248,7 +4452,7 @@ window.DATA = {
    "chap": "Carnet · chapitre 9",
    "situation": [
     "Le CERT-FR publie des avis ; la direction de TransLor demande : faut-il traiter cette vulnérabilité cette semaine ? Choisissez une CVE récente parmi les cinq dernières ajoutées au catalogue KEV de la CISA (vulnérabilités exploitées).",
-    "Quatre sources à croiser (adresses à vérifier) : NVD (nvd.nist.gov, gravité CVSS), EUVD (base de l'ENISA, euvd.enisa.europa.eu), KEV (cisa.gov), EPSS (first.org/epss : probabilité d'exploitation dans les 30 jours).",
+    "Quatre sources à croiser : NVD (nvd.nist.gov, gravité CVSS), EUVD (base de l'ENISA, euvd.enisa.europa.eu), KEV (catalogue des vulnérabilités exploitées de la CISA, cisa.gov) et EPSS (first.org/epss : probabilité d'exploitation dans les 30 jours).",
     "Notez la date de consultation de chaque source : elles changent chaque jour."
    ],
    "taches": [
@@ -4294,7 +4498,7 @@ window.DATA = {
      ],
      [
       "KEV (CISA)",
-      "Liste des vulnérabilités dont l'exploitation est constatée ; formats JSON et CSV gratuits, mise à jour quasi quotidienne (source secondaire à confirmer)"
+      "Liste des vulnérabilités dont l'exploitation est constatée ; formats JSON et CSV gratuits, mise à jour quasi quotidienne "
      ],
      [
       "EPSS (FIRST)",
@@ -4342,13 +4546,15 @@ window.DATA = {
     "Placez le récit dans le modèle de Toulmin : affirmation, donnée, garantie.",
     "Les faits ci-dessus montrent-ils un manque d'information chez Kodak ?",
     "Quelle autre explication les faits soutiennent-ils ?",
-    "Réécrivez l'affirmation avec un qualificatif et une réserve."
+    "Réécrivez l'affirmation avec un qualificatif et une réserve.",
+    "Avec une IA : demandez « Pourquoi Kodak a-t-elle fait faillite ? ». Sa réponse évoque-t-elle plusieurs causes ?"
    ],
    "types": [
     null,
     "on",
     null,
-    null
+    null,
+    "on"
    ],
    "livrable": "",
    "corr": {
@@ -4385,6 +4591,10 @@ window.DATA = {
      [
       "Réserve",
       "Source unique pour le choix de la direction (le témoignage de l'inventeur) ; les causes de la faillite n'ont pas été étudiées ici"
+     ],
+     [
+      "IA · explication de l'IA",
+      "Souvent oui : l'IA cite l'argentique rentable, le retard sur le numérique, la concurrence. Elle écrit sans date ni source : comparez avec les faits lus."
      ]
     ],
     "erreurs": [
@@ -4403,7 +4613,7 @@ window.DATA = {
    "id": "V2",
    "titre": "Même chiffre, deux lectures : le chiffre d'affaires d'Inditex",
    "mode": "Binôme",
-   "duree": 10,
+   "duree": 15,
    "chap": "Carnet · chapitre 6",
    "situation": [
     "Deux phrases exactes sur le même groupe (Inditex, première moitié de l'exercice 2025, d'après Retail Gazette, septembre 2025) :",
@@ -4415,7 +4625,8 @@ window.DATA = {
     "Quelle phrase correspond aux données publiées ?",
     "Quel est l'écart entre les deux chiffres, en points de pourcentage ? (le nombre)",
     "Pour juger la dynamique commerciale hors effet des devises, quel chiffre citez-vous ?",
-    "Écrivez une phrase honnête qui donne les deux chiffres et la source."
+    "Écrivez une phrase honnête qui donne les deux chiffres et la source.",
+    "Avec une IA : demandez « De combien le chiffre d'affaires d'Inditex a-t-il progressé ? ». Précise-t-elle les conditions (données publiées ou taux de change constants) ?"
    ],
    "types": [
     [
@@ -4427,7 +4638,8 @@ window.DATA = {
      "Données publiées",
      "Taux de change constants"
     ],
-    null
+    null,
+    "on"
    ],
    "livrable": "",
    "corr": {
@@ -4464,6 +4676,10 @@ window.DATA = {
      [
       "Contrôle",
       "L'article lu ne confirme pas « bien en dessous des attentes » : ne pas le reprendre sans source"
+     ],
+     [
+      "IA · réponse de l'IA",
+      "Souvent non : un seul chiffre, sans condition ni date. Il faut demander la source et la période."
      ]
     ],
     "erreurs": [
@@ -4482,7 +4698,7 @@ window.DATA = {
    "id": "V7",
    "titre": "Critiquer un classement ou un comparateur",
    "mode": "Binôme, ordinateur",
-   "duree": 10,
+   "duree": 15,
    "chap": "Carnet · chapitre 7",
    "situation": [
     "Les benchmarks s'appuient souvent sur des classements ou des sites d'avis. Qui les finance, et comment sont-ils construits ?",
@@ -4494,7 +4710,8 @@ window.DATA = {
     "Qui finance le classement ?",
     "La méthode (critères, mesures, nombre d'avis) est-elle publiée ?",
     "Combien de critères sont réellement mesurables ? (le nombre)",
-    "Comment citeriez-vous ce classement dans votre état de l'art ?"
+    "Comment citeriez-vous ce classement dans votre état de l'art ?",
+    "Avec une IA : demandez « Quel est le meilleur … ? » pour votre domaine. Indique-t-elle qui finance ses sources ?"
    ],
    "types": [
     null,
@@ -4506,7 +4723,8 @@ window.DATA = {
     ],
     "on",
     "num",
-    null
+    null,
+    "on"
    ],
    "livrable": "",
    "corr": {
@@ -4535,7 +4753,7 @@ window.DATA = {
      ],
      [
       "Classement d'un cabinet d'analystes",
-      "Vérifier qui l'a commandé et si la méthode est publiée (à vérifier selon le classement choisi)"
+      "Vérifier qui l'a commandé et si la méthode est publiée (selon le classement choisi)"
      ],
      [
       "Site d'avis d'utilisateurs",
@@ -4544,6 +4762,10 @@ window.DATA = {
      [
       "Phrase possible",
       "« Selon <site> (date), <produit> est classé premier ; la méthode n'est pas publiée et le site perçoit une commission : position à recouper. »"
+     ],
+     [
+      "IA · meilleur choix selon l'IA",
+      "Rarement. Une IA réécrit des classements existants sans dire qui les finance : remontez à la page d'origine."
      ]
     ],
     "erreurs": [
@@ -4565,24 +4787,41 @@ window.DATA = {
    "duree": 15,
    "chap": "Carnet · chapitre 7",
    "situation": [
-    "Cinq mesures du temps de restauration (en minutes), faites sur chaque outil de sauvegarde (valeurs fictives) :",
-    "Outil A : 41, 38, 45, 40, 36.   Outil B : 37, 44, 35, 43, 39.",
-    "Outil C : 52, 50, 53, 51, 54.   Outil D : 41, 43, 40, 42, 44.",
-    "Dans un tableur : =MOYENNE(...) pour la moyenne, =ECARTYPE(...) pour la dispersion (selon la version : ECARTYPE ou ECARTYPE.STANDARD)."
+    "TransLor teste quatre outils de sauvegarde. Pour chacun, on a mesuré 5 fois le temps de restauration, en minutes (valeurs fictives) :",
+    "Outil A : 41, 38, 45, 40, 36.   Outil B : 37, 44, 35, 43, 39.   Outil C : 52, 50, 53, 51, 54.   Outil D : 41, 43, 40, 42, 44.",
+    "Deux questions de décision : A est-il plus rapide que B ? C est-il plus rapide que D ? Les mesures d'un même outil varient d'un essai à l'autre : c'est le bruit. Il faut comparer l'écart entre deux outils à ce bruit.",
+    "Tableur : =MOYENNE(plage) et =ECARTYPE(plage) (ou ECARTYPE.STANDARD selon la version). Règle de lecture : écart des moyennes plus petit que l'écart-type = bruit ; plus de 2 écarts-types = probablement réel ; entre les deux = refaire des mesures."
    ],
    "taches": [
-    "Écart entre les moyennes de A et de B, en minutes. (le nombre)",
-    "Écart-type de A, arrondi à 0,1. (le nombre)",
-    "L'écart entre A et B est-il grand par rapport à la dispersion des mesures ?",
-    "L'écart entre C et D est-il grand par rapport à la dispersion des mesures ?",
-    "Écrivez une phrase pour la comparaison A–B et une pour C–D."
+    "A et B : écart entre les moyennes, en minutes.",
+    "A : écart-type, arrondi à 0,1.",
+    "A–B : l'écart des moyennes est-il plus petit ou plus grand que l'écart-type ?",
+    "A–B : que concluez-vous ?",
+    "C et D : écart entre les moyennes, en minutes.",
+    "C–D : que concluez-vous ?",
+    "Écrivez une phrase de conclusion pour A–B et une pour C–D, comme dans un état de l'art.",
+    "Avec une IA : demandez-lui si « B est meilleur que A ». Donne-t-elle ses calculs, et sont-ils exacts (refaites-les) ?"
    ],
    "types": [
     "num",
     "num",
-    "on",
-    "on",
-    null
+    [
+     "Plus petit",
+     "Plus grand"
+    ],
+    [
+     "Écart réel",
+     "Bruit (aucune différence établie)",
+     "À refaire avec plus de mesures"
+    ],
+    "num",
+    [
+     "Écart réel",
+     "Bruit (aucune différence établie)",
+     "À refaire avec plus de mesures"
+    ],
+    null,
+    "on"
    ],
    "livrable": "Un tableau de mesures avec moyennes et dispersion, et votre phrase de conclusion → Dossier, section 21.",
    "corr": {
@@ -4602,23 +4841,27 @@ window.DATA = {
     "rows": [
      [
       "A et B",
-      "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9. L'écart est bien plus petit que la dispersion : probablement du bruit"
+      "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9. L'écart (0,4) est bien plus petit que l'écart-type (3,4) : bruit. Conclusion : aucune différence établie."
      ],
      [
       "C et D",
-      "Moyennes 52,0 et 42,0 : écart 10 ; écarts-types 1,6 et 1,6. L'écart dépasse largement la dispersion : probablement réel"
+      "Moyennes 52,0 et 42,0 : écart 10 ; écarts-types 1,6 et 1,6 : l'écart vaut plus de 6 écarts-types : probablement réel. Conclusion : D est plus rapide d'environ 10 minutes sur ces cinq mesures."
      ],
      [
       "Test statistique (facultatif)",
-      "Un test de Student (TEST.STUDENT dans un tableur en français, à vérifier) donne environ 0,87 pour A–B et 0,00001 pour C–D (calcul fait à la construction). Plus ce nombre est petit, moins l'écart s'explique par le hasard"
+      "Un test de Student (fonction de tableur, ou avis d'un statisticien) donne environ 0,87 pour A–B et 0,00001 pour C–D (calcul fait à la construction du cours). Plus ce nombre est petit, moins l'écart s'explique par le hasard."
      ],
      [
       "t-test et ANOVA",
-      "À connaître de nom : le t-test compare deux groupes, l'ANOVA plus de deux. Pour les utiliser, demandez conseil à un statisticien"
+      "À connaître de nom : le t-test compare deux groupes, l'ANOVA plus de deux. Pour les utiliser correctement, demandez conseil à un statisticien."
      ],
      [
       "Phrases possibles",
       "A–B : « l'écart observé (0,4 min) est inférieur à la dispersion des mesures ; aucune différence n'est établie. » C–D : « D est plus rapide d'environ 10 min sur ces cinq mesures ; à confirmer avec plus de mesures. »"
+     ],
+     [
+      "IA · B meilleur que A ?",
+      "Une IA répond souvent « oui, B est légèrement meilleur » en comparant 39,6 à 40,0, sans parler de la dispersion. Refaites le calcul : l'écart est du bruit."
      ]
     ],
     "erreurs": [
@@ -5619,8 +5862,6 @@ window.DATA = {
   "EX25",
   "EX26",
   "EX27",
-  "V5",
-  "EX28",
   "EX29",
   "F9"
  ],
@@ -5643,6 +5884,8 @@ window.DATA = {
   "F1",
   "F5",
   "F7",
-  "AG1"
+  "AG1",
+  "V5",
+  "EX28"
  ]
 };

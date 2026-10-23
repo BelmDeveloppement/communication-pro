@@ -1,6 +1,6 @@
 # Communication professionnelle · TransLor
 
-© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés.
+© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur.
 
 Application du cours « Communication professionnelle de l'ingénieur » (10 h 30) : énoncés, minuteurs, corrections détaillées, Jeu 20 (quiz de 54 questions), Jeu 21 (crise « Mardi 6 h 50 »), quiz final.
 

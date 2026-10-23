@@ -86,7 +86,16 @@
     }
     return v;
   }
-  var api = { COLORS: COLORS, create: create, join: join, start: start, answer: answer, allAnswered: allAnswered, reveal: reveal, next: next,
+  /* Sujets : premier arrivé = premier servi. claims = { sujet: {sid, nom, ts} } ; un étudiant ne peut en prendre qu'un. */
+  function claim(claims, sid, nom, sujet, now) {
+    var k, mine = null; for (k in claims) if (claims[k].sid === sid) mine = k;
+    if (mine === sujet) return { ok: true, reason: "deja", mine: mine };
+    if (mine) return { ok: false, reason: "un_seul", mine: mine };
+    if (claims[sujet]) return { ok: false, reason: "pris", par: claims[sujet].nom };
+    claims[sujet] = { sid: sid, nom: nom, ts: now || Date.now() }; return { ok: true, reason: "ok", mine: sujet };
+  }
+  function release(claims, sujet) { delete claims[sujet]; }
+  var api = { claim: claim, release: release, COLORS: COLORS, create: create, join: join, start: start, answer: answer, allAnswered: allAnswered, reveal: reveal, next: next,
               view: view, ranking: ranking, itemsQuiz: itemsQuiz, itemsCrise: itemsCrise, titre: titre, shuffle: shuffle };
   if (typeof module !== "undefined") module.exports = api; else root.Engine = api;
 })(this);
