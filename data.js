@@ -18,7 +18,7 @@ window.DATA = {
     "Phrase 2 (paiement des jours de grève) : d'après la meilleure source trouvée, la phrase est-elle exacte ?",
     "Citez la source de chaque phrase (organisme, titre, date).",
     "En combien de minutes avez-vous trouvé votre première source solide ?",
-    "Avec une IA : posez-lui la phrase 1 telle quelle. Cite-t-elle un texte officiel que vous pouvez ouvrir ?"
+    "Avec ChatGPT ou une autre IA (notez laquelle) : posez-lui la phrase 1 telle quelle. Cite-t-elle un texte officiel que vous pouvez ouvrir ?"
    ],
    "types": [
     [
@@ -113,7 +113,7 @@ window.DATA = {
     "Écrivez 4 critères de comparaison (coût, sécurité, facilité d'usage, délai…).",
     "Écrivez 3 mots-clés en français et leur traduction en anglais.",
     "Tapez-les dans Google Scholar : combien de résultats environ ?",
-    "Avec une IA : demandez 5 formulations de question de décision pour votre sujet. Gardez-en une ou écrivez la vôtre, et dites pourquoi en une phrase."
+    "Avec Claude ou une autre IA (notez laquelle) : demandez 5 formulations de question de décision pour votre sujet. Gardez-en une ou écrivez la vôtre, et dites pourquoi en une phrase."
    ],
    "livrable": "Votre question de décision, 4 critères et 3 mots-clés → Dossier, section 1.",
    "corr": {
@@ -245,7 +245,7 @@ window.DATA = {
    "taches": [
     "Soulignez les 3 concepts clés de la question.",
     "Écrivez les synonymes français et anglais de chaque concept.",
-    "Demandez à une IA : « Propose-moi des mots-clés français et anglais et une requête de recherche pour : <la question> ». Combien de mots-clés proposés n'étaient pas dans votre liste ?",
+    "Demandez à une IA : « Propose-moi des mots-clés français et anglais et une requête de recherche pour : <la question> ». Combien de mots-clés proposés n'étaient pas dans votre liste ? Notez le nom de l'IA utilisée.",
     "Parmi les propositions de l'IA, combien sont hors sujet ou trompeurs ?",
     "Assemblez votre requête finale (guillemets, OR), puis faites de même pour votre question (EX1)."
    ],
@@ -316,7 +316,7 @@ window.DATA = {
     "Précisez avec guillemets, OR, tiret et filtre de dates (5 ans) : écrivez la requête finale.",
     "Combien de résultats après précision ?",
     "Relevez 5 résultats utiles : titre, auteurs, année, type de document.",
-    "Posez la même question à un assistant de recherche IA (Semantic Scholar, Consensus, Elicit, Perplexity…) : combien de ses 5 références retrouvez-vous réellement dans Google Scholar ?"
+    "Posez la même question à un assistant de recherche IA (Semantic Scholar, Consensus, Elicit, Perplexity…) : combien de ses 5 références retrouvez-vous réellement dans Google Scholar ? Notez le nom de l'IA utilisée."
    ],
    "livrable": "La requête finale, la date, et 5 résultats notés. → Dossier, section 3.",
    "corr": {
@@ -388,7 +388,7 @@ window.DATA = {
     "Trouvez deux documents utiles à votre question (au moins un d'un organisme public).",
     "Notez pour chacun : auteur ou organisme, titre, date, version, adresse.",
     "Recommandation, norme, loi, rapport ou avis d'expert ? Une phrase de synthèse par document.",
-    "Avec une IA : demandez les organismes et experts qui ont publié sur votre sujet. Combien de ses noms existent vraiment et ont publié sur le sujet (vérifiez sur leur site) ?"
+    "Avec Le Chat (Mistral) ou une autre IA (notez laquelle) : demandez les organismes et experts qui ont publié sur votre sujet. Combien de ses noms existent vraiment et ont publié sur le sujet (vérifiez sur leur site) ?"
    ],
    "livrable": "Deux références complètes avec une phrase de synthèse chacune. → Dossier, section 4.",
    "corr": {
@@ -453,13 +453,13 @@ window.DATA = {
    "situation": [
     "Zotero est un outil gratuit de gestion de références. Version de bureau avec extension de navigateur (Zotero Connector).",
     "Si l'installation est impossible sur votre poste, utilisez un tableur : auteur, année, titre, lien.",
-    "Attention : l'extension de navigateur peut déclencher le contrôle anti-robot de Google Scholar (CAPTCHA) et gêner la consultation ; des utilisateurs le signalent sur le forum de Zotero. Terminez d'abord vos recherches Scholar (EX8). Si Scholar se bloque, désactivez l'extension sur ce site, ou enregistrez les références depuis la page de l'éditeur ou par leur DOI."
+    "Si Google Scholar se bloque (contrôle anti-robot déclenché par l'extension), changez de base : HAL (hal.science), Semantic Scholar (semanticscholar.org) ou arXiv (arxiv.org). Le bouton de l'extension Zotero y fonctionne. Dernier recours : « Ajouter par identifiant » dans Zotero (collez un DOI)."
    ],
    "taches": [
     "Installez Zotero et son extension (ou ouvrez la version web).",
-    "Enregistrez 5 références depuis Google Scholar et vérifiez auteurs, année, titre.",
+    "Enregistrez 5 références depuis HAL ou Semantic Scholar (ou Google Scholar si l'extension le permet) et vérifiez auteurs, année, titre.",
     "Générez une bibliographie dans un style au choix.",
-    "Avec une IA : demandez-lui de mettre vos 2 premières références au format APA. Comparez avec la bibliographie de Zotero : combien de différences ?"
+    "Avec Perplexity ou une autre IA (notez laquelle) : demandez-lui de mettre vos 2 premières références au format APA. Comparez avec la bibliographie de Zotero : combien de différences ?"
    ],
    "livrable": "Votre bibliographie de 5 références générée par Zotero. → Dossier, section 17.",
    "corr": {
@@ -613,7 +613,7 @@ window.DATA = {
     "Choisissez 5 sources de votre question et notez-les avec la grille.",
     "Gardez-en 3 au moins et justifiez chaque décision en une phrase.",
     "Dans Zotero, étiquetez-les « retenue » ou « écartée ».",
-    "Avec une IA : donnez-lui une de vos sources et la grille, demandez une note sur 12. Quel écart avec votre note, en points ?"
+    "Avec ChatGPT ou une autre IA (notez laquelle) : donnez-lui une de vos sources et la grille, demandez une note sur 12. Quel écart avec votre note, en points ?"
    ],
    "livrable": "La grille de 5 sources remplie et 3 sources retenues dans Zotero. → Dossier, section 5.",
    "corr": {
@@ -679,7 +679,7 @@ window.DATA = {
     "Cherchez l'origine du chiffre et notez le chemin : article, article, origine.",
     "La source d'origine existe-t-elle ? Que mesure-t-elle exactement ?",
     "Que répondez-vous à la directrice qui veut le citer ?",
-    "Avec une IA : demandez l'origine du chiffre « 60 % ». Donne-t-elle une source que vous retrouvez ?"
+    "Avec Claude ou une autre IA (notez laquelle) : demandez l'origine du chiffre « 60 % ». Donne-t-elle une source que vous retrouvez ?"
    ],
    "livrable": "Le chemin de vos recherches et votre phrase de réponse. → Dossier, section 6.",
    "corr": {
@@ -756,7 +756,7 @@ window.DATA = {
    "chap": "Carnet · chapitre 5",
    "situation": [
     "Choisissez, parmi les sources de votre question (EX8 à EX12), un article scientifique en accès libre : HAL, arXiv, revue en accès ouvert, ou lien « [PDF] » de Google Scholar. Enregistrez-le dans Zotero.",
-    "Plan B si vous n'en trouvez pas en 5 minutes : l'enseignant projette un extrait fictif (étude sur 40 organisations, −42 % de comptes compromis, volontaires, pas de groupe témoin, financée par un éditeur)."
+    "Plan B si vous n'en trouvez pas en 5 minutes : analysez cet article réel en accès libre : Meyer L. A. et al. (Microsoft), « How effective is multifactor authentication at deterring cyberattacks? », arXiv:2305.00945, mai 2023 (arxiv.org/abs/2305.00945). Lisez dans l'ordre : résumé, conclusion, méthode, résultats."
    ],
    "taches": [
     "Écrivez la référence complète et la question de l'article en une phrase.",
@@ -764,7 +764,7 @@ window.DATA = {
     "Combien de limites l'article reconnaît-il lui-même ?",
     "Une déclaration de financement ou de conflit d'intérêts est-elle indiquée ?",
     "Écrivez la phrase honnête qui citerait ce résultat dans votre état de l'art.",
-    "Avec une IA (document public seulement) : demandez un résumé de l'article. Le résumé contient-il une erreur ou oublie-t-il une limite ?"
+    "Avec Gemini ou une autre IA (document public seulement ; notez laquelle) : demandez un résumé de l'article. Le résumé contient-il une erreur ou oublie-t-il une limite ?"
    ],
    "types": [
     null,
@@ -783,32 +783,44 @@ window.DATA = {
     ],
     "cols": [
      "Question",
-     "Exemple sur l'extrait fictif (plan B)"
+     "Réponses pour l'article du plan B (Meyer et al., 2023)"
     ],
     "widths": [
-     2.2,
-     6.6
+     1.5,
+     6.5
     ],
     "rows": [
      [
+      "Référence",
+      "Meyer L. A., Romero S., Bertoli G., Burt T., Weinert A., Ferres J. L. (2023). How effective is multifactor authentication at deterring cyberattacks? arXiv:2305.00945. Tous les auteurs sont employés de Microsoft."
+     ],
+     [
       "Question",
-      "L'authentification sans mot de passe réduit-elle les compromissions de comptes ?"
+      "L'authentification multifacteur (MFA) réduit-elle le risque de compromission d'un compte ?"
      ],
      [
       "Méthode",
-      "40 organisations volontaires, avant / après sur 12 mois, sans groupe témoin"
+      "Comptes d'entreprise du service Azure AD de Microsoft présentant une activité suspecte, du 22 avril au 22 septembre 2022 ; un échantillon est examiné à la main par une équipe spécialisée, puis le taux de compromission est estimé par une méthode statistique avec intervalle à 95 %."
      ],
      [
       "Résultat",
-      "−42 % de comptes compromis après adoption"
+      "Le risque de compromission est réduit de 99,22 % pour les comptes avec MFA ; de 98,56 % pour 128 000 comptes dont le mot de passe avait fuité."
      ],
      [
       "Limites",
-      "Volontaires déjà sensibilisées ; secteur unique ; absence de groupe témoin ; financement par un éditeur (possible conflit d'intérêts)"
+      "Aucune section « limites ». Les auteurs signalent seulement que les compromissions sont sous-déclarées (d'où l'échantillon) et que leur estimateur est corrigé d'un biais. À ajouter vous-même : un seul service (Azure AD) ; comptes à activité suspecte seulement ; pas de comparaison indépendante."
+     ],
+     [
+      "Financement et conflit",
+      "Aucune déclaration de conflit d'intérêts. Les auteurs travaillent pour l'éditeur du service étudié, qui vend le produit : à dire dans votre phrase."
      ],
      [
       "Formulation honnête",
-      "« Dans une étude de 40 organisations volontaires (fictive), les compromissions ont baissé de 42 % après adoption, sans groupe témoin. »"
+      "« Dans une étude de Microsoft sur des comptes Azure AD (2022), le risque de compromission est réduit de 99,22 % avec l'authentification multifacteur ; l'étude est réalisée par l'éditeur du service, sans déclaration de conflit d'intérêts (Meyer et al., 2023). »"
+     ],
+     [
+      "Lien avec EX18",
+      "Ce n'est pas le « 99,9 % » de 2019 : un autre chiffre (99,22 %), une autre mesure (risque de compromission), la même source (Microsoft). Citer le bon chiffre avec sa mesure."
      ],
      [
       "Sur votre article",
@@ -820,8 +832,8 @@ window.DATA = {
      ]
     ],
     "erreurs": [
-     "Généraliser un résultat à toutes les organisations.",
-     "Ignorer le financement et la présence ou non d'un groupe témoin.",
+     "Généraliser un résultat obtenu sur un seul service à toutes les organisations.",
+     "Ignorer l'employeur des auteurs : l'étude est utile, mais ce n'est pas un avis indépendant.",
      "Citer le résumé sans lire la méthode."
     ]
    }
@@ -838,7 +850,7 @@ window.DATA = {
     "Vérifiez chaque référence sans demander à l'IA : Google Scholar (titre exact), doi.org (le DOI)."
    ],
    "taches": [
-    "Demandez à l'IA 5 références sur votre question (consigne ci-dessus) et recopiez-les.",
+    "Demandez à l'IA 5 références sur votre question (consigne ci-dessus) et recopiez-les. Notez le nom de l'IA utilisée.",
     "Combien existent réellement (titre, auteurs et revue corrects) ?",
     "Y a-t-il au moins une référence inventée ou mélangée ?",
     "Quelle règle appliquerez-vous avant de citer une source donnée par une IA ?"
@@ -909,7 +921,7 @@ window.DATA = {
    "duree": 5,
    "chap": "Carnet · chapitre 5",
    "situation": [
-    "Quel biais dans chaque situation ?",
+    "Sur votre téléphone : scannez le QR de cette page (ou ouvrez l'application), puis appuyez sur le bouton de votre choix pour chaque situation. Quel biais dans chaque situation ?",
     "1. Les études sans résultat marquant ne sont jamais publiées.",
     "2. L'étude est financée par le fabricant du produit testé.",
     "3. Vous ne gardez que les articles qui disent que votre solution préférée est la meilleure.",
@@ -998,7 +1010,7 @@ window.DATA = {
     "Placez chaque élément du propos dans les 6 cases du modèle de Toulmin (écrivez « manquant » si la case n'a pas de contenu).",
     "Repérez ce qui manque et ce qui n'est pas un argument.",
     "Réécrivez l'argument complet.",
-    "Avec une IA : demandez-lui de cartographier le même propos avec Toulmin. Combien de cases diffèrent de la vôtre ?"
+    "Avec Le Chat (Mistral) ou une autre IA (notez laquelle) : demandez-lui de cartographier le même propos avec Toulmin. Combien de cases diffèrent de la vôtre ?"
    ],
    "livrable": "Une carte de Toulmin complétée. → Dossier, section 9.",
    "corr": {
@@ -1078,7 +1090,7 @@ window.DATA = {
    "duree": 8,
    "chap": "Carnet · chapitre 6",
    "situation": [
-    "Six phrases entendues en réunion :",
+    "Sur votre téléphone : scannez le QR de cette page (ou ouvrez l'application) et appuyez sur le bouton du sophisme pour chaque phrase. Six phrases entendues en réunion :",
     "1. « Depuis la mise à jour de jeudi, les tickets ont augmenté : la mise à jour est la cause. »",
     "2. « Si on retarde la migration d'un mois, nous serons piratés. »",
     "3. « Tous les concurrents sont passés au cloud, donc nous devons y passer. »",
@@ -1194,25 +1206,36 @@ window.DATA = {
   "EX18": {
    "id": "EX18",
    "titre": "Interroger un vrai chiffre de fournisseur",
-   "mode": "Binôme, ordinateur",
+   "mode": "Individuel, ordinateur (une phrase par étudiant)",
    "duree": 20,
    "chap": "Carnet · chapitre 6",
    "situation": [
-    "Cherchez sur le site d'un éditeur ou d'un fournisseur de votre domaine (sauvegarde, authentification, hébergement…) une affirmation chiffrée du type « réduit de X % » ou « Y % des entreprises… ».",
-    "Pour vous entraîner sur un cas connu : « L'authentification multifacteur bloque 99,9 % des attaques de prise de contrôle de compte » (attribué à Microsoft en 2019, voir D4 de EX11b)."
+    "Choisissez une phrase (A à D) différente de celle de vos voisins ; la E est à chercher par vous. A est réelle (EX11b, D4) ; B, C, D sont fictives, dans le style des pages de fournisseurs.",
+    "A · « L'authentification multifacteur bloque 99,9 % des attaques de prise de contrôle de compte. » (attribué à Microsoft, 2019)",
+    "B · « Notre solution de sauvegarde réduit de 70 % le temps de restauration. »",
+    "C · « 9 entreprises sur 10 ont subi une tentative d'hameçonnage cette année. »",
+    "D · « Nos clients économisent en moyenne 40 % sur leur facture d'hébergement. »",
+    "E · Une affirmation chiffrée trouvée sur le site d'un fournisseur de votre domaine (adresse et date)."
    ],
    "taches": [
-    "Recopiez une affirmation chiffrée d'un site de fournisseur (adresse et date).",
-    "Posez les 5 questions (base, mesure, échantillon, auteur, durée) et notez les réponses de la page, ou « non indiqué ».",
-    "Combien de questions restent sans réponse ?",
-    "Écrivez la phrase que vous mettriez dans votre état de l'art.",
-    "Avec une IA : demandez-lui les questions à poser à cette affirmation chiffrée. En oublie-t-elle une des cinq (base, mesure, échantillon, auteur, durée) ?"
+    "Choisissez votre phrase (A, B, C ou D), différente de celle de votre voisin de gauche.",
+    "Posez à votre phrase les 5 questions (base, mesure, échantillon, auteur, durée) et notez ce que la phrase dit, ou « non indiqué ».",
+    "Combien de questions restent sans réponse pour votre phrase ?",
+    "Écrivez la phrase honnête que vous mettriez dans votre état de l'art pour votre phrase.",
+    "Phrase E : trouvez-en une sur un site de fournisseur, posez les mêmes 5 questions. Combien restent sans réponse ?",
+    "Avec Perplexity ou une autre IA (notez laquelle) : demandez-lui les questions à poser à votre phrase. En oublie-t-elle une des cinq (base, mesure, échantillon, auteur, durée) ?"
    ],
    "types": [
-    null,
+    [
+     "A",
+     "B",
+     "C",
+     "D"
+    ],
     null,
     "num",
     null,
+    "num",
     "on"
    ],
    "livrable": "L'affirmation, les cinq questions et la phrase d'état de l'art → Dossier, section 10.",
@@ -1223,50 +1246,46 @@ window.DATA = {
      "Citer le chiffre comme une position, avec sa source."
     ],
     "cols": [
-     "Question",
-     "Réponse attendue"
+     "Phrase",
+     "Ce que les 5 questions révèlent"
     ],
     "widths": [
-     2.6,
-     6.2
+     1.5,
+     6.5
     ],
     "rows": [
      [
-      "Par rapport à quoi ?",
-      "Quelle valeur de départ ? 99 % de 10 incidents ou de 10 000 ?"
+      "Les 5 questions",
+      "Par rapport à quoi (base) ? Mesuré comment ? Sur quel échantillon ? Par qui ? Sur quelle durée ?"
      ],
      [
-      "Mesuré comment ?",
-      "Définition d'un « incident », méthode de comptage"
+      "A · 99,9 %",
+      "Cas réel (EX11b, D4) : « études » de Microsoft non nommées, attaques automatisées ; le titre généralise. Phrase : « Selon Microsoft (2019, relayé par Slaw.ca), l'authentification multifacteur bloquerait 99,9 % des connexions frauduleuses automatisées ; méthode non publiée. »"
      ],
      [
-      "Sur quel échantillon ?",
-      "Combien de clients, lesquels, choisis par qui ?"
+      "B · −70 %",
+      "Base : 70 % de quoi (10 h → 3 h ?) ; mesure, échantillon, durée non indiqués ; auteur = le fournisseur. 4 questions sans réponse. Phrase : « Le fournisseur annonce −70 % de temps de restauration, sans méthode publiée ; à confirmer par notre test. »"
      ],
      [
-      "Par qui ?",
-      "L'éditeur lui-même ou un tiers indépendant ?"
+      "C · 9 sur 10",
+      "Échantillon inconnu (combien, lesquelles ?) ; « tentative » non définie ; auteur = un éditeur qui vend une protection ; période vague. Phrase : « Selon l'enquête d'un éditeur (échantillon non précisé), 90 % des entreprises auraient reçu une tentative d'hameçonnage. »"
      ],
      [
-      "Sur quelle durée ?",
-      "Un mois ou trois ans ?"
+      "D · −40 %",
+      "Base : quelle facture de départ ? Moyenne de quels clients (les satisfaits seulement : biais du survivant) ? Auteur = le fournisseur. Phrase : « Le fournisseur indique −40 % en moyenne ; clients et méthode non précisés : à recouper. »"
      ],
      [
-      "Cas réel : 99,9 %",
-      "Dans D4 (Slaw.ca, 2019), le chiffre est attribué à des « études » de Microsoft non nommées et porte sur des attaques automatisées ; le titre généralise."
+      "E · votre recherche",
+      "Même démarche. Beaucoup de pages commerciales laissent 3 à 5 questions sans réponse : c'est le résultat attendu."
      ],
      [
-      "Phrase d'état de l'art",
-      "« Selon Microsoft (2019, relayé par Slaw.ca), l'authentification multifacteur bloquerait 99,9 % des tentatives de connexion frauduleuses automatisées ; la méthode n'est pas publiée dans l'article, ce chiffre est une position de l'éditeur. »"
-     ],
-     [
-      "IA · questions à poser",
-      "Souvent oui : l'IA oublie l'auteur ou la durée. Vous gardez les cinq questions du cours comme liste de contrôle."
+      "IA · questions",
+      "Souvent oui : l'IA oublie l'auteur ou la durée. Gardez les cinq questions du cours comme liste de contrôle."
      ]
     ],
     "erreurs": [
      "Reprendre le chiffre sans le qualifier.",
-     "Rejeter la source : on peut la citer comme position de l'éditeur.",
+     "Rejeter la source : on peut la citer comme position du fournisseur.",
      "Généraliser un chiffre sur des attaques automatisées à « toutes les attaques »."
     ]
    }
@@ -1278,15 +1297,15 @@ window.DATA = {
    "duree": 25,
    "chap": "Carnet · chapitre 6",
    "situation": [
-    "Votre équipe a une question (EX1) et des sources notées (EX12).",
-    "Écrivez votre premier argument avec le modèle de Toulmin."
+    "Votre équipe a une question (EX1) et des sources notées (EX12). Écrivez votre premier argument avec le modèle de Toulmin.",
+    "Exemple (fictif) : Affirmation : « Activons les mises à jour automatiques. » Données : « 3 des 5 postes compromis en 2025 n'étaient pas à jour (journal interne, mars 2026) ; le guide de l'organisme X conseille les correctifs sous 30 jours (réf. 1). » Garantie : un poste à jour est exposé à moins de failles connues. Fondement : bonnes pratiques de gestion des correctifs (réf. 1). Réfutation : sauf si une mise à jour bloque un logiciel métier. Qualificatif : probablement, après test sur un poste pilote."
    ],
    "taches": [
     "Écrivez l'affirmation provisoire (votre recommandation).",
     "Choisissez deux données, chacune avec sa source.",
     "Écrivez la garantie et le fondement.",
     "Cherchez une réfutation et choisissez un qualificatif.",
-    "Avec une IA : demandez-lui 2 données possibles pour votre argument. Combien sont retrouvables dans une source réelle ?"
+    "Avec ChatGPT ou une autre IA (notez laquelle) : demandez-lui 2 données possibles pour votre argument. Combien sont retrouvables dans une source réelle ?"
    ],
    "livrable": "Votre fiche de Toulmin dans le carnet. → Dossier, section 9.",
    "corr": {
@@ -1359,7 +1378,7 @@ window.DATA = {
     "Puis l'équipe voisine ajoute une objection que l'IA n'a pas vue, et vous répondez par un fait, une concession ou une réserve."
    ],
    "taches": [
-    "Collez votre argument dans une IA (sans donnée confidentielle) et recopiez ses 3 objections.",
+    "Collez votre argument dans une IA (sans donnée confidentielle) et recopiez ses 3 objections. Notez le nom de l'IA utilisée.",
     "Combien sont pertinentes pour votre cas ?",
     "L'équipe voisine ajoute une objection : laquelle ?",
     "Répondez à deux objections (fait, concession ou réserve)."
@@ -1429,22 +1448,23 @@ window.DATA = {
   },
   "EX21": {
    "id": "EX21",
-   "titre": "Comparer trois solutions dans un tableur",
-   "mode": "Groupe de 3, tableur",
+   "titre": "Comparer trois solutions avec une matrice pondérée",
+   "mode": "Binômes, calculatrice ou tableur",
    "duree": 30,
    "chap": "Carnet · chapitre 7",
    "situation": [
-    "TransLor hésite sur la sauvegarde. Méthode de la matrice pondérée : on note chaque solution de 1 à 5 sur chaque critère (5 = meilleur), on multiplie chaque note par le poids du critère, puis on additionne. Le total classe les solutions ; les poids traduisent les priorités de la directrice.",
-    "Exemple pour le disque local (coût 5, sécurité 2, restauration 2, simplicité 5) avec les poids de départ coût 30 %, sécurité 30 %, restauration 25 %, simplicité 15 % : 5×0,30 + 2×0,30 + 2×0,25 + 5×0,15 = 3,35.",
-    "À vous : Cloud seul : coût 3, sécurité 4, restauration 4, simplicité 4. Hybride (local et cloud) : coût 2, sécurité 5, restauration 5, simplicité 3.",
-    "Test de sensibilité : refaire le calcul avec d'autres poids pour voir si le classement tient. Poids n° 2 : coût 50 %, sécurité 20 %, restauration 20 %, simplicité 10 %."
+    "TransLor choisit sa sauvegarde. Notes de 1 à 5 (5 = meilleur) ; poids = importance du critère (total 100 %).",
+    "Total = somme de note × poids. Exemple, disque local : 5×0,30 + 2×0,30 + 2×0,25 + 5×0,15 = 3,35.",
+    "Sensibilité : même calcul avec coût 50 %, sécurité 20 %, restauration 20 %, simplicité 10 %."
    ],
    "taches": [
-    "Dans un tableur, saisissez scores et poids (une ligne par solution). Vérifiez que vous retrouvez 3,35 pour le disque local, puis calculez les deux autres avec =SOMMEPROD.",
-    "Avec les poids de départ, quelle solution a le meilleur total ?",
-    "Avec les poids n° 2 (coût 50 %), le classement change-t-il ?",
-    "Rédigez la conclusion en 3 phrases, avec un qualificatif et une réserve.",
-    "Avec une IA : demandez-lui de calculer les trois totaux sans tableur. Trouve-t-elle exactement 3,35, 3,70 et 3,80 ?"
+    "Calculez le total du Cloud seul avec les poids de départ (3×0,30 + 4×0,30 + 4×0,25 + 4×0,15).",
+    "Calculez le total de l'Hybride avec les poids de départ.",
+    "Quelle solution est première avec les poids de départ ?",
+    "Avec les poids 50 / 20 / 20 / 10, calculez le total du disque local.",
+    "Avec ces nouveaux poids, le classement change-t-il ? (calculez aussi le cloud et l'hybride)",
+    "Écrivez la conclusion en 2 phrases, avec un qualificatif (« probablement ») et une réserve.",
+    "Avec Gemini ou une autre IA (notez laquelle) : demandez-lui de calculer les trois totaux sans tableur. Trouve-t-elle exactement 3,35, 3,70 et 3,80 ?"
    ],
    "livrable": "Votre tableur et la conclusion. → Dossier, section 11.",
    "corr": {
@@ -1455,43 +1475,43 @@ window.DATA = {
     ],
     "cols": [
      "Solution",
-     "Base (30/30/25/15)",
-     "Coût 50 % (50/20/20/10)"
+     "Poids de départ (30/30/25/15)",
+     "Poids coût 50 % (50/20/20/10)"
     ],
     "widths": [
-     1.8,
-     3.2,
-     3.4
+     1.5,
+     3.4,
+     3.6
     ],
     "rows": [
      [
       "Disque local",
-      "1,5 + 0,6 + 0,5 + 0,75 = 3,35",
-      "2,5 + 0,4 + 0,4 + 0,5 = 3,80"
+      "5×0,30 + 2×0,30 + 2×0,25 + 5×0,15 = 1,5 + 0,6 + 0,5 + 0,75 = 3,35",
+      "5×0,5 + 2×0,2 + 2×0,2 + 5×0,1 = 2,5 + 0,4 + 0,4 + 0,5 = 3,80"
      ],
      [
-      "Cloud",
-      "0,9 + 1,2 + 1,0 + 0,6 = 3,70",
-      "1,5 + 0,8 + 0,8 + 0,4 = 3,50"
+      "Cloud seul",
+      "3×0,30 + 4×0,30 + 4×0,25 + 4×0,15 = 0,9 + 1,2 + 1,0 + 0,6 = 3,70",
+      "3×0,5 + 4×0,2 + 4×0,2 + 4×0,1 = 1,5 + 0,8 + 0,8 + 0,4 = 3,50"
      ],
      [
       "Hybride",
-      "0,6 + 1,5 + 1,25 + 0,45 = 3,80",
-      "1,0 + 1,0 + 1,0 + 0,3 = 3,30"
+      "2×0,30 + 5×0,30 + 5×0,25 + 3×0,15 = 0,6 + 1,5 + 1,25 + 0,45 = 3,80",
+      "2×0,5 + 5×0,2 + 5×0,2 + 3×0,1 = 1,0 + 1,0 + 1,0 + 0,3 = 3,30"
      ],
      [
       "Classement",
-      "Hybride > Cloud > Local",
-      "Local > Cloud > Hybride : le classement s'inverse"
+      "1. Hybride (3,80) · 2. Cloud (3,70) · 3. Disque local (3,35)",
+      "1. Disque local (3,80) · 2. Cloud (3,50) · 3. Hybride (3,30) : le classement s'inverse"
      ],
      [
-      "Formule",
-      "=SOMMEPROD(B2:E2;$B$7:$E$7), poids dans des cellules séparées",
+      "Dans un tableur",
+      "Une ligne par solution (notes en B à E), les poids en ligne 6 : =SOMMEPROD(B2:E2;$B$6:$E$6)",
       ""
      ],
      [
       "IA · calcul sans tableur",
-      "Les modèles de langage se trompent parfois sur les calculs, surtout enchaînés : refaites toujours le calcul dans le tableur. L'IA peut en revanche proposer la formule.",
+      "Les modèles de langage se trompent parfois sur les calculs enchaînés : refaites le calcul vous-même. L'IA peut en revanche proposer la formule.",
       ""
      ]
     ],
@@ -1504,16 +1524,64 @@ window.DATA = {
     "retenir": "Un état de l'art honnête : critères explicites, test de sensibilité, réserve, sources à citer."
    },
    "types": [
-    null,
+    "num",
+    "num",
     [
      "Disque local",
      "Cloud seul",
      "Hybride"
     ],
+    "num",
     "on",
     null,
     "on"
-   ]
+   ],
+   "tableau": {
+    "header": [
+     "Solution",
+     "Coût",
+     "Sécurité",
+     "Restauration",
+     "Simplicité"
+    ],
+    "widths": [
+     2.2,
+     1,
+     1.2,
+     1.5,
+     1.4
+    ],
+    "rows": [
+     [
+      "Disque local",
+      "5",
+      "2",
+      "2",
+      "5"
+     ],
+     [
+      "Cloud seul",
+      "3",
+      "4",
+      "4",
+      "4"
+     ],
+     [
+      "Hybride",
+      "2",
+      "5",
+      "5",
+      "3"
+     ],
+     [
+      "Poids de départ",
+      "30 %",
+      "30 %",
+      "25 %",
+      "15 %"
+     ]
+    ]
+   }
   },
   "EX22": {
    "id": "EX22",
@@ -1529,7 +1597,7 @@ window.DATA = {
     "Remplissez les scores en citant la source (référence Zotero) pour chacun.",
     "Calculez avec =SOMMEPROD et classez.",
     "Test de sensibilité sur le critère le plus discutable : le classement change-t-il ?",
-    "Avec une IA : demandez-lui 3 critères qui manquent à votre matrice. En gardez-vous un, et pourquoi ?"
+    "Avec Copilot ou une autre IA (notez laquelle) : demandez-lui 3 critères qui manquent à votre matrice. En gardez-vous un, et pourquoi ?"
    ],
    "livrable": "Votre matrice avec sources, le test de sensibilité et la conclusion. → Dossier, section 11.",
    "corr": {
@@ -1599,7 +1667,7 @@ window.DATA = {
     "Écrivez le plan : chaque partie en une ligne, avec sa longueur (en %).",
     "Écrivez le résumé d'ouverture : question, méthode, conclusion.",
     "Relisez : le lecteur a-t-il la réponse dans le résumé d'ouverture ?",
-    "Avec une IA : demandez-lui quelle décision elle comprend de votre résumé. Correspond-elle à votre conclusion ?"
+    "Avec Le Chat (Mistral) ou une autre IA (notez laquelle) : demandez-lui quelle décision elle comprend de votre résumé. Correspond-elle à votre conclusion ?"
    ],
    "livrable": "Le plan et le résumé d'ouverture de votre état de l'art. → Dossier, section 12.",
    "corr": {
@@ -1687,7 +1755,7 @@ window.DATA = {
     "Rédigez en pyramide inversée, avec au moins 6 sources citées.",
     "Générez la bibliographie avec Zotero.",
     "Relisez avec la liste (question, méthode, sources, comparaison, réserve).",
-    "Si vous avez utilisé une IA (relecture, reformulation), écrivez la phrase de déclaration à ajouter en fin de document : outil, usage, vérification."
+    "Si vous avez utilisé une IA (laquelle ? notez-la) (relecture, reformulation), écrivez la phrase de déclaration à ajouter en fin de document : outil, usage, vérification."
    ],
    "livrable": "L'état de l'art de 2 pages dans un document partagé (lien) avec sa bibliographie. → Dossier, section 13.",
    "corr": {
@@ -1739,8 +1807,8 @@ window.DATA = {
      ],
      [
       "IA · déclaration d'usage",
-      "Exemple : « Une IA générative a servi à relire l'orthographe et à proposer des reformulations ; chaque source a été ouverte et lue par l'équipe. » L'IA n'est jamais citée comme source.",
-      ""
+      "",
+      "Exemple : « Une IA générative a servi à relire l'orthographe et à proposer des reformulations ; chaque source a été ouverte et lue par l'équipe. » L'IA n'est jamais citée comme source."
      ]
     ],
     "erreurs": [
@@ -1773,7 +1841,7 @@ window.DATA = {
     "Relisez le document de l'autre équipe avec la grille : deux points forts, deux améliorations, chacun avec un fait.",
     "Formulez un feedback en SBI : situation, comportement, impact.",
     "Écoutez le feedback reçu sans vous justifier ; décidez deux corrections.",
-    "Avec une IA (document de l'autre équipe, si elle l'accepte) : demandez-lui une relecture avec la grille. Combien de ses remarques utiles n'aviez-vous pas relevées ?"
+    "Avec ChatGPT ou une autre IA (notez laquelle ; document de l'autre équipe, si elle l'accepte) : demandez-lui une relecture avec la grille. Combien de ses remarques utiles n'aviez-vous pas relevées ?"
    ],
    "livrable": "Deux points forts, deux améliorations, deux corrections décidées. → Dossier, section 14.",
    "corr": {
@@ -1830,7 +1898,7 @@ window.DATA = {
     "Construisez le plan : accroche, problème, solution, preuve, appel à décision.",
     "Préparez les réponses aux 3 objections les plus probables.",
     "Chronométrez-vous une fois.",
-    "Avec une IA : demandez-lui de jouer la directrice non technique et de poser 3 questions sur votre pitch. Notez celle qui vous met le plus en difficulté."
+    "Avec Claude ou une autre IA (notez laquelle) : demandez-lui de jouer la directrice non technique et de poser 3 questions sur votre pitch. Notez celle qui vous met le plus en difficulté."
    ],
    "livrable": "Votre message clé, votre plan et les trois objections préparées. → Dossier, section 15.",
    "corr": {
@@ -2332,7 +2400,7 @@ window.DATA = {
    "taches": [
     "Écrivez vos trois reformulations et nommez le type de chacune.",
     "Retirez tout conseil ou jugement caché.",
-    "Test IA (ordinateur) : collez vos reformulations avec la consigne « Repère tout conseil ou jugement caché » ; combien de remarques retenez-vous ?"
+    "Test IA (ordinateur) : collez vos reformulations avec la consigne « Repère tout conseil ou jugement caché » ; combien de remarques retenez-vous ? Notez le nom de l'IA utilisée."
    ],
    "livrable": "Six reformulations, chacune avec son type.",
    "corr": {
@@ -2403,7 +2471,7 @@ window.DATA = {
     "Menez l'entretien (8 minutes) sans proposer de solution.",
     "Reformulez le besoin réel en une phrase.",
     "Chiffrez le coût annuel actuel, en euros (45 min par jour et par gestionnaire, 225 jours, 15 gestionnaires, 32 € de l'heure).",
-    "Après l'entretien, demandez à une IA 6 questions QQOQCCP pour la demande de Marc. Combien de ses questions auraient apporté une information que vous n'avez pas obtenue ?"
+    "Après l'entretien, demandez à une IA 6 questions QQOQCCP pour la demande de Marc. Combien de ses questions auraient apporté une information que vous n'avez pas obtenue ? Notez le nom de l'IA utilisée."
    ],
    "livrable": "Besoin reformulé, coût annuel, critère de réussite. → Dossier, section 2.",
    "fiche_role": "FICHE DE MARC (secrète). Demande affichée : un export Excel des tournées. Besoin réel : savoir avant 7 h quelles tournées risquent un retard pour prévenir les clients. À dévoiler seulement si l'enquêteur pose des questions ouvertes : 20 tournées par jour, 12 % dépassent le créneau, il recopie les heures dans Excel 45 minutes par jour, 3 clients (60 % du CA) pénalisent les retards, budget maximal 2 k€, critère de réussite : une alerte au moins 30 minutes avant le créneau. Si on vous propose une solution trop vite, répondez « oui, peut-être ».",
@@ -2477,7 +2545,7 @@ window.DATA = {
    "taches": [
     "Pour E1, E2 et E3, trouvez les défauts (un par e-mail pour commencer).",
     "Réécrivez l'objet de E1 et de E2 (8 mots maximum) et le texte de E1 en 4 lignes, conclusion en premier.",
-    "Test IA (ordinateur) : collez votre E1 réécrit et demandez « Quelle action attend-on du lecteur, pour quand ? »."
+    "Test IA (ordinateur) : collez votre E1 réécrit et demandez « Quelle action attend-on du lecteur, pour quand ? ». Notez le nom de l'IA utilisée."
    ],
    "livrable": "Trois e-mails corrigés.",
    "corr": {
@@ -4169,7 +4237,7 @@ window.DATA = {
     "D5 : quel verdict ?",
     "D4 : le chiffre « 99,9 % » renvoie-t-il à une étude précise nommée dans l'article ?",
     "Quel document est un relais à ne pas citer à la place du guide d'origine ?",
-    "Avec une IA : demandez-lui de noter D4 avec la grille. Est-elle d'accord avec vous ?"
+    "Avec Perplexity ou une autre IA (notez laquelle) : demandez-lui de noter D4 avec la grille. Est-elle d'accord avec vous ?"
    ],
    "types": [
     [
@@ -4287,7 +4355,7 @@ window.DATA = {
     "L'offre demande-t-elle explicitement de la veille ?",
     "Associez trois verbes aux objectifs du syllabus (O1, O2, O3, P1, P2).",
     "Quelle compétence de cette offre ce cours vous fera-t-il travailler en priorité ?",
-    "Avec une IA : collez l'offre et demandez « quelles compétences de communication attend-on ? ». Combien de compétences l'IA ajoute-t-elle que vous n'aviez pas relevées ?"
+    "Avec ChatGPT ou une autre IA (notez laquelle) : collez l'offre et demandez « quelles compétences de communication attend-on ? ». Combien de compétences l'IA ajoute-t-elle que vous n'aviez pas relevées ?"
    ],
    "types": [
     null,
@@ -4371,7 +4439,7 @@ window.DATA = {
     "Combien d'articles non lus apparaissent après 5 minutes ?",
     "Exportez votre liste au format OPML : l'export a-t-il réussi ?",
     "Parmi les articles, repérez un signal fort et un signal faible (peu cité mais important) : justifiez.",
-    "Avec une IA : demandez-lui 5 sources à suivre sur votre question. Combien existent, publient encore et sont utiles ?"
+    "Avec Claude ou une autre IA (notez laquelle) : demandez-lui 5 sources à suivre sur votre question. Combien existent, publient encore et sont utiles ?"
    ],
    "types": [
     "on",
@@ -4547,7 +4615,7 @@ window.DATA = {
     "Les faits ci-dessus montrent-ils un manque d'information chez Kodak ?",
     "Quelle autre explication les faits soutiennent-ils ?",
     "Réécrivez l'affirmation avec un qualificatif et une réserve.",
-    "Avec une IA : demandez « Pourquoi Kodak a-t-elle fait faillite ? ». Sa réponse évoque-t-elle plusieurs causes ?"
+    "Avec Gemini ou une autre IA (notez laquelle) : demandez « Pourquoi Kodak a-t-elle fait faillite ? ». Sa réponse évoque-t-elle plusieurs causes ?"
    ],
    "types": [
     null,
@@ -4626,7 +4694,7 @@ window.DATA = {
     "Quel est l'écart entre les deux chiffres, en points de pourcentage ? (le nombre)",
     "Pour juger la dynamique commerciale hors effet des devises, quel chiffre citez-vous ?",
     "Écrivez une phrase honnête qui donne les deux chiffres et la source.",
-    "Avec une IA : demandez « De combien le chiffre d'affaires d'Inditex a-t-il progressé ? ». Précise-t-elle les conditions (données publiées ou taux de change constants) ?"
+    "Avec Copilot ou une autre IA (notez laquelle) : demandez « De combien le chiffre d'affaires d'Inditex a-t-il progressé ? ». Précise-t-elle les conditions (données publiées ou taux de change constants) ?"
    ],
    "types": [
     [
@@ -4703,15 +4771,16 @@ window.DATA = {
    "situation": [
     "Les benchmarks s'appuient souvent sur des classements ou des sites d'avis. Qui les finance, et comment sont-ils construits ?",
     "Choisissez une page de classement ou de comparaison dans votre domaine (« meilleur gestionnaire de mots de passe », « comparatif de solutions de sauvegarde », résumé public d'un classement d'analystes, site d'avis).",
-    "Exemple connu : le témoignage de Colas publié par le fournisseur Sindup (fr.sindup.com, page non datée) ne donne aucun chiffre de retour sur investissement : c'est une position du fournisseur."
+    "Exemple connu : le témoignage de Colas publié par le fournisseur Sindup (fr.sindup.com, page non datée) ne donne aucun chiffre de retour sur investissement : c'est une position du fournisseur.",
+    "Où trouver les réponses ? Sur la page même et ses pages voisines : « À propos », « Méthodologie » ou « Comment nous testons », mentions « partenaire », « affilié », « sponsorisé », mentions légales, logos de partenaires. Si rien n'est indiqué, répondez « non indiqué » : c'est déjà une information."
    ],
    "taches": [
     "Notez l'adresse, la date et l'auteur de la page.",
     "Qui finance le classement ?",
-    "La méthode (critères, mesures, nombre d'avis) est-elle publiée ?",
+    "La méthode (critères, mesures, nombre d'avis) est-elle publiée ? Cherchez « Méthodologie » ou « Comment nous testons ».",
     "Combien de critères sont réellement mesurables ? (le nombre)",
     "Comment citeriez-vous ce classement dans votre état de l'art ?",
-    "Avec une IA : demandez « Quel est le meilleur … ? » pour votre domaine. Indique-t-elle qui finance ses sources ?"
+    "Avec Le Chat (Mistral) ou une autre IA (notez laquelle) : demandez « Quel est le meilleur … ? » pour votre domaine. Indique-t-elle qui finance ses sources ?"
    ],
    "types": [
     null,
@@ -4766,6 +4835,10 @@ window.DATA = {
      [
       "IA · meilleur choix selon l'IA",
       "Rarement. Une IA réécrit des classements existants sans dire qui les finance : remontez à la page d'origine."
+     ],
+     [
+      "Où chercher",
+      "« À propos », « Méthodologie », mentions légales, mentions « affilié » ou « sponsorisé ». Absence d'indication = « non indiqué », à signaler dans la citation."
      ]
     ],
     "erreurs": [
@@ -4787,10 +4860,9 @@ window.DATA = {
    "duree": 15,
    "chap": "Carnet · chapitre 7",
    "situation": [
-    "TransLor teste quatre outils de sauvegarde. Pour chacun, on a mesuré 5 fois le temps de restauration, en minutes (valeurs fictives) :",
-    "Outil A : 41, 38, 45, 40, 36.   Outil B : 37, 44, 35, 43, 39.   Outil C : 52, 50, 53, 51, 54.   Outil D : 41, 43, 40, 42, 44.",
-    "Deux questions de décision : A est-il plus rapide que B ? C est-il plus rapide que D ? Les mesures d'un même outil varient d'un essai à l'autre : c'est le bruit. Il faut comparer l'écart entre deux outils à ce bruit.",
-    "Tableur : =MOYENNE(plage) et =ECARTYPE(plage) (ou ECARTYPE.STANDARD selon la version). Règle de lecture : écart des moyennes plus petit que l'écart-type = bruit ; plus de 2 écarts-types = probablement réel ; entre les deux = refaire des mesures."
+    "TransLor teste 4 outils de sauvegarde (5 mesures chacun, en minutes, valeurs fictives). A est-il plus rapide que B ? C plus rapide que D ?",
+    "Comparez l'écart entre outils au bruit. Écart-type pas à pas : page précédente ; tableur : =MOYENNE(plage), =ECARTYPE(plage).",
+    "Règle : rapport < 1 bruit ; > 2 probablement réel."
    ],
    "taches": [
     "A et B : écart entre les moyennes, en minutes.",
@@ -4800,7 +4872,7 @@ window.DATA = {
     "C et D : écart entre les moyennes, en minutes.",
     "C–D : que concluez-vous ?",
     "Écrivez une phrase de conclusion pour A–B et une pour C–D, comme dans un état de l'art.",
-    "Avec une IA : demandez-lui si « B est meilleur que A ». Donne-t-elle ses calculs, et sont-ils exacts (refaites-les) ?"
+    "Avec Perplexity ou une autre IA (notez laquelle) : demandez-lui si « B est meilleur que A ». Donne-t-elle ses calculs, et sont-ils exacts (refaites-les) ?"
    ],
    "types": [
     "num",
@@ -4840,6 +4912,10 @@ window.DATA = {
     ],
     "rows": [
      [
+      "Écart-type de A, pas à pas",
+      "Moyenne : 200 ÷ 5 = 40. Écarts à la moyenne : +1, −2, +5, 0, −4. Carrés : 1, 4, 25, 0, 16 ; somme = 46. Variance : 46 ÷ (5−1) = 11,5. Écart-type : √11,5 = 3,4. (Même résultat que =ECARTYPE.)"
+     ],
+     [
       "A et B",
       "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9. L'écart (0,4) est bien plus petit que l'écart-type (3,4) : bruit. Conclusion : aucune différence établie."
      ],
@@ -4870,6 +4946,58 @@ window.DATA = {
      "Croire qu'un test remplace la réflexion sur la façon de mesurer."
     ],
     "retenir": "Avant de classer deux solutions, comparer l'écart à la dispersion et dire le nombre de mesures."
+   },
+   "tableau": {
+    "header": [
+     "Outil",
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "widths": [
+     1.4,
+     1,
+     1,
+     1,
+     1,
+     1
+    ],
+    "rows": [
+     [
+      "A",
+      "41",
+      "38",
+      "45",
+      "40",
+      "36"
+     ],
+     [
+      "B",
+      "37",
+      "44",
+      "35",
+      "43",
+      "39"
+     ],
+     [
+      "C",
+      "52",
+      "50",
+      "53",
+      "51",
+      "54"
+     ],
+     [
+      "D",
+      "41",
+      "43",
+      "40",
+      "42",
+      "44"
+     ]
+    ]
    }
   },
   "AG1": {

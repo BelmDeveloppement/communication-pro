@@ -159,7 +159,7 @@
     Sess.onchange = drawBar; drawBar(); Sess.connect();
     var roleBox = h("div", {});
     var parts = [bar, h("p", { class: "meta" }, h("span", { class: "badge" }, id.replace("EX", "EX ").replace("F", "F ")), e.mode + " · " + e.duree + " min · " + e.chap), h("h1", {}, e.titre),
-      h("div", { class: "card" }, h("h2", {}, "Mise en situation"), lines(e.situation)),
+      h("div", { class: "card" }, h("h2", {}, "Mise en situation"), lines(e.situation), e.tableau ? h("table", {}, h("tr", {}, e.tableau.header.map(function (x) { return h("th", {}, x); })), e.tableau.rows.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); })) : null),
       h("div", { class: "card" }, h("h2", {}, "À faire"), h("ol", {}, e.taches.map(function (t) { return h("li", {}, t); }))),
       e.livrable ? h("p", { class: "warn" }, "Livrable : " + e.livrable) : null,
       h("div", { class: "card" }, disp, bt, reset)];
