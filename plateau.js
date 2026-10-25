@@ -45,7 +45,8 @@
       h("p", { class: "meta" }, "Un plateau de 30 cases en trois actes. Chaque équipe joue sur son téléphone ; la bonne réponse fait avancer le pion."),
       h("div", { class: "grid" }, h("a", { class: "tile", href: "#/plateau/equipe" }, h("b", {}, "Je suis une équipe"), h("div", { class: "meta" }, "Rejoindre la partie avec le code de la table")),
         h("a", { class: "tile g", href: "#/plateau/anim" }, h("b", {}, "Je suis l'animateur"), h("div", { class: "meta" }, "Ouvrir la partie, projeter le plateau, suivre les tables")),
-        h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8"))));
+        h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8"))),
+      h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_5_A2.pdf" }, "Plateau A2 (impression chez un imprimeur)"), " · ", h("a", { href: "Plateau_5_A3.pdf" }, "A3 (essai)"), " · ", h("a", { href: "Plateau_5_pions.pdf" }, "Pions à découper (A4)"))));
   }
   function rules() {
     mount(h("h1", {}, "Règles du plateau"),

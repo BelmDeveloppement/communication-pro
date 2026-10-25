@@ -6474,33 +6474,50 @@ window.DATA = {
    "page": 78
   },
   {
+   "t": "seance",
+   "titre": "Plateau · séance 1 : retour sur le jour 1",
+   "page": 80
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 81,
+   "titre": "Jeu 5.1 · Course aux requêtes"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 82,
+   "titre": "Jeu 5.2 · La source tient-elle ?"
+  },
+  {
    "t": "module",
    "titre": "Argumenter pour convaincre un décideur"
   },
   {
    "t": "ex",
    "id": "EX16",
-   "page": 83
-  },
-  {
-   "t": "ex",
-   "id": "EX17",
    "page": 86
   },
   {
    "t": "ex",
-   "id": "EX18",
+   "id": "EX17",
    "page": 89
   },
   {
    "t": "ex",
-   "id": "EX19",
+   "id": "EX18",
    "page": 92
   },
   {
    "t": "ex",
+   "id": "EX19",
+   "page": 95
+  },
+  {
+   "t": "ex",
    "id": "EX20",
-   "page": 94
+   "page": 97
   },
   {
    "t": "module",
@@ -6509,43 +6526,60 @@ window.DATA = {
   {
    "t": "ex",
    "id": "V7",
-   "page": 99
-  },
-  {
-   "t": "ex",
-   "id": "V8",
    "page": 102
   },
   {
    "t": "ex",
-   "id": "EX21",
+   "id": "V8",
    "page": 105
   },
   {
    "t": "ex",
-   "id": "EX22",
-   "page": 107
+   "id": "EX21",
+   "page": 108
   },
   {
    "t": "ex",
-   "id": "EX23",
+   "id": "EX22",
    "page": 110
   },
   {
    "t": "ex",
-   "id": "M3",
+   "id": "EX23",
    "page": 113
   },
   {
    "t": "ex",
-   "id": "EX24",
+   "id": "M3",
    "page": 116
   },
   {
-   "t": "jeu",
-   "route": "jeu20",
-   "page": 119,
-   "titre": "Jeu 20"
+   "t": "ex",
+   "id": "EX24",
+   "page": 119
+  },
+  {
+   "t": "seance",
+   "titre": "Plateau · séance 2 : argumenter",
+   "page": 121
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 122,
+   "titre": "Jeu 5.3 · La chasse aux biais et aux sophismes"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 123,
+   "titre": "Jeu 5.4 · Reconstituer l'argument"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 124,
+   "titre": "Jeu 5.5 · Le chiffre piégé"
   },
   {
    "t": "module",
@@ -6554,42 +6588,59 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX25",
-   "page": 123
+   "page": 127
   },
   {
    "t": "ex",
    "id": "EX26",
-   "page": 128
+   "page": 132
   },
   {
    "t": "ex",
    "id": "EX27",
-   "page": 131
+   "page": 135
+  },
+  {
+   "t": "seance",
+   "titre": "Plateau · séance 3 : écrire et défendre",
+   "page": 137
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 138,
+   "titre": "Jeu 5.6 · Le mail qui obtient une réponse"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 139,
+   "titre": "Jeu 5.7 · La phrase honnête"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 140,
+   "titre": "Jeu 5.8 · Le pitch éclair"
   },
   {
    "t": "module",
-   "titre": "Examen, quiz final et boîte à outils"
+   "titre": "Examen et boîte à outils"
   },
   {
    "t": "ex",
    "id": "EX29",
-   "page": 135
-  },
-  {
-   "t": "jeu",
-   "route": "quiz-final",
-   "page": 137,
-   "titre": "Quiz final"
+   "page": 143
   },
   {
    "t": "ex",
    "id": "F9",
-   "page": 138
+   "page": 145
   },
   {
    "t": "page",
    "route": "outils",
-   "page": 139,
+   "page": 146,
    "titre": "Boîte à outils (1/2) : chercher, vérifier, lire"
   }
  ]
