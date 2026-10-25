@@ -22,12 +22,12 @@
   }
   function acteOf(pos) { return pos <= 10 ? 1 : pos <= 20 ? 2 : 3; }
   function capFor(acteOuvert, caps) { return caps[Math.min(2, Math.max(0, acteOuvert - 1))]; }
-  /* Avance de pts cases sans dépasser la fin de l'acte ouvert. Renvoie la nouvelle position. */
-  function advance(pos, pts, acteOuvert, caps) { return Math.min(pos + pts, capFor(acteOuvert, caps)); }
+  /* Avance exactement de pts cases (la fin de l'acte n'est plus une barrière : l'équipe attend ensuite l'ouverture de l'acte suivant). */
+  function advance(pos, pts, acteOuvert, caps) { return Math.min(pos + pts, 31); }
   /* Effet d'une case événement atteinte. */
   function landing(cases, events, pos, acteOuvert, caps) {
     var c = cases[pos]; if (!c || c.type !== "event") return null;
-    var ev = events[c.ev]; var np = Math.max(0, Math.min(pos + (ev.move || 0), capFor(acteOuvert, caps)));
+    var ev = events[c.ev]; var np = Math.max(0, Math.min(pos + (ev.move || 0), 31));
     return { ev: ev, pos: np, rejoue: !!ev.rejoue };
   }
   /* Choisit une carte pas encore vue par l'équipe pour ce jeu (repart de zéro quand toutes sont vues). */

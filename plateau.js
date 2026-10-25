@@ -46,12 +46,12 @@
       h("div", { class: "grid" }, h("a", { class: "tile", href: "#/plateau/equipe" }, h("b", {}, "Je suis une équipe"), h("div", { class: "meta" }, "Rejoindre la partie avec le code de la table")),
         h("a", { class: "tile g", href: "#/plateau/anim" }, h("b", {}, "Je suis l'animateur"), h("div", { class: "meta" }, "Ouvrir la partie, projeter le plateau, suivre les tables")),
         h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8")),
-        h("a", { class: "tile r", href: "#/plateau/demo" }, h("b", {}, "Partie démo en 3D"), h("div", { class: "meta" }, "Cinq équipes fictives : dé qui roule, pions qui avancent (sans téléphones)"))),
+        h("a", { class: "tile r", href: "#/plateau/demo" }, h("b", {}, "Partie démo en 3D"), h("div", { class: "meta" }, "Cinq équipes fictives : roue qui tourne, pions qui avancent (sans téléphones)"))),
       h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_5_A2.pdf" }, "Plateau A2 (impression chez un imprimeur)"), " · ", h("a", { href: "Plateau_5_A3.pdf" }, "A3 (essai)"), " · ", h("a", { href: "Plateau_5_pions.pdf" }, "Pions à découper (A4)"))));
   }
   function rules() {
     mount(h("h1", {}, "Règles du plateau"),
-      h("div", { class: "card" }, h("ol", {}, h("li", {}, "Chaque équipe a un pion, posé sur « Départ »."), h("li", {}, "À son tour, l'équipe tire une carte du jeu de la prochaine case de jeu, répond sur son téléphone, puis lit le corrigé."), h("li", {}, "Le nombre de points (0 à 3) est le nombre de cases dont le pion avance."), h("li", {}, "Une case « ? » est un événement : il fait avancer, reculer ou rejouer."), h("li", {}, "Le plateau a trois actes. L'animateur ouvre l'acte suivant à chaque séance : on ne peut pas dépasser la fin de l'acte ouvert."), h("li", {}, "Arriver à « Examen » termine la partie. Le classement : la case atteinte, puis les points."))),
+      h("div", { class: "card" }, h("ol", {}, h("li", {}, "Chaque équipe a un pion, posé sur « Départ »."), h("li", {}, "À son tour, l'équipe tire une carte du jeu de la prochaine case de jeu, répond sur son téléphone, puis lit le corrigé."), h("li", {}, "Le nombre de points (0 à 3) est le nombre de cases dont le pion avance."), h("li", {}, "Une case « ? » est un événement : il fait avancer, reculer ou rejouer."), h("li", {}, "Une roue tourne puis s'arrête sur les points gagnés : le pion avance exactement de ce nombre de cases, même au-delà de la fin de l'acte."), h("li", {}, "Le plateau a trois actes. Une équipe qui a terminé l'acte ouvert est « en attente des autres équipes » : l'animateur ouvre l'acte suivant à chaque séance."), h("li", {}, "Arriver à « Examen » termine la partie. Le classement : la case atteinte, puis les points."))),
       h("div", { class: "card" }, h("h2", {}, "Les cinq zones du syllabus"), Object.keys(D.zones).map(function (z) { return h("p", {}, h("span", { class: "team", style: "background:" + D.zones[z].col }, z), D.zones[z].syl); })),
       Object.keys(D.jeux).map(function (k) { var j = D.jeux[k]; return h("div", { class: "card" }, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", { class: "meta" }, "Zone " + j.zone + " · acte " + j.acte + " · " + j.duree + " min par carte environ"), h("p", {}, j.regle)); }),
       h("p", {}, h("a", { href: "#/plateau" }, "← Retour")));
@@ -117,7 +117,7 @@
       if (st.pos >= 31) { main.appendChild(h("div", { class: "card" }, h("h2", {}, "Arrivée à l'Examen !"), h("p", {}, "Votre équipe a terminé la route. Total : " + st.score + " points."))); return; }
       var nx = nextGameCase(st.pos);
       if (st.pos >= cap) {
-        main.appendChild(h("div", { class: "warn" }, "Fin de l'acte " + st.cfg.acte + " : attendez que l'animateur ouvre l'acte suivant."));
+        main.appendChild(h("div", { class: "warn" }, "En attente des autres équipes : fin de l'acte " + st.cfg.acte + ". L'animateur ouvrira l'acte suivant."));
         if (st.cfg.bonus) { var js = D.actes[st.cfg.acte].jeux, code = js[(st.bonusN || 0) % js.length], jb = jeuOf(code);
           main.appendChild(h("div", { class: "card" }, h("h2", {}, "Cartes bonus"), h("p", {}, "En attendant les autres équipes : une carte de plus ne fait pas avancer le pion, mais ses points servent à départager les équipes."), h("p", { class: "meta" }, "Jeu " + code + " · " + jb.titre),
             h("button", { class: "ok", onclick: function () { var r = PE.pickCard(jb, (st.seen[code] || []), st.sid + "b"); if (r.reset) st.seen[code] = []; st.bonusN = (st.bonusN || 0) + 1; st.cur = { jeu: code, id: r.card.id, bonus: true }; save(); draw(); } }, "Tirer une carte bonus"))); }
@@ -155,18 +155,27 @@
       st.res = { jeu: jeu, id: c.id, bonus: bonus, rolled: false, pts: r.pts, detail: r.detail, from: from, to: np, final: st.pos, ev: eff ? { titre: eff.ev.titre, txt: eff.ev.txt, rejoue: eff.rejoue } : null };
       st.log.push({ jeu: jeu, pts: r.pts, to: st.pos, bonus: bonus }); st.cur = null; save(); draw();
     }
-    function rollDie2D(el, pts, done) {
-      var i = 0, steps = 15, delay = 55, fin = false;
-      function stop() { if (fin) return; fin = true; clearTimeout(el._t); el.textContent = pts; el.style.transform = "rotate(0deg) scale(1.12)"; el.className = "die2d done"; setTimeout(done, 700); }
-      function tick() { if (fin || !document.body.contains(el)) return; i++; if (i >= steps) return stop(); var v = Math.floor(Math.random() * 4); if (v === el._v) v = (v + 1) % 4; el._v = v; el.textContent = v; el.style.transform = "rotate(" + ((i * 53) % 360) + "deg) scale(1.05)"; delay *= 1.18; el._t = setTimeout(tick, delay); }
-      tick(); return stop;
+    var WCOL = ["#5B6478", "#E9A400", "#3B6FD8", "#2E9E6B"];
+    function wheelEl() {
+      var w = sv("svg", { viewBox: "-60 -66 120 126", width: 200, height: 210, style: "display:block;margin:6px auto" }), g = sv("g", { style: "transition:transform 3.4s cubic-bezier(.12,.7,.18,1);transform-origin:0 0" });
+      for (var i = 0; i < 4; i++) { var a0 = (i * 90 - 90) * Math.PI / 180, a1 = ((i + 1) * 90 - 90) * Math.PI / 180, am = (a0 + a1) / 2;
+        g.appendChild(sv("path", { d: "M0 0 L" + (55 * Math.cos(a0)).toFixed(2) + " " + (55 * Math.sin(a0)).toFixed(2) + " A55 55 0 0 1 " + (55 * Math.cos(a1)).toFixed(2) + " " + (55 * Math.sin(a1)).toFixed(2) + " Z", fill: WCOL[i], stroke: "#fff", "stroke-width": 1.5 }));
+        g.appendChild(sv("text", { x: (33 * Math.cos(am)).toFixed(2), y: (33 * Math.sin(am) + 7).toFixed(2), "text-anchor": "middle", "font-size": 22, "font-weight": 800, fill: "#fff" }, String(i))); }
+      w.appendChild(g); w.appendChild(sv("circle", { cx: 0, cy: 0, r: 5, fill: "#1F2A5C" })); w.appendChild(sv("path", { d: "M-7 -64 L7 -64 L0 -50 Z", fill: "#E4572E", stroke: "#fff", "stroke-width": 1 })); w._g = g; return w;
+    }
+    function spinWheel(w, pts, done) {
+      var fin = false, g = w._g; function end() { if (fin) return; fin = true; setTimeout(done, 900); }
+      var R = 360 * 4 + 360 - (pts * 90 + 45); requestAnimationFrame(function () { requestAnimationFrame(function () { g.style.transform = "rotate(" + R + "deg)"; }); });
+      g.addEventListener("transitionend", end); var t = setTimeout(end, 3700);
+      return function () { if (fin) return; g.style.transition = "none"; g.style.transform = "rotate(" + (360 - (pts * 90 + 45)) + "deg)"; clearTimeout(t); end(); };
     }
     function drawResult() {
-      if (!st.res.rolled) { var face = h("div", { class: "die2d" }, "?"), skip; main.appendChild(h("div", { class: "card", style: "text-align:center" }, h("p", { class: "big" }, "Le dé révèle vos points…"), face, skip = h("button", { class: "sec" }, "Passer"))); var stop = rollDie2D(face, st.res.pts, function () { st.res.rolled = true; save(); draw(); }); skip.onclick = stop; return; }
+      if (!st.res.rolled) { var wl = wheelEl(), skip; main.appendChild(h("div", { class: "card", style: "text-align:center" }, h("p", { class: "big" }, "La roue révèle vos points…"), wl, skip = h("button", { class: "sec" }, "Passer"))); var stop = spinWheel(wl, st.res.pts, function () { st.res.rolled = true; save(); draw(); }); skip.onclick = stop; return; }
       var r = st.res, c = jeuOf(r.jeu).cartes.filter(function (x) { return x.id === r.id; })[0], phys = st.cfg.mode === "physique", moved = r.final - r.from;
       main.appendChild(h("div", { class: "card" }, h("h2", {}, r.pts + " point" + (r.pts > 1 ? "s" : "") + " sur 3"), h("ul", {}, r.detail.map(function (d) { return h("li", { style: "color:" + (d.ok ? "#1b6b45" : "#a33") }, (d.ok ? "✓ " : "✗ ") + d.lab); })),
         c.modele ? h("p", {}, h("b", {}, "Réponse modèle : "), c.modele) : null, h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)));
       main.appendChild(h("div", { class: phys && !r.bonus ? "warn big" : "card" }, r.bonus ? "Points bonus : +" + r.pts + ". Votre pion reste sur la case " + r.final + "." : phys ? "Déplacez votre pion de " + (r.to - r.from) + " case" + ((r.to - r.from) > 1 ? "s" : "") + (r.ev && r.final !== r.to ? ", puis " + (r.final - r.to > 0 ? "avancez" : "reculez") + " de " + Math.abs(r.final - r.to) : "") + " : case " + r.final + "." : "Votre pion va à la case " + r.final + "."));
+      if (!r.bonus && r.final < 31 && r.final >= PE.capFor(st.cfg.acte, D.caps)) main.appendChild(h("div", { class: "warn" }, "En attente des autres équipes : vous avez terminé l'acte " + st.cfg.acte + "."));
       if (r.ev) main.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Événement : " + r.ev.titre), h("p", {}, r.ev.txt)));
       main.appendChild(h("button", { class: "ok", onclick: function () { var rej = r.ev && r.ev.rejoue, jeu = r.jeu; st.res = null; if (rej && st.pos < PE.capFor(st.cfg.acte, D.caps)) { var j = jeuOf(jeu), rr = PE.pickCard(j, st.seen[jeu] || [], st.sid + "j"); st.cur = { jeu: jeu, id: rr.card.id }; } save(); draw(); } }, r.ev && r.ev.rejoue ? "Rejouer une carte" : "Carte suivante"));
     }
@@ -224,9 +233,9 @@
         content.appendChild(h("label", {}, cam, " Caméra automatique (suit l'équipe qui joue) · glisser pour tourner le plateau")); content.appendChild(box); load3d(box, function (api) { three = api; if (api) api.update(pawns()); else { content.innerHTML = ""; content.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); content.appendChild(boardSvg(pawns(), { big: true })); } }); return; }
       if (view === "plateau") { content.appendChild(boardSvg(pawns(), { big: true })); content.appendChild(h("p", {}, ts.map(function (t) { return h("span", { class: "team", style: "background:" + COLS[(t.ci || 0) % COLS.length] }, (t.table ? t.table + " · " : "") + t.nom + " · case " + t.pos); }))); return; }
       var rank = ts.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); });
-      var tb = h("table", {}, h("tr", {}, ["Rang", "Table", "Équipe", "Case", "Points", "Dernier jeu", "En ligne", "Ajuster"].map(function (x) { return h("th", {}, x); })));
+      var tb = h("table", {}, h("tr", {}, ["Rang", "Table", "Équipe", "Case", "Statut", "Points", "Dernier jeu", "En ligne", "Ajuster"].map(function (x) { return h("th", {}, x); })));
       rank.forEach(function (t, i) { var l = t.last;
-        tb.appendChild(h("tr", {}, [h("td", {}, String(i + 1)), h("td", {}, t.table || "—"), h("td", {}, h("span", { class: "team", style: "background:" + COLS[(t.ci || 0) % COLS.length] }, t.nom)), h("td", {}, t.done ? "Examen ✓" : String(t.pos)), h("td", {}, String(t.score)), h("td", {}, l ? (l.jeu + " · " + l.pts + " pt") : ""), h("td", {}, online[t.sid] ? "●" : "○"),
+        tb.appendChild(h("tr", {}, [h("td", {}, String(i + 1)), h("td", {}, t.table || "—"), h("td", {}, h("span", { class: "team", style: "background:" + COLS[(t.ci || 0) % COLS.length] }, t.nom)), h("td", {}, t.done ? "Examen ✓" : String(t.pos)), h("td", {}, t.done ? "" : ((t.pos || 0) >= PE.capFor(P.acte, D.caps) ? "En attente des autres équipes" : "En jeu")), h("td", {}, String(t.score)), h("td", {}, l ? (l.jeu + " · " + l.pts + " pt") : ""), h("td", {}, online[t.sid] ? "●" : "○"),
           h("td", {}, h("button", { class: "sec", onclick: function () { adj(t.sid, -1); } }, "−1"), h("button", { class: "sec", onclick: function () { adj(t.sid, 1); } }, "+1"))])); });
       content.appendChild(tb); content.appendChild(h("p", { class: "meta" }, "Classement : case atteinte, puis points. « Ajuster » déplace le pion de l'équipe (arbitrage d'une réponse orale, par exemple)."));
     }
@@ -269,11 +278,13 @@
         });
         g.add(new T.Line(new T.BufferGeometry().setFromPoints(D.cases.map(function (c) { var p = P3(c); p.y = 0.05; return p; })), new T.LineBasicMaterial({ color: 0xb9c4e8 })));
         function tileTop(i) { var c = D.cases[i], p = P3(c); p.y = c.type === "exam" ? 1.7 : 0.9; return p; }
-        /* dé : faces 1,2,3,0 (valeur → face) */
-        function faceTex(n, col) { var c = document.createElement("canvas"); c.width = c.height = 128; var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, 128, 128); x.strokeStyle = col; x.lineWidth = 10; x.strokeRect(5, 5, 118, 118); x.fillStyle = col; x.font = "bold 84px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(n), 64, 70); return new T.CanvasTexture(c); }
-        var faceVal = [1, 2, 3, 0, 2, 1]; /* ordre des matériaux : +x, -x, +y, -y, +z, -z */
-        var die = new T.Mesh(new T.BoxGeometry(1.1, 1.1, 1.1), faceVal.map(function (n) { return new T.MeshBasicMaterial({ map: faceTex(n, ["#E4572E", "#3B6FD8", "#2E9E6B", "#5B6478", "#E9A400", "#D6479B"][n === 0 ? 3 : n]) }); })); die.visible = false; sc.add(die);
-        var FACE = { 0: 3, 1: 0, 2: 1, 3: 2 }, UPQ = [new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), Math.PI / 2), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), -Math.PI / 2), new T.Quaternion(), new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), Math.PI), new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), Math.PI / 2), new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), -Math.PI / 2)];
+        /* roue : 4 secteurs 0 à 3, aiguille fixe ; l'arrêt est décidé par la réponse (aucun hasard) */
+        var WC = ["#5B6478", "#E9A400", "#3B6FD8", "#2E9E6B"], wc = document.createElement("canvas"); wc.width = wc.height = 256; var wx = wc.getContext("2d");
+        for (var wi = 0; wi < 4; wi++) { var a0 = (wi * 90 - 90) * Math.PI / 180, a1 = ((wi + 1) * 90 - 90) * Math.PI / 180; wx.fillStyle = WC[wi]; wx.beginPath(); wx.moveTo(128, 128); wx.arc(128, 128, 124, a0, a1); wx.closePath(); wx.fill(); wx.strokeStyle = "#fff"; wx.lineWidth = 5; wx.stroke();
+          var am = (a0 + a1) / 2; wx.fillStyle = "#fff"; wx.font = "bold 70px sans-serif"; wx.textAlign = "center"; wx.textBaseline = "middle"; wx.fillText(String(wi), 128 + 78 * Math.cos(am), 128 + 78 * Math.sin(am)); }
+        var wheel = new T.Group(), disc = new T.Mesh(new T.CircleGeometry(1.6, 48), new T.MeshBasicMaterial({ map: new T.CanvasTexture(wc) })); disc.rotation.x = -Math.PI / 2; wheel.add(disc);
+        var rim = new T.Mesh(new T.CylinderGeometry(1.68, 1.68, 0.12, 48), new T.MeshLambertMaterial({ color: 0x1f2a5c })); rim.position.y = -0.08; wheel.add(rim);
+        var needle = new T.Mesh(new T.ConeGeometry(0.28, 0.7, 12), new T.MeshLambertMaterial({ color: 0xe4572e })); needle.position.set(0, 0.35, -1.75); needle.rotation.x = Math.PI; var holder = new T.Group(); holder.add(wheel); holder.add(needle); holder.visible = false; sc.add(holder);
         var cap = document.createElement("div"); cap.style.cssText = "position:absolute;left:10px;top:10px;background:rgba(31,42,92,.88);color:#fff;padding:8px 14px;border-radius:8px;font:600 18px sans-serif;display:none;max-width:70%"; box.appendChild(cap);
         function say(t, col) { if (!t) { cap.style.display = "none"; return; } cap.style.display = "block"; cap.style.borderLeft = "8px solid " + (col || "#fff"); cap.textContent = t; }
         var pw = {}, nser = 0, focus = new T.Vector3(0, 0, 0), focusT = new T.Vector3(0, 0, 0), rad = 13.5, radT = 13.5, lastMove = 0, now0 = performance.now();
@@ -285,11 +296,10 @@
         var jobs = [], busy = null, pending = null, lastList = [];
         function startJob(j) {
           busy = { j: j, t: 0, phase: "roll" }; var pawn = pw[j.key]; var o = pawn ? pawn.m.position.clone() : new T.Vector3(0, 0, 0);
-          busy.at = o.clone().add(new T.Vector3(1.6, 0, -1.2)); busy.axis = new T.Vector3(Math.random() - .5, Math.random() - .5, Math.random() - .5).normalize(); busy.turns = 7 + Math.random() * 3;
-          busy.fin = UPQ[FACE[j.pts]].clone(); busy.yaw = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), Math.random() * 6.28); busy.fin = busy.yaw.clone().multiply(busy.fin);
-          die.visible = true; focusT.copy(o); radT = 10; lastMove = performance.now(); say((j.nom || "Équipe") + " lance le dé…", j.col);
+          busy.at = o.clone().add(new T.Vector3(2.2, 0, -1.4)); busy.R = 360 * 4 + 360 - (j.pts * 90 + 45);
+          holder.visible = true; focusT.copy(o); radT = 10; lastMove = performance.now(); say((j.nom || "Équipe") + " : la roue tourne…", j.col);
         }
-        function endJob() { die.visible = false; var j = busy.j; busy = null; apply(pending || j.list || lastList); pending = null; lastMove = performance.now(); if (j.done) try { j.done(); } catch (e) {} }
+        function endJob() { holder.visible = false; var j = busy.j; busy = null; apply(pending || j.list || lastList); pending = null; lastMove = performance.now(); if (j.done) try { j.done(); } catch (e) {} }
         r.domElement.addEventListener("pointerdown", function (e) { dragging = true; lx = e.clientX; }); window.addEventListener("pointerup", function () { dragging = false; });
         r.domElement.addEventListener("pointermove", function (e) { if (dragging) { ang -= (e.clientX - lx) * 0.01; lx = e.clientX; } });
         var alive = true, prev = performance.now();
@@ -298,10 +308,9 @@
           var nowt = performance.now(), dt = Math.min(0.1, (nowt - prev) / 1000); prev = nowt; var sp = opts.speed ? opts.speed() : 1; dt *= sp;
           if (!busy && jobs.length) startJob(jobs.shift());
           if (busy) {
-            busy.t += dt; var T1 = 1.5, u = Math.min(1, busy.t / T1);
+            busy.t += dt; var T1 = 2.6, u = Math.min(1, busy.t / T1);
             if (busy.phase === "roll") {
-              var e = 1 - Math.pow(1 - u, 3), q = new T.Quaternion().setFromAxisAngle(busy.axis, (1 - e) * busy.turns * Math.PI * 2); die.quaternion.copy(busy.fin).multiply(q);
-              die.position.set(busy.at.x, 1.15 + Math.abs(Math.cos(u * Math.PI * 3.2)) * 2.2 * (1 - u) * (1 - u), busy.at.z);
+              var e = 1 - Math.pow(1 - u, 3); wheel.rotation.y = -(e * busy.R) * Math.PI / 180; holder.position.set(busy.at.x, 2.3 + Math.sin(u * 6) * 0.05 * (1 - u), busy.at.z);
               if (u >= 1) { busy.phase = "show"; busy.t = 0; say((busy.j.nom || "Équipe") + " : " + busy.j.pts + " point" + (busy.j.pts > 1 ? "s" : "") + (busy.j.bonus ? " (bonus)" : busy.j.pts ? " : le pion avance de " + busy.j.pts + " case" + (busy.j.pts > 1 ? "s" : "") : " : le pion reste"), busy.j.col); }
             } else if (busy.t > 0.9) endJob();
           }
@@ -342,7 +351,7 @@
       if (!t) { if (S.acte < 3) { S.acte++; say("▶ L'animateur ouvre l'acte " + S.acte + " : " + D.actes[S.acte].nom); showChips(); tmr = setTimeout(step, 1200 / S.speed); } else { S.fin = true; S.run = false; btnRun.textContent = "Lancer"; say("★ Tous les pions sont à l'Examen"); showChips(); } return; }
       var nx = nextGameCase(t.pos); if (!nx) { S.turn++; tmr = setTimeout(step, 100); return; }
       var pts = weighted(), from = t.pos, np = PE.advance(from, pts, S.acte, D.caps), eff = PE.landing(D.cases, D.events, np, S.acte, D.caps); t.pos = eff ? eff.pos : np; t.score += pts; var rej = eff && eff.rejoue;
-      say(t.nom + " · jeu " + nx.jeu + " · dé " + pts + " → case " + t.pos + (eff ? " · événement « " + eff.ev.titre + " »" : ""));
+      say(t.nom + " · jeu " + nx.jeu + " · roue " + pts + " → case " + t.pos + (eff ? " · événement « " + eff.ev.titre + " »" : ""));
       if (!rej) S.turn = (S.turn + 1) % n;
       var done = function () { showChips(); tmr = setTimeout(step, 500 / S.speed); };
       if (api) api.play({ key: t.nom, pts: pts, nom: t.nom, col: t.col, done: done }, list()); else { fb.innerHTML = ""; fb.appendChild(boardSvg(list().map(function (p) { return p; }), { big: true })); tmr = setTimeout(done, 900 / S.speed); }
@@ -351,7 +360,7 @@
     btnRun = h("button", { class: "ok", onclick: function () { if (S.fin) reset(); S.run = !S.run; btnRun.textContent = S.run ? "Pause" : "Lancer"; if (S.run) { clearTimeout(tmr); step(); } } }, "Lancer");
     var sel = h("select", { onchange: function () { S.speed = +sel.value; } }, [["0.6", "Lent"], ["1", "Normal"], ["2.2", "Rapide"]].map(function (o) { return h("option", { value: o[0] }, o[1]); })); sel.value = "1"; sel.style.cssText = "width:auto;display:inline-block;max-width:150px";
     var cam = h("input", { type: "checkbox", style: "width:auto" }); cam.checked = true; cam.addEventListener("change", function () { if (api) api.setAuto(cam.checked); });
-    mount(h("h1", {}, "Démo du plateau : cinq équipes fictives"), h("p", { class: "meta" }, "Aucun téléphone nécessaire : les équipes jouent seules (réponses simulées). On voit le dé rouler, les pions sauter de case en case et la caméra suivre l'équipe qui joue. Glisser pour tourner le plateau."),
+    mount(h("h1", {}, "Démo du plateau : cinq équipes fictives"), h("p", { class: "meta" }, "Aucun téléphone nécessaire : les équipes jouent seules (réponses simulées). On voit la roue tourner, les pions sauter de case en case et la caméra suivre l'équipe qui joue. Glisser pour tourner le plateau."),
       h("div", { class: "card" }, btnRun, h("button", { class: "sec", onclick: reset }, "Recommencer"), h("label", { style: "margin-left:12px" }, "Vitesse : ", sel), h("label", { style: "margin-left:12px" }, cam, " Caméra automatique"), h("a", { href: "#/plateau", style: "margin-left:16px" }, "← Retour")), info, box, fb, chips, h("div", { class: "card" }, h("h2", {}, "Déroulé"), logBox));
     showChips();
     load3d(box, function (a) { if (a) { api = a; api.update(list()); } else { box.style.display = "none"; fb.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); fb.appendChild(boardSvg(list(), { big: true })); } }, { speed: function () { return S.speed; } });
