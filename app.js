@@ -32,7 +32,7 @@
     var bar0 = h("div", {}); Sess.onchange = function () { bar0.innerHTML = ""; bar0.appendChild(sessionBar()); }; Sess.onchange(); Sess.connect();
     mount(h("h1", {}, "Communication professionnelle : exercices, quiz et jeux"), bar0,
       h("p", { class: "meta" }, "Scannez le QR code de la diapositive, ou choisissez ci-dessous. Cas fictif : TransLor."),
-      h("p", { class: "meta" }, "Les activités sont rangées dans l'ordre du PowerPoint (la page du support est indiquée sur chaque carte)."),
+      h("p", { class: "meta" }, "Les activités sont rangées dans l'ordre du PowerPoint (la page du support est indiquée sur chaque carte). ", h("a", { href: "#/animateur" }, "Fiche animateur")),
       h("div", { class: "grid" }, (D.parcours || []).map(function (p) {
         if (p.t === "module") return h("h2", { style: "grid-column:1/-1;margin:14px 0 0" }, p.titre);
         var tile = function (cls, href, b, m) { return h("a", { class: "tile " + cls, href: href }, h("b", {}, b), h("div", { class: "meta" }, m + (p.page ? "  ·  page " + p.page : ""))); };
@@ -230,7 +230,7 @@
     }
     var status = h("p", { class: "meta" }, "");
     var code = h("input", { placeholder: "Code de la session (ex. COM1)", maxlength: 8, style: "text-transform:uppercase;max-width:260px" }); code.value = P.salle || newCode();
-    var head = h("div", { class: "card" }, h("h2", {}, "Session du cours"), code,
+    var head = h("div", { class: "card" }, h("h2", {}, "Session du cours"), h("p", { class: "meta" }, h("a", { href: "#/animateur" }, "Fiche animateur : conduire la séance")), code,
       h("button", { class: "ok", onclick: function () { if (code.value.trim()) { open(code.value.trim().toUpperCase()); drawHead(); } } }, "Ouvrir la session"), status);
     var qrBox = h("div", {});
     function drawHead() {
@@ -552,6 +552,19 @@
       h("p", {}, h("a", { href: "#/" }, "← Retour à l'accueil")));
   }
 
+  /* ---------- Fiche animateur (#/animateur) ---------- */
+  function aidePage() {
+    var li = function () { return h("ul", {}, [].slice.call(arguments).map(function (t) { return h("li", {}, t); })); };
+    mount(h("h1", {}, "Fiche animateur : conduire la séance"),
+      h("p", { class: "meta" }, "Une page. À ouvrir sur l'ordinateur relié au vidéoprojecteur (navigateur récent : Chrome, Edge ou Firefox)."),
+      h("div", { class: "card" }, h("h2", {}, "1 · La veille"), li("Ouvrir la page animateur (lien en bas de chaque page d'exercice du support, ou #/prof) et vérifier qu'elle s'affiche.", "Tester avec deux téléphones : rejoindre la session, répondre à un exercice, voir la réponse arriver.", "Prévoir le partage de connexion d'un téléphone si le Wi-Fi de la salle bloque les connexions directes.")),
+      h("div", { class: "card" }, h("h2", {}, "2 · Au début du cours"), li("Page animateur : saisir un code (ex. COM1), cliquer sur « Ouvrir la session ». Garder cette page ouverte jusqu'à la fin.", "Projeter le QR de la session : chaque étudiant le scanne une fois et saisit son prénom. En l'absence de QR, afficher le code et l'adresse du site.", "Contrôler le compteur « n en ligne » : les absents de la liste n'ont pas rejoint la session.")),
+      h("div", { class: "card" }, h("h2", {}, "3 · À chaque exercice"), li("Projeter la page du support ; les étudiants scannent son QR et répondent sur leur téléphone.", "Onglet « Réponses d'un exercice » : un tableau, une ligne par étudiant, une colonne par consigne. Cocher « Grand texte » pour le projeter.", "Après la restitution, cliquer sur « Ouvrir la correction aux étudiants », puis projeter la page de correction du support.", "Exercice 1 : l'onglet « Sujets choisis » montre qui a pris quel sujet (premier arrivé, premier servi).")),
+      h("div", { class: "card" }, h("h2", {}, "4 · En fin de journée"), li("Cliquer sur « Exporter en CSV » : les réponses sont gardées dans le navigateur de cet ordinateur seulement, l'export est la sauvegarde.", "Ne pas utiliser « Effacer les réponses » avant d'avoir exporté.")),
+      h("div", { class: "card" }, h("h2", {}, "5 · Si cela ne marche pas"), li("« Aucune salle avec ce code » : la session n'est pas ouverte ; ouvrir la page animateur et cliquer sur « Ouvrir la session ».", "« Ce code est déjà utilisé » : une autre page animateur est ouverte ; fermer l'autre onglet ou changer de code.", "Les réponses n'arrivent pas : changer de réseau (partage de connexion). Les étudiants gardent leur saisie sur leur téléphone et la renvoient en rechargeant la page.", "Pas d'écran de projection du QR : écrire le code au tableau.", "Les étudiants sans smartphone : binômes, ou réponses sur papier.")),
+      h("p", {}, h("a", { href: "#/prof" }, "→ Ouvrir la page animateur"), "  ·  ", h("a", { href: "#/" }, "← Accueil")));
+  }
+
   function route() {
     var p = (location.hash || "#/").replace(/\?.*$/, "").split("/").filter(Boolean); p.shift();
     Sess_off(); var a = p[0] || "";
@@ -562,6 +575,7 @@
     if (a === "quiz-final") return quizFinal();
     if (a === "session") return sessionPage();
     if (a === "prof") return profPage();
+    if (a === "animateur") return aidePage();
     if (a === "outils") return outilsPage();
     if (a === "sujets") return sujetsPage();
     if (a === "dossier") return dossierPage();

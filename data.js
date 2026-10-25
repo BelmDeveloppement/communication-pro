@@ -6358,18 +6358,18 @@ window.DATA = {
   {
    "t": "page",
    "route": "sujets",
-   "page": 16,
+   "page": 17,
    "titre": "19 sujets pour votre état de l'art"
   },
   {
    "t": "ex",
    "id": "EX1",
-   "page": 17
+   "page": 18
   },
   {
    "t": "page",
    "route": "dossier",
-   "page": 19,
+   "page": 20,
    "titre": "Votre fil rouge : le dossier d'état de l'art"
   },
   {
@@ -6379,17 +6379,17 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX5",
-   "page": 23
+   "page": 24
   },
   {
    "t": "ex",
    "id": "EX6",
-   "page": 26
+   "page": 27
   },
   {
    "t": "ex",
    "id": "EX4",
-   "page": 30
+   "page": 31
   },
   {
    "t": "module",
@@ -6398,37 +6398,37 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX7",
-   "page": 35
+   "page": 36
   },
   {
    "t": "ex",
    "id": "M1",
-   "page": 38
+   "page": 39
   },
   {
    "t": "ex",
    "id": "EX8",
-   "page": 41
+   "page": 42
   },
   {
    "t": "ex",
    "id": "EX9",
-   "page": 45
+   "page": 48
   },
   {
    "t": "ex",
    "id": "M2",
-   "page": 47
-  },
-  {
-   "t": "ex",
-   "id": "EX10",
    "page": 50
   },
   {
    "t": "ex",
-   "id": "V4",
+   "id": "EX10",
    "page": 53
+  },
+  {
+   "t": "ex",
+   "id": "V4",
+   "page": 56
   },
   {
    "t": "module",
@@ -6437,22 +6437,22 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX11b",
-   "page": 57
+   "page": 60
   },
   {
    "t": "ex",
    "id": "EX12",
-   "page": 59
-  },
-  {
-   "t": "ex",
-   "id": "EX13",
    "page": 62
   },
   {
    "t": "ex",
+   "id": "EX13",
+   "page": 65
+  },
+  {
+   "t": "ex",
    "id": "M4",
-   "page": 64
+   "page": 67
   },
   {
    "t": "module",
@@ -6461,17 +6461,17 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX14",
-   "page": 68
-  },
-  {
-   "t": "ex",
-   "id": "F6",
    "page": 71
   },
   {
    "t": "ex",
+   "id": "F6",
+   "page": 74
+  },
+  {
+   "t": "ex",
    "id": "EX15",
-   "page": 75
+   "page": 78
   },
   {
    "t": "module",
@@ -6480,27 +6480,27 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX16",
-   "page": 80
-  },
-  {
-   "t": "ex",
-   "id": "EX17",
    "page": 83
   },
   {
    "t": "ex",
-   "id": "EX18",
+   "id": "EX17",
    "page": 86
   },
   {
    "t": "ex",
-   "id": "EX19",
+   "id": "EX18",
    "page": 89
   },
   {
    "t": "ex",
+   "id": "EX19",
+   "page": 92
+  },
+  {
+   "t": "ex",
    "id": "EX20",
-   "page": 91
+   "page": 94
   },
   {
    "t": "module",
@@ -6509,42 +6509,42 @@ window.DATA = {
   {
    "t": "ex",
    "id": "V7",
-   "page": 96
-  },
-  {
-   "t": "ex",
-   "id": "V8",
    "page": 99
   },
   {
    "t": "ex",
-   "id": "EX21",
+   "id": "V8",
    "page": 102
   },
   {
    "t": "ex",
-   "id": "EX22",
-   "page": 104
+   "id": "EX21",
+   "page": 105
   },
   {
    "t": "ex",
-   "id": "EX23",
+   "id": "EX22",
    "page": 107
   },
   {
    "t": "ex",
-   "id": "M3",
+   "id": "EX23",
    "page": 110
   },
   {
    "t": "ex",
-   "id": "EX24",
+   "id": "M3",
    "page": 113
+  },
+  {
+   "t": "ex",
+   "id": "EX24",
+   "page": 116
   },
   {
    "t": "jeu",
    "route": "jeu20",
-   "page": 116,
+   "page": 119,
    "titre": "Jeu 20"
   },
   {
@@ -6554,17 +6554,17 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX25",
-   "page": 120
+   "page": 123
   },
   {
    "t": "ex",
    "id": "EX26",
-   "page": 125
+   "page": 128
   },
   {
    "t": "ex",
    "id": "EX27",
-   "page": 128
+   "page": 131
   },
   {
    "t": "module",
@@ -6573,23 +6573,23 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX29",
-   "page": 132
+   "page": 135
   },
   {
    "t": "jeu",
    "route": "quiz-final",
-   "page": 134,
+   "page": 137,
    "titre": "Quiz final"
   },
   {
    "t": "ex",
    "id": "F9",
-   "page": 135
+   "page": 138
   },
   {
    "t": "page",
    "route": "outils",
-   "page": 136,
+   "page": 139,
    "titre": "Boîte à outils (1/2) : chercher, vérifier, lire"
   }
  ]
