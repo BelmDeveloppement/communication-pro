@@ -6598,10 +6598,6 @@ window.DATA = {
  ],
  "parcours": [
   {
-   "t": "module",
-   "titre": "Ouverture"
-  },
-  {
    "t": "ex",
    "id": "F0",
    "page": 6
@@ -6612,20 +6608,31 @@ window.DATA = {
    "page": 12
   },
   {
+   "t": "seance",
+   "titre": "Plateau · séance 0 : former les équipes",
+   "page": 15
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 15,
+   "titre": "Le plateau : votre fil conducteur sur les 2,5 jours (séance 0 : former les équipes, 5 min)"
+  },
+  {
    "t": "page",
    "route": "sujets",
-   "page": 17,
+   "page": 18,
    "titre": "19 sujets pour votre état de l'art"
   },
   {
    "t": "ex",
    "id": "EX1",
-   "page": 18
+   "page": 19
   },
   {
    "t": "page",
    "route": "dossier",
-   "page": 20,
+   "page": 21,
    "titre": "Votre fil rouge : le dossier d'état de l'art"
   },
   {
@@ -6635,17 +6642,17 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX5",
-   "page": 24
+   "page": 25
   },
   {
    "t": "ex",
    "id": "EX6",
-   "page": 27
+   "page": 28
   },
   {
    "t": "ex",
    "id": "EX4",
-   "page": 31
+   "page": 32
   },
   {
    "t": "module",
@@ -6654,37 +6661,37 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX7",
-   "page": 36
+   "page": 37
   },
   {
    "t": "ex",
    "id": "M1",
-   "page": 39
+   "page": 40
   },
   {
    "t": "ex",
    "id": "EX8",
-   "page": 42
+   "page": 43
   },
   {
    "t": "ex",
    "id": "EX9",
-   "page": 48
+   "page": 49
   },
   {
    "t": "ex",
    "id": "M2",
-   "page": 50
+   "page": 51
   },
   {
    "t": "ex",
    "id": "EX10",
-   "page": 53
+   "page": 54
   },
   {
    "t": "ex",
    "id": "V4",
-   "page": 56
+   "page": 57
   },
   {
    "t": "module",
@@ -6693,22 +6700,22 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX11b",
-   "page": 60
+   "page": 61
   },
   {
    "t": "ex",
    "id": "EX12",
-   "page": 62
+   "page": 63
   },
   {
    "t": "ex",
    "id": "EX13",
-   "page": 65
+   "page": 66
   },
   {
    "t": "ex",
    "id": "M4",
-   "page": 67
+   "page": 68
   },
   {
    "t": "module",
@@ -6717,33 +6724,33 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX14",
-   "page": 71
+   "page": 72
   },
   {
    "t": "ex",
    "id": "F6",
-   "page": 74
+   "page": 75
   },
   {
    "t": "ex",
    "id": "EX15",
-   "page": 78
+   "page": 79
   },
   {
    "t": "seance",
    "titre": "Plateau · séance 1 : retour sur le jour 1",
-   "page": 80
-  },
-  {
-   "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 81,
-   "titre": "Jeu 5.1 · Course aux requêtes"
+   "page": 81
   },
   {
    "t": "jeu5",
    "route": "plateau/equipe",
    "page": 82,
+   "titre": "Jeu 5.1 · Course aux requêtes"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 83,
    "titre": "Jeu 5.2 · La source tient-elle ?"
   },
   {
@@ -6753,27 +6760,27 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX16",
-   "page": 86
+   "page": 87
   },
   {
    "t": "ex",
    "id": "EX17",
-   "page": 89
+   "page": 90
   },
   {
    "t": "ex",
    "id": "EX18",
-   "page": 92
+   "page": 93
   },
   {
    "t": "ex",
    "id": "EX19",
-   "page": 95
+   "page": 96
   },
   {
    "t": "ex",
    "id": "EX20",
-   "page": 97
+   "page": 98
   },
   {
    "t": "module",
@@ -6782,59 +6789,59 @@ window.DATA = {
   {
    "t": "ex",
    "id": "V7",
-   "page": 102
+   "page": 103
   },
   {
    "t": "ex",
    "id": "V8",
-   "page": 105
+   "page": 106
   },
   {
    "t": "ex",
    "id": "EX21",
-   "page": 108
+   "page": 109
   },
   {
    "t": "ex",
    "id": "EX22",
-   "page": 110
+   "page": 111
   },
   {
    "t": "ex",
    "id": "EX23",
-   "page": 113
+   "page": 114
   },
   {
    "t": "ex",
    "id": "M3",
-   "page": 116
+   "page": 117
   },
   {
    "t": "ex",
    "id": "EX24",
-   "page": 119
+   "page": 120
   },
   {
    "t": "seance",
    "titre": "Plateau · séance 2 : argumenter",
-   "page": 121
-  },
-  {
-   "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 122,
-   "titre": "Jeu 5.3 · La chasse aux biais et aux sophismes"
+   "page": 122
   },
   {
    "t": "jeu5",
    "route": "plateau/equipe",
    "page": 123,
-   "titre": "Jeu 5.4 · Reconstituer l'argument"
+   "titre": "Jeu 5.3 · La chasse aux biais et aux sophismes"
   },
   {
    "t": "jeu5",
    "route": "plateau/equipe",
    "page": 124,
+   "titre": "Jeu 5.4 · Reconstituer l'argument"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 125,
    "titre": "Jeu 5.5 · Le chiffre piégé"
   },
   {
@@ -6844,39 +6851,39 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX25",
-   "page": 127
+   "page": 128
   },
   {
    "t": "ex",
    "id": "EX26",
-   "page": 132
+   "page": 133
   },
   {
    "t": "ex",
    "id": "EX27",
-   "page": 135
+   "page": 136
   },
   {
    "t": "seance",
    "titre": "Plateau · séance 3 : écrire et défendre",
-   "page": 137
-  },
-  {
-   "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 138,
-   "titre": "Jeu 5.6 · Le mail qui obtient une réponse"
+   "page": 138
   },
   {
    "t": "jeu5",
    "route": "plateau/equipe",
    "page": 139,
-   "titre": "Jeu 5.7 · La phrase honnête"
+   "titre": "Jeu 5.6 · Le mail qui obtient une réponse"
   },
   {
    "t": "jeu5",
    "route": "plateau/equipe",
    "page": 140,
+   "titre": "Jeu 5.7 · La phrase honnête"
+  },
+  {
+   "t": "jeu5",
+   "route": "plateau/equipe",
+   "page": 141,
    "titre": "Jeu 5.8 · Le pitch éclair"
   },
   {
@@ -6886,18 +6893,51 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX29",
-   "page": 143
+   "page": 144
   },
   {
    "t": "ex",
    "id": "F9",
-   "page": 145
+   "page": 146
   },
   {
    "t": "page",
    "route": "outils",
-   "page": 146,
+   "page": 147,
    "titre": "Boîte à outils (1/2) : chercher, vérifier, lire"
   }
- ]
+ ],
+ "labels": {
+  "EX0": "EX0",
+  "EX1": "EX1",
+  "EX5": "EX2",
+  "EX6": "EX3",
+  "EX4": "EX4",
+  "EX7": "EX5",
+  "EX8": "EX6",
+  "EX9": "EX7",
+  "EX10": "EX8",
+  "EX11b": "EX9",
+  "EX12": "EX10",
+  "EX13": "EX11",
+  "EX14": "EX12",
+  "EX15": "EX13",
+  "EX16": "EX14",
+  "EX17": "EX15",
+  "EX18": "EX16",
+  "EX19": "EX17",
+  "EX20": "EX18",
+  "EX21": "EX19",
+  "EX22": "EX20",
+  "EX23": "EX21",
+  "EX24": "EX22",
+  "EX25": "EX23",
+  "EX26": "EX24",
+  "EX27": "EX25",
+  "EX29": "EX26",
+  "EX11": "EX27",
+  "EX28": "EX28",
+  "EX2": "EX29",
+  "EX3": "EX30"
+ }
 };

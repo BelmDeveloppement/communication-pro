@@ -15,3 +15,6 @@ textarea,input,select{font:inherit;width:100%;padding:8px;border:1px solid #b9c4
 .big{font-size:22px}.warn{background:#FFF3D6;border-left:6px solid var(--o);padding:8px 12px;border-radius:6px}ol li,ul li{margin:4px 0}
 
 .choices{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}button.choice{flex:1 1 40%;min-height:48px;background:#e8ecf8;color:#1F2A5C;border:2px solid #b9c4e8;font-weight:700}button.choice.on{background:#3B6FD8;color:#fff;border-color:#1F2A5C}input.num{max-width:200px;font-size:20px;margin-bottom:10px}
+.die2d{width:110px;height:110px;margin:24px auto;border-radius:20px;background:#fff;border:6px solid var(--m,#1F2A5C);font-size:64px;font-weight:800;line-height:98px;text-align:center;color:var(--m,#1F2A5C);box-shadow:0 8px 18px rgba(0,0,0,.25);transition:transform .08s linear;user-select:none}
+.die2d.done{background:#E8F6EE;border-color:#2E9E6B;color:#1b6b45;transition:transform .25s ease-out}
+a.tile.r{border-color:#D6479B}

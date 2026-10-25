@@ -45,7 +45,8 @@
       h("p", { class: "meta" }, "Un plateau de 30 cases en trois actes. Chaque équipe joue sur son téléphone ; la bonne réponse fait avancer le pion."),
       h("div", { class: "grid" }, h("a", { class: "tile", href: "#/plateau/equipe" }, h("b", {}, "Je suis une équipe"), h("div", { class: "meta" }, "Rejoindre la partie avec le code de la table")),
         h("a", { class: "tile g", href: "#/plateau/anim" }, h("b", {}, "Je suis l'animateur"), h("div", { class: "meta" }, "Ouvrir la partie, projeter le plateau, suivre les tables")),
-        h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8"))),
+        h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8")),
+        h("a", { class: "tile r", href: "#/plateau/demo" }, h("b", {}, "Partie démo en 3D"), h("div", { class: "meta" }, "Cinq équipes fictives : dé qui roule, pions qui avancent (sans téléphones)"))),
       h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_5_A2.pdf" }, "Plateau A2 (impression chez un imprimeur)"), " · ", h("a", { href: "Plateau_5_A3.pdf" }, "A3 (essai)"), " · ", h("a", { href: "Plateau_5_pions.pdf" }, "Pions à découper (A4)"))));
   }
   function rules() {
@@ -71,7 +72,7 @@
         conn = peer.connect("cpro-p-" + st.code, { reliable: true });
         conn.on("open", function () { setLink(true); conn.send({ t: "hello", sid: st.sid, nom: st.nom, table: st.table, pos: st.pos, score: st.score, done: st.done, n: st.log.length }); });
         conn.on("data", function (m) {
-          if (m.t === "cfg") { st.cfg = { mode: m.mode, acte: m.acte }; LSset(TK, st); if (onCfg) onCfg(); }
+          if (m.t === "cfg") { st.cfg = { mode: m.mode, acte: m.acte, bonus: !!m.bonus }; LSset(TK, st); if (onCfg) onCfg(); }
           else if (m.t === "adj") { st.pos = Math.max(0, Math.min(31, st.pos + (m.delta || 0))); st.log.push({ jeu: "—", pts: m.delta, note: "ajustement animateur" }); LSset(TK, st); teamSend(); if (onCfg) onCfg(true); }
         });
         conn.on("close", function () { again(4000); }); conn.on("error", function () { again(6000); });
@@ -115,7 +116,12 @@
       if (st.cur) return drawCard();
       if (st.pos >= 31) { main.appendChild(h("div", { class: "card" }, h("h2", {}, "Arrivée à l'Examen !"), h("p", {}, "Votre équipe a terminé la route. Total : " + st.score + " points."))); return; }
       var nx = nextGameCase(st.pos);
-      if (st.pos >= cap) { main.appendChild(h("div", { class: "warn" }, "Fin de l'acte " + st.cfg.acte + " : attendez que l'animateur ouvre l'acte suivant.")); return; }
+      if (st.pos >= cap) {
+        main.appendChild(h("div", { class: "warn" }, "Fin de l'acte " + st.cfg.acte + " : attendez que l'animateur ouvre l'acte suivant."));
+        if (st.cfg.bonus) { var js = D.actes[st.cfg.acte].jeux, code = js[(st.bonusN || 0) % js.length], jb = jeuOf(code);
+          main.appendChild(h("div", { class: "card" }, h("h2", {}, "Cartes bonus"), h("p", {}, "En attendant les autres équipes : une carte de plus ne fait pas avancer le pion, mais ses points servent à départager les équipes."), h("p", { class: "meta" }, "Jeu " + code + " · " + jb.titre),
+            h("button", { class: "ok", onclick: function () { var r = PE.pickCard(jb, (st.seen[code] || []), st.sid + "b"); if (r.reset) st.seen[code] = []; st.bonusN = (st.bonusN || 0) + 1; st.cur = { jeu: code, id: r.card.id, bonus: true }; save(); draw(); } }, "Tirer une carte bonus"))); }
+        return; }
       var j = jeuOf(nx.jeu);
       main.appendChild(h("div", { class: "card" }, h("h2", {}, "Prochaine carte : jeu " + nx.jeu + " · " + j.titre), h("p", {}, h("span", { class: "team", style: "background:" + D.zones[j.zone].col }, j.zone), D.zones[j.zone].nom), h("p", {}, j.regle),
         h("button", { class: "ok", onclick: function () { var r = PE.pickCard(j, (st.seen[nx.jeu] || []), st.sid); if (r.reset) st.seen[nx.jeu] = []; st.cur = { jeu: nx.jeu, id: r.card.id }; save(); draw(); } }, "Tirer la carte")));
@@ -144,16 +150,23 @@
       } }, "Valider"); box.appendChild(btn); main.appendChild(box);
     }
     function validate(c) {
-      var r = PE.score(c, ans), from = st.pos, np = PE.advance(from, r.pts, st.cfg.acte, D.caps), eff = PE.landing(D.cases, D.events, np, st.cfg.acte, D.caps), jeu = st.cur.jeu;
+      var bonus = !!st.cur.bonus, r = PE.score(c, ans), from = st.pos, np = bonus ? from : PE.advance(from, r.pts, st.cfg.acte, D.caps), eff = bonus ? null : PE.landing(D.cases, D.events, np, st.cfg.acte, D.caps), jeu = st.cur.jeu;
       (st.seen[jeu] = st.seen[jeu] || []).push(c.id); st.score += r.pts; st.pos = eff ? eff.pos : np; if (st.pos >= 31) st.done = true;
-      st.res = { jeu: jeu, id: c.id, pts: r.pts, detail: r.detail, from: from, to: np, final: st.pos, ev: eff ? { titre: eff.ev.titre, txt: eff.ev.txt, rejoue: eff.rejoue } : null };
-      st.log.push({ jeu: jeu, pts: r.pts, to: st.pos }); st.cur = null; save(); draw();
+      st.res = { jeu: jeu, id: c.id, bonus: bonus, rolled: false, pts: r.pts, detail: r.detail, from: from, to: np, final: st.pos, ev: eff ? { titre: eff.ev.titre, txt: eff.ev.txt, rejoue: eff.rejoue } : null };
+      st.log.push({ jeu: jeu, pts: r.pts, to: st.pos, bonus: bonus }); st.cur = null; save(); draw();
+    }
+    function rollDie2D(el, pts, done) {
+      var i = 0, steps = 15, delay = 55, fin = false;
+      function stop() { if (fin) return; fin = true; clearTimeout(el._t); el.textContent = pts; el.style.transform = "rotate(0deg) scale(1.12)"; el.className = "die2d done"; setTimeout(done, 700); }
+      function tick() { if (fin || !document.body.contains(el)) return; i++; if (i >= steps) return stop(); var v = Math.floor(Math.random() * 4); if (v === el._v) v = (v + 1) % 4; el._v = v; el.textContent = v; el.style.transform = "rotate(" + ((i * 53) % 360) + "deg) scale(1.05)"; delay *= 1.18; el._t = setTimeout(tick, delay); }
+      tick(); return stop;
     }
     function drawResult() {
+      if (!st.res.rolled) { var face = h("div", { class: "die2d" }, "?"), skip; main.appendChild(h("div", { class: "card", style: "text-align:center" }, h("p", { class: "big" }, "Le dé révèle vos points…"), face, skip = h("button", { class: "sec" }, "Passer"))); var stop = rollDie2D(face, st.res.pts, function () { st.res.rolled = true; save(); draw(); }); skip.onclick = stop; return; }
       var r = st.res, c = jeuOf(r.jeu).cartes.filter(function (x) { return x.id === r.id; })[0], phys = st.cfg.mode === "physique", moved = r.final - r.from;
       main.appendChild(h("div", { class: "card" }, h("h2", {}, r.pts + " point" + (r.pts > 1 ? "s" : "") + " sur 3"), h("ul", {}, r.detail.map(function (d) { return h("li", { style: "color:" + (d.ok ? "#1b6b45" : "#a33") }, (d.ok ? "✓ " : "✗ ") + d.lab); })),
         c.modele ? h("p", {}, h("b", {}, "Réponse modèle : "), c.modele) : null, h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)));
-      main.appendChild(h("div", { class: phys ? "warn big" : "card" }, phys ? "Déplacez votre pion de " + (r.to - r.from) + " case" + ((r.to - r.from) > 1 ? "s" : "") + (r.ev && r.final !== r.to ? ", puis " + (r.final - r.to > 0 ? "avancez" : "reculez") + " de " + Math.abs(r.final - r.to) : "") + " : case " + r.final + "." : "Votre pion va à la case " + r.final + "."));
+      main.appendChild(h("div", { class: phys && !r.bonus ? "warn big" : "card" }, r.bonus ? "Points bonus : +" + r.pts + ". Votre pion reste sur la case " + r.final + "." : phys ? "Déplacez votre pion de " + (r.to - r.from) + " case" + ((r.to - r.from) > 1 ? "s" : "") + (r.ev && r.final !== r.to ? ", puis " + (r.final - r.to > 0 ? "avancez" : "reculez") + " de " + Math.abs(r.final - r.to) : "") + " : case " + r.final + "." : "Votre pion va à la case " + r.final + "."));
       if (r.ev) main.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Événement : " + r.ev.titre), h("p", {}, r.ev.txt)));
       main.appendChild(h("button", { class: "ok", onclick: function () { var rej = r.ev && r.ev.rejoue, jeu = r.jeu; st.res = null; if (rej && st.pos < PE.capFor(st.cfg.acte, D.caps)) { var j = jeuOf(jeu), rr = PE.pickCard(j, st.seen[jeu] || [], st.sid + "j"); st.cur = { jeu: jeu, id: rr.card.id }; } save(); draw(); } }, r.ev && r.ev.rejoue ? "Rejouer une carte" : "Carte suivante"));
     }
@@ -164,14 +177,15 @@
   /* ---------- Animateur ---------- */
   var PK = "pl-prof";
   function animPage() {
-    var P = LSget(PK) || { code: "", mode: "numerique", acte: 1, teams: {} }, hpeer = null, online = {}, view = "plateau", big = false, dirty = true, three = null, content = h("div", {}), status = h("p", { class: "meta" }, "");
+    var infoP = null, P = LSget(PK) || { code: "", mode: "numerique", acte: 1, teams: {} }, hpeer = null, online = {}, view = "plateau", big = false, dirty = true, three = null, content = h("div", {}), status = h("p", { class: "meta" }, "");
     function persist() { LSset(PK, P); }
-    function cfgMsg() { return { t: "cfg", mode: P.mode, acte: P.acte }; }
+    function cfgMsg() { return { t: "cfg", mode: P.mode, acte: P.acte, bonus: !!P.bonus }; }
     function bcast() { Object.keys(online).forEach(function (sid) { try { online[sid].send(cfgMsg()); } catch (e) {} }); }
     function ingest(m, c) {
       if (m.t !== "hello" && m.t !== "state") return;
-      var o = P.teams[m.sid] = P.teams[m.sid] || { ci: Object.keys(P.teams).length }; ["nom", "table", "pos", "score", "done", "n"].forEach(function (k) { if (m[k] !== undefined) o[k] = m[k]; }); if (m.last) o.last = m.last; o.ts = Date.now();
+      var prevN = P.teams[m.sid] ? (P.teams[m.sid].n || 0) : null, o = P.teams[m.sid] = P.teams[m.sid] || { ci: Object.keys(P.teams).length }; ["nom", "table", "pos", "score", "done", "n"].forEach(function (k) { if (m[k] !== undefined) o[k] = m[k]; }); if (m.last) o.last = m.last; o.ts = Date.now();
       if (c) { online[m.sid] = c; if (m.t === "hello") try { c.send(cfgMsg()); } catch (e) {} }
+      if (m.t === "state" && prevN !== null && o.n > prevN && m.last && m.last.jeu !== "—" && view === "3d" && three) three.play({ key: m.sid, pts: m.last.pts, nom: o.nom, col: COLS[(o.ci || 0) % COLS.length], bonus: m.last.bonus }, pawns());
       persist(); dirty = true;
     }
     function open(code) {
@@ -189,22 +203,25 @@
     function ctrl() {
       var box = h("div", { class: "card" }, h("h2", {}, "Partie"), code, h("button", { class: "ok", onclick: function () { if (code.value.trim()) { open(code.value.trim().toUpperCase()); drawQr(); } } }, "Ouvrir la partie"), status,
         h("div", {}, h("b", {}, "Mode : "), [["numerique", "Plateau numérique (projeté)"], ["physique", "Plateaux physiques (un par table)"]].map(function (m) { return h("button", { class: P.mode === m[0] ? "" : "sec", onclick: function () { P.mode = m[0]; persist(); bcast(); rebuild(); } }, m[1]); })),
-        h("div", {}, h("b", {}, "Acte ouvert : "), [1, 2, 3].map(function (a) { return h("button", { class: P.acte === a ? "" : "sec", onclick: function () { P.acte = a; persist(); bcast(); rebuild(); } }, "Acte " + a + " · " + D.actes[a].nom + " (" + D.actes[a].jeux.join(", ") + ")"); })));
+        h("div", {}, h("b", {}, "Acte ouvert : "), [1, 2, 3].map(function (a) { return h("button", { class: P.acte === a ? "" : "sec", onclick: function () { P.acte = a; persist(); bcast(); rebuild(); } }, "Acte " + a + " · " + D.actes[a].nom + " (" + D.actes[a].jeux.join(", ") + ")"); })),
+        h("div", {}, h("button", { class: "sec", onclick: pushLate }, "Passer les retardataires au début de l'acte " + Math.min(3, Math.max(2, P.acte))),
+          h("button", { class: P.bonus ? "" : "sec", onclick: function () { P.bonus = !P.bonus; persist(); bcast(); rebuild(); } }, "Cartes bonus pour les équipes en avance : " + (P.bonus ? "activées" : "désactivées")), h("a", { href: "#/plateau/demo", target: "_blank", style: "margin-left:12px" }, "Partie démo 3D (autre onglet)")));
       return box;
     }
     var ctrlBox = h("div", {}), bar = h("div", { class: "card" });
     function rebuild() { ctrlBox.innerHTML = ""; ctrlBox.appendChild(ctrl()); }
     function tabs() {
-      bar.innerHTML = ""; [["plateau", "Plateau"], ["tableau", "Tableau des tables"], ["3d", "Vue 3D"]].forEach(function (t) { bar.appendChild(h("button", { class: view === t[0] ? "" : "sec", onclick: function () { view = t[0]; tabs(); dirty = true; draw(); } }, t[1])); });
+      bar.innerHTML = ""; [["plateau", "Plateau"], ["tableau", "Tableau des tables"], ["3d", "Vue 3D"]].forEach(function (t) { bar.appendChild(h("button", { class: view === t[0] ? "" : "sec", onclick: function () { view = t[0]; three = null; tabs(); dirty = true; draw(); } }, t[1])); });
       var bg = h("input", { type: "checkbox", style: "width:auto" }); bg.checked = big; bg.addEventListener("change", function () { big = bg.checked; content.style.fontSize = big ? "24px" : ""; });
       bar.appendChild(h("label", { style: "margin-left:12px" }, bg, " Grand texte (projection)")); bar.appendChild(h("button", { class: "sec", onclick: exportCsv }, "Exporter en CSV"));
       bar.appendChild(h("button", { class: "sec", onclick: function () { if (confirm("Effacer toutes les équipes de la partie ?")) { P.teams = {}; persist(); dirty = true; draw(); } } }, "Effacer les équipes"));
     }
     function draw() {
-      if (view === "3d" && three && !dirty) { three.update(pawns()); return; }
-      dirty = false; content.innerHTML = ""; var ts = teams();
-      content.appendChild(h("p", { class: "meta" }, ts.length + " équipe(s) · " + Object.keys(online).length + " en ligne · mode " + (P.mode === "physique" ? "physique" : "numérique") + " · acte " + P.acte + " ouvert"));
-      if (view === "3d") { three = null; var box = h("div", { style: "width:100%;height:520px;background:#F3F5F9;border-radius:10px;position:relative" }); content.appendChild(box); load3d(box, function (api) { three = api; if (api) api.update(pawns()); else { content.innerHTML = ""; content.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); content.appendChild(boardSvg(pawns(), { big: true })); } }); return; }
+      var ts = teams(), infoTxt = ts.length + " équipe(s) · " + Object.keys(online).length + " en ligne · mode " + (P.mode === "physique" ? "physique" : "numérique") + " · acte " + P.acte + " ouvert";
+      if (view === "3d" && three && content.contains(infoP)) { dirty = false; infoP.textContent = infoTxt; three.update(pawns()); return; }
+      dirty = false; content.innerHTML = ""; infoP = h("p", { class: "meta" }, infoTxt); content.appendChild(infoP);
+      if (view === "3d") { three = null; var box = h("div", { style: "width:100%;height:560px;background:#F3F5F9;border-radius:10px;position:relative" }), cam = h("input", { type: "checkbox", style: "width:auto" }); cam.checked = true; cam.addEventListener("change", function () { if (three) three.setAuto(cam.checked); });
+        content.appendChild(h("label", {}, cam, " Caméra automatique (suit l'équipe qui joue) · glisser pour tourner le plateau")); content.appendChild(box); load3d(box, function (api) { three = api; if (api) api.update(pawns()); else { content.innerHTML = ""; content.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); content.appendChild(boardSvg(pawns(), { big: true })); } }); return; }
       if (view === "plateau") { content.appendChild(boardSvg(pawns(), { big: true })); content.appendChild(h("p", {}, ts.map(function (t) { return h("span", { class: "team", style: "background:" + COLS[(t.ci || 0) % COLS.length] }, (t.table ? t.table + " · " : "") + t.nom + " · case " + t.pos); }))); return; }
       var rank = ts.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); });
       var tb = h("table", {}, h("tr", {}, ["Rang", "Table", "Équipe", "Case", "Points", "Dernier jeu", "En ligne", "Ajuster"].map(function (x) { return h("th", {}, x); })));
@@ -212,6 +229,13 @@
         tb.appendChild(h("tr", {}, [h("td", {}, String(i + 1)), h("td", {}, t.table || "—"), h("td", {}, h("span", { class: "team", style: "background:" + COLS[(t.ci || 0) % COLS.length] }, t.nom)), h("td", {}, t.done ? "Examen ✓" : String(t.pos)), h("td", {}, String(t.score)), h("td", {}, l ? (l.jeu + " · " + l.pts + " pt") : ""), h("td", {}, online[t.sid] ? "●" : "○"),
           h("td", {}, h("button", { class: "sec", onclick: function () { adj(t.sid, -1); } }, "−1"), h("button", { class: "sec", onclick: function () { adj(t.sid, 1); } }, "+1"))])); });
       content.appendChild(tb); content.appendChild(h("p", { class: "meta" }, "Classement : case atteinte, puis points. « Ajuster » déplace le pion de l'équipe (arbitrage d'une réponse orale, par exemple)."));
+    }
+    function pushLate() {
+      if (P.acte < 2) { alert("Ouvrez d'abord l'acte suivant, puis passez les retardataires."); return; }
+      var lim = D.caps[P.acte - 2], late = teams().filter(function (t) { return (t.pos || 0) < lim; });
+      if (!late.length) { status.textContent = "Aucun retardataire : toutes les équipes ont terminé l'acte " + (P.acte - 1) + "."; return; }
+      if (!confirm(late.length + " équipe(s) n'ont pas fini l'acte " + (P.acte - 1) + " : elles passent à la case " + lim + ", début de l'acte " + P.acte + ". Confirmer ?")) return;
+      late.forEach(function (t) { adj(t.sid, lim - (t.pos || 0)); }); status.textContent = late.length + " équipe(s) passée(s) au début de l'acte " + P.acte + ".";
     }
     function adj(sid, d) { var t = P.teams[sid]; if (!t) return; t.pos = Math.max(0, Math.min(31, (t.pos || 0) + d)); persist(); try { online[sid] && online[sid].send({ t: "adj", delta: d }); } catch (e) {} dirty = true; draw(); }
     function exportCsv() {
@@ -225,44 +249,115 @@
     A.timers.push(setInterval(function () { if (dirty) draw(); else if (view === "3d" && three) three.update(pawns()); }, 700));
   }
 
-  /* ---------- 3D (Three.js chargé à la demande) ---------- */
-  function load3d(box, cb) {
+  /* ---------- 3D (Three.js chargé à la demande) : tuiles, pions qui sautent, dé qui roule, caméra qui suit ---------- */
+  function load3d(box, cb, opts) {
+    opts = opts || {};
     function go() {
       try {
         var T = window.THREE; var cv = document.createElement("canvas"); var gl = cv.getContext("webgl") || cv.getContext("experimental-webgl"); if (!gl) return cb(null);
         var W = box.clientWidth || 900, H = box.clientHeight || 520, r = new T.WebGLRenderer({ antialias: true, alpha: true }); r.setSize(W, H); box.appendChild(r.domElement);
-        var sc = new T.Scene(), cam = new T.PerspectiveCamera(45, W / H, 0.1, 200), ang = 0, dragging = false, lx = 0, tilt = 0.9;
-        sc.add(new T.AmbientLight(0xffffff, 0.8)); var dl = new T.DirectionalLight(0xffffff, 0.8); dl.position.set(8, 14, 6); sc.add(dl);
+        var sc = new T.Scene(), cam = new T.PerspectiveCamera(45, W / H, 0.1, 200), ang = 0, dragging = false, lx = 0, tilt = 0.9, auto = true;
+        sc.add(new T.AmbientLight(0xffffff, 0.62)); var dl = new T.DirectionalLight(0xffffff, 0.45); dl.position.set(8, 14, 6); sc.add(dl);
         function P3(c) { return new T.Vector3(c.x * 0.2 - 12, 0, c.y * 0.2 - 6.6); }
         var g = new T.Group(); sc.add(g);
-        var base = new T.Mesh(new T.BoxGeometry(26, 0.4, 15.4), new T.MeshLambertMaterial({ color: 0xc5d5ee })); base.position.y = -0.4; g.add(base);
-        D.cases.forEach(function (c, i) {
-          var p = P3(c), m = new T.Mesh(new T.BoxGeometry(1.5, c.type === "exam" ? 1.4 : 0.5, 1.5), new T.MeshLambertMaterial({ color: zcol(c) })); m.position.set(p.x, 0.15, p.z); g.add(m);
-          var cvs = document.createElement("canvas"); cvs.width = cvs.height = 64; var x = cvs.getContext("2d"); x.fillStyle = "#fff"; x.font = "bold 30px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(c.type === "jeu" ? c.jeu : c.type === "event" ? "?" : c.type === "exam" ? "★" : "▶", 32, 34);
-          var pl = new T.Mesh(new T.PlaneGeometry(1.3, 1.3), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cvs), transparent: true })); pl.rotation.x = -Math.PI / 2; pl.position.set(p.x, c.type === "exam" ? 0.86 : 0.41, p.z); g.add(pl);
+        var base = new T.Mesh(new T.BoxGeometry(27, 0.4, 16), new T.MeshLambertMaterial({ color: 0xc5d5ee })); base.position.y = -0.4; g.add(base);
+        D.cases.forEach(function (c) {
+          var p = P3(c), big = c.type === "exam", m = new T.Mesh(new T.BoxGeometry(1.85, big ? 1.4 : 0.5, 1.85), new T.MeshLambertMaterial({ color: zcol(c) })); m.position.set(p.x, 0.15, p.z); g.add(m);
+          var cvs = document.createElement("canvas"); cvs.width = cvs.height = 128; var x = cvs.getContext("2d"); x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle";
+          x.font = "bold 58px sans-serif"; x.fillText(caseLabel(c), 64, 58); x.font = "bold 26px sans-serif"; x.fillText(c.type === "depart" ? "Départ" : c.type === "exam" ? "Examen" : String(c.n), 64, 108);
+          var pl = new T.Mesh(new T.PlaneGeometry(1.75, 1.75), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cvs), transparent: true })); pl.rotation.x = -Math.PI / 2; pl.position.set(p.x, big ? 0.86 : 0.41, p.z); g.add(pl);
         });
-        var line = new T.Line(new T.BufferGeometry().setFromPoints(D.cases.map(function (c) { var p = P3(c); p.y = 0.05; return p; })), new T.LineBasicMaterial({ color: 0xb9c4e8 })); g.add(line);
-        var pawnsM = {}, targets = {};
-        function frame() { var rad = 13.5; cam.position.set(Math.sin(ang) * rad, rad * tilt, Math.cos(ang) * rad); cam.lookAt(0, 0, 0); }
+        g.add(new T.Line(new T.BufferGeometry().setFromPoints(D.cases.map(function (c) { var p = P3(c); p.y = 0.05; return p; })), new T.LineBasicMaterial({ color: 0xb9c4e8 })));
+        function tileTop(i) { var c = D.cases[i], p = P3(c); p.y = c.type === "exam" ? 1.7 : 0.9; return p; }
+        /* dé : faces 1,2,3,0 (valeur → face) */
+        function faceTex(n, col) { var c = document.createElement("canvas"); c.width = c.height = 128; var x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, 128, 128); x.strokeStyle = col; x.lineWidth = 10; x.strokeRect(5, 5, 118, 118); x.fillStyle = col; x.font = "bold 84px sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(n), 64, 70); return new T.CanvasTexture(c); }
+        var faceVal = [1, 2, 3, 0, 2, 1]; /* ordre des matériaux : +x, -x, +y, -y, +z, -z */
+        var die = new T.Mesh(new T.BoxGeometry(1.1, 1.1, 1.1), faceVal.map(function (n) { return new T.MeshBasicMaterial({ map: faceTex(n, ["#E4572E", "#3B6FD8", "#2E9E6B", "#5B6478", "#E9A400", "#D6479B"][n === 0 ? 3 : n]) }); })); die.visible = false; sc.add(die);
+        var FACE = { 0: 3, 1: 0, 2: 1, 3: 2 }, UPQ = [new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), Math.PI / 2), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), -Math.PI / 2), new T.Quaternion(), new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), Math.PI), new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), Math.PI / 2), new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), -Math.PI / 2)];
+        var cap = document.createElement("div"); cap.style.cssText = "position:absolute;left:10px;top:10px;background:rgba(31,42,92,.88);color:#fff;padding:8px 14px;border-radius:8px;font:600 18px sans-serif;display:none;max-width:70%"; box.appendChild(cap);
+        function say(t, col) { if (!t) { cap.style.display = "none"; return; } cap.style.display = "block"; cap.style.borderLeft = "8px solid " + (col || "#fff"); cap.textContent = t; }
+        var pw = {}, nser = 0, focus = new T.Vector3(0, 0, 0), focusT = new T.Vector3(0, 0, 0), rad = 13.5, radT = 13.5, lastMove = 0, now0 = performance.now();
+        function mkPawn(p) {
+          var m = new T.Group(), mat = new T.MeshLambertMaterial({ color: p.col }), body = new T.Mesh(new T.CylinderGeometry(0.3, 0.4, 0.85, 16), mat), head = new T.Mesh(new T.SphereGeometry(0.33, 16, 12), mat); head.position.y = 0.65; m.add(body); m.add(head);
+          var a = nser++ * 2.4; var o = { m: m, idx: 0, want: 0, anim: null, off: new T.Vector3(Math.cos(a) * 0.42, 0, Math.sin(a) * 0.42) }; var t0 = tileTop(0); m.position.set(t0.x + o.off.x, t0.y, t0.z + o.off.z); g.add(m); return o;
+        }
+        function apply(list) { list.forEach(function (p) { var k = p.sid || p.nom; if (!pw[k]) pw[k] = mkPawn(p); pw[k].want = Math.max(0, Math.min(D.cases.length - 1, p.pos)); pw[k].nom = p.nom || p.label; pw[k].col = p.col; }); }
+        var jobs = [], busy = null, pending = null, lastList = [];
+        function startJob(j) {
+          busy = { j: j, t: 0, phase: "roll" }; var pawn = pw[j.key]; var o = pawn ? pawn.m.position.clone() : new T.Vector3(0, 0, 0);
+          busy.at = o.clone().add(new T.Vector3(1.6, 0, -1.2)); busy.axis = new T.Vector3(Math.random() - .5, Math.random() - .5, Math.random() - .5).normalize(); busy.turns = 7 + Math.random() * 3;
+          busy.fin = UPQ[FACE[j.pts]].clone(); busy.yaw = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), Math.random() * 6.28); busy.fin = busy.yaw.clone().multiply(busy.fin);
+          die.visible = true; focusT.copy(o); radT = 10; lastMove = performance.now(); say((j.nom || "Équipe") + " lance le dé…", j.col);
+        }
+        function endJob() { die.visible = false; var j = busy.j; busy = null; apply(pending || j.list || lastList); pending = null; lastMove = performance.now(); if (j.done) try { j.done(); } catch (e) {} }
         r.domElement.addEventListener("pointerdown", function (e) { dragging = true; lx = e.clientX; }); window.addEventListener("pointerup", function () { dragging = false; });
         r.domElement.addEventListener("pointermove", function (e) { if (dragging) { ang -= (e.clientX - lx) * 0.01; lx = e.clientX; } });
-        var alive = true;
-        function loop() { if (!alive || !document.body.contains(r.domElement)) { alive = false; return; } Object.keys(pawnsM).forEach(function (k) { var m = pawnsM[k], t = targets[k]; if (t) m.position.lerp(t, 0.12); }); frame(); r.render(sc, cam); requestAnimationFrame(loop); }
+        var alive = true, prev = performance.now();
+        function loop() {
+          if (!alive || !document.body.contains(r.domElement)) { alive = false; return; }
+          var nowt = performance.now(), dt = Math.min(0.1, (nowt - prev) / 1000); prev = nowt; var sp = opts.speed ? opts.speed() : 1; dt *= sp;
+          if (!busy && jobs.length) startJob(jobs.shift());
+          if (busy) {
+            busy.t += dt; var T1 = 1.5, u = Math.min(1, busy.t / T1);
+            if (busy.phase === "roll") {
+              var e = 1 - Math.pow(1 - u, 3), q = new T.Quaternion().setFromAxisAngle(busy.axis, (1 - e) * busy.turns * Math.PI * 2); die.quaternion.copy(busy.fin).multiply(q);
+              die.position.set(busy.at.x, 1.15 + Math.abs(Math.cos(u * Math.PI * 3.2)) * 2.2 * (1 - u) * (1 - u), busy.at.z);
+              if (u >= 1) { busy.phase = "show"; busy.t = 0; say((busy.j.nom || "Équipe") + " : " + busy.j.pts + " point" + (busy.j.pts > 1 ? "s" : "") + (busy.j.bonus ? " (bonus)" : busy.j.pts ? " : le pion avance de " + busy.j.pts + " case" + (busy.j.pts > 1 ? "s" : "") : " : le pion reste"), busy.j.col); }
+            } else if (busy.t > 0.9) endJob();
+          }
+          if (!busy) {
+            var moving = false;
+            Object.keys(pw).forEach(function (k) {
+              var o = pw[k];
+              if (!o.anim && o.idx !== o.want) { var nx = o.idx + (o.want > o.idx ? 1 : -1), a = o.m.position.clone(), b = tileTop(nx).add(o.off), far = Math.abs(o.want - o.idx) > 6; o.anim = { a: a, b: b, t: 0, d: far ? 0.2 : 0.4, nx: nx }; }
+              if (o.anim) { moving = true; o.anim.t += dt; var s = Math.min(1, o.anim.t / o.anim.d); o.m.position.lerpVectors(o.anim.a, o.anim.b, s); o.m.position.y = o.anim.a.y + (o.anim.b.y - o.anim.a.y) * s + Math.sin(Math.PI * s) * 0.9; if (s >= 1) { o.idx = o.anim.nx; o.anim = null; } if (moving) { focusT.copy(o.m.position); radT = 11; lastMove = nowt; } }
+            });
+            if (!moving && nowt - lastMove > 2200) { focusT.set(0, 0, 0); radT = 13.5; }
+          }
+          if (auto) { focus.lerp(focusT, 0.06); rad += (radT - rad) * 0.04; } else { focus.lerp(new T.Vector3(0, 0, 0), 0.1); rad += (13.5 - rad) * 0.1; }
+          cam.position.set(focus.x + Math.sin(ang) * rad, focus.y + rad * tilt, focus.z + Math.cos(ang) * rad); cam.lookAt(focus);
+          r.render(sc, cam); requestAnimationFrame(loop);
+        }
         loop();
-        cb({ update: function (list) {
-          var byPos = {}; list.forEach(function (p) { (byPos[p.pos] = byPos[p.pos] || []).push(p); });
-          list.forEach(function (p) {
-            var k = p.sid || p.nom; if (!pawnsM[k]) { var m = new T.Group(), body = new T.Mesh(new T.CylinderGeometry(0.28, 0.36, 0.8, 16), new T.MeshLambertMaterial({ color: p.col })), head = new T.Mesh(new T.SphereGeometry(0.3, 16, 12), new T.MeshLambertMaterial({ color: p.col })); head.position.y = 0.6; m.add(body); m.add(head); var c0 = D.cases[0], p0 = P3(c0); m.position.set(p0.x, 0.9, p0.z); g.add(m); pawnsM[k] = m; }
-            var c = D.cases[p.pos], p3 = P3(c), arr = byPos[p.pos], i = arr.indexOf(p), a = i / arr.length * Math.PI * 2, rr = arr.length > 1 ? 0.45 : 0;
-            targets[k] = new T.Vector3(p3.x + Math.cos(a) * rr, (c.type === "exam" ? 1.7 : 0.9), p3.z - 0.5 + Math.sin(a) * rr);
-          });
-        } });
+        cb({ update: function (list) { lastList = list; if (busy || jobs.length) pending = list; else apply(list); },
+          play: function (ev, list) { ev.list = list; lastList = list; jobs.push(ev); },
+          setAuto: function (v) { auto = !!v; }, idle: function () { return !busy && !jobs.length && Object.keys(pw).every(function (k) { return pw[k].idx === pw[k].want; }); } });
       } catch (e) { cb(null); }
     }
     if (window.THREE) return go();
     var s = document.createElement("script"); s.src = "three.min.js"; s.onload = go; s.onerror = function () { cb(null); }; document.head.appendChild(s);
   }
 
-  window.PLATEAU = { route: function (p) { var a = p[0] || ""; if (a === "equipe") return teamJoinPage(); if (a === "anim") return animPage(); if (a === "regles") return rules(); return entry(); } };
+  /* ---------- Partie démo : cinq équipes fictives, sans téléphones ---------- */
+  var DEMO_TEAMS = ["Les Pingouins", "Octet Club", "Team Sentinelle", "Les Zélés", "Alpha Cyber"];
+  function demoPage() {
+    var S = { teams: DEMO_TEAMS.map(function (n, i) { return { nom: n, col: COLS[i % COLS.length], pos: 0, score: 0, seen: {}, ci: i }; }), acte: 1, turn: 0, run: false, speed: 1, fin: false }, api = null, logBox = h("ol", { reversed: "reversed", style: "max-height:260px;overflow:auto;margin:0;padding-left:26px" }), info = h("p", { class: "big" }, ""), box = h("div", { style: "width:100%;height:560px;background:#F3F5F9;border-radius:10px;position:relative" }), fb = h("div", {}), tmr = null, btnRun, chips = h("p", {});
+    function list() { return S.teams.map(function (t) { return { sid: t.nom, nom: t.nom, label: t.nom, col: t.col, pos: t.pos }; }); }
+    function say(txt) { logBox.insertBefore(h("li", {}, txt), logBox.firstChild); }
+    function showChips() { chips.innerHTML = ""; S.teams.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); }).forEach(function (t) { chips.appendChild(h("span", { class: "team", style: "background:" + t.col }, t.nom + " · case " + t.pos + " · " + t.score + " pt")); }); info.textContent = "Acte " + S.acte + " ouvert : " + D.actes[S.acte].nom + (S.fin ? " · partie terminée" : ""); }
+    function weighted() { var r = Math.random(); return r < 0.15 ? 0 : r < 0.4 ? 1 : r < 0.75 ? 2 : 3; }
+    function step() {
+      if (!S.run || S.fin || !document.body.contains(box)) return; var cap = PE.capFor(S.acte, D.caps), n = S.teams.length, t = null, k;
+      for (k = 0; k < n; k++) { var c = S.teams[(S.turn + k) % n]; if (c.pos < cap && c.pos < 31) { t = c; S.turn = (S.turn + k) % n; break; } }
+      if (!t) { if (S.acte < 3) { S.acte++; say("▶ L'animateur ouvre l'acte " + S.acte + " : " + D.actes[S.acte].nom); showChips(); tmr = setTimeout(step, 1200 / S.speed); } else { S.fin = true; S.run = false; btnRun.textContent = "Lancer"; say("★ Tous les pions sont à l'Examen"); showChips(); } return; }
+      var nx = nextGameCase(t.pos); if (!nx) { S.turn++; tmr = setTimeout(step, 100); return; }
+      var pts = weighted(), from = t.pos, np = PE.advance(from, pts, S.acte, D.caps), eff = PE.landing(D.cases, D.events, np, S.acte, D.caps); t.pos = eff ? eff.pos : np; t.score += pts; var rej = eff && eff.rejoue;
+      say(t.nom + " · jeu " + nx.jeu + " · dé " + pts + " → case " + t.pos + (eff ? " · événement « " + eff.ev.titre + " »" : ""));
+      if (!rej) S.turn = (S.turn + 1) % n;
+      var done = function () { showChips(); tmr = setTimeout(step, 500 / S.speed); };
+      if (api) api.play({ key: t.nom, pts: pts, nom: t.nom, col: t.col, done: done }, list()); else { fb.innerHTML = ""; fb.appendChild(boardSvg(list().map(function (p) { return p; }), { big: true })); tmr = setTimeout(done, 900 / S.speed); }
+    }
+    function reset() { clearTimeout(tmr); S.teams.forEach(function (t) { t.pos = 0; t.score = 0; }); S.acte = 1; S.turn = 0; S.fin = false; S.run = false; logBox.innerHTML = ""; if (btnRun) btnRun.textContent = "Lancer"; if (api) api.update(list()); showChips(); }
+    btnRun = h("button", { class: "ok", onclick: function () { if (S.fin) reset(); S.run = !S.run; btnRun.textContent = S.run ? "Pause" : "Lancer"; if (S.run) { clearTimeout(tmr); step(); } } }, "Lancer");
+    var sel = h("select", { onchange: function () { S.speed = +sel.value; } }, [["0.6", "Lent"], ["1", "Normal"], ["2.2", "Rapide"]].map(function (o) { return h("option", { value: o[0] }, o[1]); })); sel.value = "1"; sel.style.cssText = "width:auto;display:inline-block;max-width:150px";
+    var cam = h("input", { type: "checkbox", style: "width:auto" }); cam.checked = true; cam.addEventListener("change", function () { if (api) api.setAuto(cam.checked); });
+    mount(h("h1", {}, "Démo du plateau : cinq équipes fictives"), h("p", { class: "meta" }, "Aucun téléphone nécessaire : les équipes jouent seules (réponses simulées). On voit le dé rouler, les pions sauter de case en case et la caméra suivre l'équipe qui joue. Glisser pour tourner le plateau."),
+      h("div", { class: "card" }, btnRun, h("button", { class: "sec", onclick: reset }, "Recommencer"), h("label", { style: "margin-left:12px" }, "Vitesse : ", sel), h("label", { style: "margin-left:12px" }, cam, " Caméra automatique"), h("a", { href: "#/plateau", style: "margin-left:16px" }, "← Retour")), info, box, fb, chips, h("div", { class: "card" }, h("h2", {}, "Déroulé"), logBox));
+    showChips();
+    load3d(box, function (a) { if (a) { api = a; api.update(list()); } else { box.style.display = "none"; fb.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); fb.appendChild(boardSvg(list(), { big: true })); } }, { speed: function () { return S.speed; } });
+    window.PLATEAU._demo = { S: S, step: step };
+  }
+
+  window.PLATEAU = { route: function (p) { var a = p[0] || ""; if (a === "equipe") return teamJoinPage(); if (a === "anim") return animPage(); if (a === "regles") return rules(); if (a === "demo") return demoPage(); return entry(); } };
   if ((location.hash || "").indexOf("#/plateau") === 0) window.dispatchEvent(new Event("hashchange"));
 })();
