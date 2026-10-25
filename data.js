@@ -123,40 +123,48 @@ window.DATA = {
      "Les mots-clés viennent de la question, pas du hasard."
     ],
     "cols": [
+     "N°",
      "Faible",
      "Bon (exemple)"
     ],
     "widths": [
+     0.6,
      3.0,
-     6.0
+     5.2
     ],
     "rows": [
      [
-      "« Les passkeys »",
+      "1",
+      "« Les passkeys » (un thème, pas une décision)",
       "« Faut-il remplacer les mots de passe par des passkeys chez TransLor, selon le coût, la sécurité, la facilité d'usage et la compatibilité ? »"
      ],
      [
-      "« Le cloud, c'est mieux ? »",
-      "« Faut-il héberger la messagerie dans un cloud public, chez un hébergeur local ou en interne, selon le coût, la sécurité et la reprise après panne ? »"
+      "2",
+      "« bien », « moderne », « sécurisé » (mots qu'on ne peut pas comparer)",
+      "Quatre critères comparables : coût annuel, délai de déploiement, risque résiduel, satisfaction des utilisateurs"
      ],
      [
-      "Critères : « bien », « moderne »",
-      "Critères comparables : coût annuel, délai de déploiement, risque résiduel, satisfaction des utilisateurs"
+      "3",
+      "« sécurité » (un mot vague, en français seulement)",
+      "« passkeys » OR « passwordless », « authentification » OR « authentication » (français et anglais)"
      ],
      [
-      "Mots-clés : « sécurité »",
-      "« passkeys » OR « passwordless », « authentification » OR « authentication »"
+      "4",
+      "Un nombre de résultats sans la requête ni la date",
+      "Requête, date et nombre notés ; plusieurs dizaines de milliers de résultats = question trop large, presque aucun = trop étroite : reformulez"
      ],
      [
-      "IA · formulations",
-      "Gardez la formulation qui contient une décision, des critères comparables et un périmètre (TransLor). Une IA propose souvent des questions trop larges : resserrez."
+      "5",
+      "Garder la première formulation de l'IA sans la discuter",
+      "Garder celle qui contient une décision, des critères comparables et un périmètre (TransLor), et justifier en une phrase. Une IA propose souvent des questions trop larges : resserrez."
      ]
     ],
     "erreurs": [
      "Un sujet trop large : on ne finira pas.",
      "Un sujet sans littérature : vérifiez en deux minutes que vous trouvez au moins cinq résultats sérieux.",
      "Écrire la réponse d'avance : la question reste ouverte."
-    ]
+    ],
+    "retenir": "Le numéro de chaque ligne est celui de la consigne de l'énoncé. Autre exemple de question : « Faut-il héberger la messagerie dans un cloud public, chez un hébergeur local ou en interne, selon le coût, la sécurité et la reprise après panne ? »"
    },
    "types": [
     null,
@@ -6331,5 +6339,258 @@ window.DATA = {
   "V1",
   "V2",
   "AG1"
+ ],
+ "parcours": [
+  {
+   "t": "module",
+   "titre": "Ouverture"
+  },
+  {
+   "t": "ex",
+   "id": "F0",
+   "page": 6
+  },
+  {
+   "t": "ex",
+   "id": "EX0",
+   "page": 12
+  },
+  {
+   "t": "page",
+   "route": "sujets",
+   "page": 16,
+   "titre": "19 sujets pour votre état de l'art"
+  },
+  {
+   "t": "ex",
+   "id": "EX1",
+   "page": 17
+  },
+  {
+   "t": "page",
+   "route": "dossier",
+   "page": 19,
+   "titre": "Votre fil rouge : le dossier d'état de l'art"
+  },
+  {
+   "t": "module",
+   "titre": "Écrire et demander pour obtenir une réponse"
+  },
+  {
+   "t": "ex",
+   "id": "EX5",
+   "page": 23
+  },
+  {
+   "t": "ex",
+   "id": "EX6",
+   "page": 26
+  },
+  {
+   "t": "ex",
+   "id": "EX4",
+   "page": 30
+  },
+  {
+   "t": "module",
+   "titre": "Chercher vite et bien : la boîte à outils"
+  },
+  {
+   "t": "ex",
+   "id": "EX7",
+   "page": 35
+  },
+  {
+   "t": "ex",
+   "id": "M1",
+   "page": 38
+  },
+  {
+   "t": "ex",
+   "id": "EX8",
+   "page": 41
+  },
+  {
+   "t": "ex",
+   "id": "EX9",
+   "page": 45
+  },
+  {
+   "t": "ex",
+   "id": "M2",
+   "page": 47
+  },
+  {
+   "t": "ex",
+   "id": "EX10",
+   "page": 50
+  },
+  {
+   "t": "ex",
+   "id": "V4",
+   "page": 53
+  },
+  {
+   "t": "module",
+   "titre": "Vérifier une source en deux minutes"
+  },
+  {
+   "t": "ex",
+   "id": "EX11b",
+   "page": 57
+  },
+  {
+   "t": "ex",
+   "id": "EX12",
+   "page": 59
+  },
+  {
+   "t": "ex",
+   "id": "EX13",
+   "page": 62
+  },
+  {
+   "t": "ex",
+   "id": "M4",
+   "page": 64
+  },
+  {
+   "t": "module",
+   "titre": "Lire vite, contrôler l'IA"
+  },
+  {
+   "t": "ex",
+   "id": "EX14",
+   "page": 68
+  },
+  {
+   "t": "ex",
+   "id": "F6",
+   "page": 71
+  },
+  {
+   "t": "ex",
+   "id": "EX15",
+   "page": 75
+  },
+  {
+   "t": "module",
+   "titre": "Argumenter pour convaincre un décideur"
+  },
+  {
+   "t": "ex",
+   "id": "EX16",
+   "page": 80
+  },
+  {
+   "t": "ex",
+   "id": "EX17",
+   "page": 83
+  },
+  {
+   "t": "ex",
+   "id": "EX18",
+   "page": 86
+  },
+  {
+   "t": "ex",
+   "id": "EX19",
+   "page": 89
+  },
+  {
+   "t": "ex",
+   "id": "EX20",
+   "page": 91
+  },
+  {
+   "t": "module",
+   "titre": "Comparer et décider avec des chiffres"
+  },
+  {
+   "t": "ex",
+   "id": "V7",
+   "page": 96
+  },
+  {
+   "t": "ex",
+   "id": "V8",
+   "page": 99
+  },
+  {
+   "t": "ex",
+   "id": "EX21",
+   "page": 102
+  },
+  {
+   "t": "ex",
+   "id": "EX22",
+   "page": 104
+  },
+  {
+   "t": "ex",
+   "id": "EX23",
+   "page": 107
+  },
+  {
+   "t": "ex",
+   "id": "M3",
+   "page": 110
+  },
+  {
+   "t": "ex",
+   "id": "EX24",
+   "page": 113
+  },
+  {
+   "t": "jeu",
+   "route": "jeu20",
+   "page": 116,
+   "titre": "Jeu 20"
+  },
+  {
+   "t": "module",
+   "titre": "Relire, présenter, défendre"
+  },
+  {
+   "t": "ex",
+   "id": "EX25",
+   "page": 120
+  },
+  {
+   "t": "ex",
+   "id": "EX26",
+   "page": 125
+  },
+  {
+   "t": "ex",
+   "id": "EX27",
+   "page": 128
+  },
+  {
+   "t": "module",
+   "titre": "Examen, quiz final et boîte à outils"
+  },
+  {
+   "t": "ex",
+   "id": "EX29",
+   "page": 132
+  },
+  {
+   "t": "jeu",
+   "route": "quiz-final",
+   "page": 134,
+   "titre": "Quiz final"
+  },
+  {
+   "t": "ex",
+   "id": "F9",
+   "page": 135
+  },
+  {
+   "t": "page",
+   "route": "outils",
+   "page": 136,
+   "titre": "Boîte à outils (1/2) : chercher, vérifier, lire"
+  }
  ]
 };

@@ -32,18 +32,17 @@
     var bar0 = h("div", {}); Sess.onchange = function () { bar0.innerHTML = ""; bar0.appendChild(sessionBar()); }; Sess.onchange(); Sess.connect();
     mount(h("h1", {}, "Communication professionnelle : exercices, quiz et jeux"), bar0,
       h("p", { class: "meta" }, "Scannez le QR code de la diapositive, ou choisissez ci-dessous. Cas fictif : TransLor."),
-      h("h2", {}, "Jeux"),
-      h("div", { class: "grid" },
-        h("a", { class: "tile g", href: "#/jeu20" }, h("b", {}, "Jeu 20 · Quiz Chercher, évaluer, argumenter"), h("div", { class: "meta" }, D.quiz.length + " questions, équipes sur téléphone")),
-        h("a", { class: "tile g", href: "#/jeu21" }, h("b", {}, "Jeu 21 · Mardi 6 h 50"), h("div", { class: "meta" }, "Communication de crise, 5 injects")),
-        h("a", { class: "tile g", href: "#/quiz-final" }, h("b", {}, "Quiz final"), h("div", { class: "meta" }, "10 questions, individuel")),
-        h("a", { class: "tile", href: "#/outils" }, h("b", {}, "Boîte à outils"), h("div", { class: "meta" }, "Modèles à copier, calculettes, outils réels")),
-        h("a", { class: "tile", href: "#/dossier" }, h("b", {}, "Dossier d'état de l'art"), h("div", { class: "meta" }, "Modèle PowerPoint à remplir au fil des exercices")),
-        h("a", { class: "tile", href: "#/sujets" }, h("b", {}, "Sujets de l'état de l'art"), h("div", { class: "meta" }, D.sujets.length + " questions de départ"))),
-      h("h2", {}, "Exercices"),
-      h("div", { class: "grid" }, EX.map(function (i) { return h("a", { class: "tile", href: "#/ex/" + i }, h("b", {}, i.replace("EX", "EX ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
-      h("h2", {}, "Exercices flash et exit tickets"),
-      h("div", { class: "grid" }, F.map(function (i) { return h("a", { class: "tile f", href: "#/f/" + i }, h("b", {}, i.replace("F", "F ")), h("div", { class: "meta" }, D.exo[i].titre)); })),
+      h("p", { class: "meta" }, "Les activités sont rangées dans l'ordre du PowerPoint (la page du support est indiquée sur chaque carte)."),
+      h("div", { class: "grid" }, (D.parcours || []).map(function (p) {
+        if (p.t === "module") return h("h2", { style: "grid-column:1/-1;margin:14px 0 0" }, p.titre);
+        var tile = function (cls, href, b, m) { return h("a", { class: "tile " + cls, href: href }, h("b", {}, b), h("div", { class: "meta" }, m + (p.page ? "  ·  page " + p.page : ""))); };
+        if (p.t === "ex") { var e = D.exo[p.id]; return tile(p.id.charAt(0) === "F" ? "f" : "", (p.id.charAt(0) === "F" ? "#/f/" : "#/ex/") + p.id, p.id.replace(/^(EX|F)(\d)/, "$1 $2"), e.titre); }
+        if (p.t === "jeu") { var nm = p.route === "jeu20" ? ["Jeu 20 · Quiz Chercher, évaluer, argumenter", D.quiz.length + " questions, équipes sur téléphone"] : p.route === "jeu21" ? ["Jeu 21 · Mardi 6 h 50", "Communication de crise, 5 injects"] : ["Quiz final", "10 questions, individuel"]; return tile("g", "#/" + p.route, nm[0], nm[1]); }
+        var pg = { outils: ["Boîte à outils", "Sites, modèles à copier, calculettes"], dossier: ["Dossier d'état de l'art", "Modèle PowerPoint à remplir au fil des exercices"], sujets: ["Sujets de l'état de l'art", D.sujets.length + " questions de départ"] }[p.route];
+        return tile("", "#/" + p.route, pg[0], pg[1]);
+      })),
+      h("h2", {}, "Hors parcours"),
+      h("div", { class: "grid" }, h("a", { class: "tile g", href: "#/jeu21" }, h("b", {}, "Jeu 21 · Mardi 6 h 50"), h("div", { class: "meta" }, "Communication de crise, 5 injects"))),
       h("h2", {}, "Annexe : communication générale (hors temps de cours)"),
       h("div", { class: "grid" }, (D.annexe || []).map(function (i) { return h("a", { class: "tile f", href: "#/ex/" + i }, h("b", {}, i.replace("AX", "Annexe X ").replace("AF", "Annexe F ")), h("div", { class: "meta" }, D.exo[i].titre)); })));
   }
@@ -277,11 +276,14 @@
         var e = D.exo[ex], unl = P.unlocked.indexOf(ex) >= 0, rep = sids.filter(function (s) { return status3(P.data[s], ex) > 0; }).length;
         content.appendChild(h("div", { class: "card" }, h("h2", {}, ex + " · " + e.titre), h("p", {}, rep + " / " + sids.length + " ont répondu · " + sids.filter(function (s) { return status3(P.data[s], ex) === 2; }).length + " terminé(s)"),
           h("button", { class: unl ? "sec" : "ok", onclick: function () { var i = P.unlocked.indexOf(ex); if (i >= 0) P.unlocked.splice(i, 1); else P.unlocked.push(ex); persist(); broadcastUnlock(); draw(); } }, unl ? "Fermer la correction aux étudiants" : "Ouvrir la correction aux étudiants")));
+        var fmt = function (v) { v = String(v || ""); return /\n§\n/.test(v) ? v.split("\n§\n").map(function (x, k) { return ["Affirmation", "Données", "Garantie", "Fondement", "Réfutation", "Qualificatif"][k] + " : " + x; }).join("\n") : v; };
+        content.appendChild(h("div", { class: "card" }, h("b", {}, "Consignes"), e.taches.map(function (t, i) { return h("div", { class: "meta" }, (i + 1) + ". " + t); })));
+        var tb2 = h("table", {}, h("tr", {}, [h("th", {}, "Étudiant")].concat(e.taches.map(function (t, i) { return h("th", { title: t }, String(i + 1)); })).concat([h("th", {}, "État")])));
         sids.forEach(function (sid) {
           var o = P.data[sid].rep[ex]; if (!o) return;
-          content.appendChild(h("div", { class: "card" }, h("b", {}, (online[sid] ? "● " : "○ ") + P.data[sid].nom + (o.done ? "  ✓ terminé" : "")),
-            e.taches.map(function (t, i) { return o.a[i] && o.a[i].trim() ? h("div", {}, h("div", { class: "meta" }, (i + 1) + ". " + t), h("p", { class: "pre" }, String(o.a[i]).split("\n§\n").map(function (x, k) { return /\n§\n/.test(o.a[i]) ? ["Affirmation","Données","Garantie","Fondement","Réfutation","Qualificatif"][k] + " : " + x : x; }).join("\n"))) : null; })));
+          tb2.appendChild(h("tr", {}, [h("td", {}, (online[sid] ? "● " : "○ ") + P.data[sid].nom)].concat(e.taches.map(function (t, i) { return h("td", { class: "pre", style: "white-space:pre-wrap" }, fmt(o.a[i])); })).concat([h("td", { style: "text-align:center" }, o.done ? "✓" : "…")])));
         });
+        content.appendChild(tb2);
       }
     }
     function exportCsv() {
