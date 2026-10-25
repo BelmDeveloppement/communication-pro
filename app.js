@@ -565,6 +565,7 @@
       h("p", {}, h("a", { href: "#/prof" }, "→ Ouvrir la page animateur"), "  ·  ", h("a", { href: "#/" }, "← Accueil")));
   }
 
+  window.APP = { h: h, mount: mount, LSget: LSget, LSset: LSset, BASE: BASE, timers: timers };
   function route() {
     var p = (location.hash || "#/").replace(/\?.*$/, "").split("/").filter(Boolean); p.shift();
     Sess_off(); var a = p[0] || "";
@@ -576,6 +577,7 @@
     if (a === "session") return sessionPage();
     if (a === "prof") return profPage();
     if (a === "animateur") return aidePage();
+    if (a === "plateau" && window.PLATEAU) return window.PLATEAU.route(p.slice(1));
     if (a === "outils") return outilsPage();
     if (a === "sujets") return sujetsPage();
     if (a === "dossier") return dossierPage();
