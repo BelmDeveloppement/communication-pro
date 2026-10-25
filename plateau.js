@@ -46,7 +46,7 @@
       h("div", { class: "grid" }, h("a", { class: "tile", href: "#/plateau/equipe" }, h("b", {}, "Je suis une équipe"), h("div", { class: "meta" }, "Rejoindre la partie avec le code de la table")),
         h("a", { class: "tile g", href: "#/plateau/anim" }, h("b", {}, "Je suis l'animateur"), h("div", { class: "meta" }, "Ouvrir la partie, projeter le plateau, suivre les tables")),
         h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8")),
-        h("a", { class: "tile r", href: "#/plateau/demo" }, h("b", {}, "Partie démo en 3D"), h("div", { class: "meta" }, "Cinq équipes fictives : roue qui tourne, pions qui avancent (sans téléphones)"))),
+        h("a", { class: "tile r", href: "#/plateau/demo" }, h("b", {}, "Partie démo en 3D"), h("div", { class: "meta" }, "Une partie simulée avec les vraies cartes, la roue et les pions (sans téléphones)"))),
       h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_5_A2.pdf" }, "Plateau A2 (impression chez un imprimeur)"), " · ", h("a", { href: "Plateau_5_A3.pdf" }, "A3 (essai)"), " · ", h("a", { href: "Plateau_5_pions.pdf" }, "Pions à découper (A4)"))));
   }
   function rules() {
@@ -270,8 +270,9 @@
         function P3(c) { return new T.Vector3(c.x * 0.2 - 12, 0, c.y * 0.2 - 6.6); }
         var g = new T.Group(); sc.add(g);
         var base = new T.Mesh(new T.BoxGeometry(27, 0.4, 16), new T.MeshLambertMaterial({ color: 0xc5d5ee })); base.position.y = -0.4; g.add(base);
+        var tiles = [];
         D.cases.forEach(function (c) {
-          var p = P3(c), big = c.type === "exam", m = new T.Mesh(new T.BoxGeometry(1.85, big ? 1.4 : 0.5, 1.85), new T.MeshLambertMaterial({ color: zcol(c) })); m.position.set(p.x, 0.15, p.z); g.add(m);
+          var p = P3(c), big = c.type === "exam", m = new T.Mesh(new T.BoxGeometry(1.85, big ? 1.4 : 0.5, 1.85), new T.MeshLambertMaterial({ color: zcol(c) })); m.position.set(p.x, 0.15, p.z); g.add(m); tiles.push(m);
           var cvs = document.createElement("canvas"); cvs.width = cvs.height = 128; var x = cvs.getContext("2d"); x.fillStyle = "#fff"; x.textAlign = "center"; x.textBaseline = "middle";
           x.font = "bold 58px sans-serif"; x.fillText(caseLabel(c), 64, 58); x.font = "bold 26px sans-serif"; x.fillText(c.type === "depart" ? "Départ" : c.type === "exam" ? "Examen" : String(c.n), 64, 108);
           var pl = new T.Mesh(new T.PlaneGeometry(1.75, 1.75), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cvs), transparent: true })); pl.rotation.x = -Math.PI / 2; pl.position.set(p.x, big ? 0.86 : 0.41, p.z); g.add(pl);
@@ -294,6 +295,7 @@
         }
         function apply(list) { list.forEach(function (p) { var k = p.sid || p.nom; if (!pw[k]) pw[k] = mkPawn(p); pw[k].want = Math.max(0, Math.min(D.cases.length - 1, p.pos)); pw[k].nom = p.nom || p.label; pw[k].col = p.col; }); }
         var jobs = [], busy = null, pending = null, lastList = [];
+        function pawnsIdle() { return Object.keys(pw).every(function (k) { return pw[k].idx === pw[k].want && !pw[k].anim; }); }
         function startJob(j) {
           busy = { j: j, t: 0, phase: "roll" }; var pawn = pw[j.key]; var o = pawn ? pawn.m.position.clone() : new T.Vector3(0, 0, 0);
           busy.at = o.clone().add(new T.Vector3(2.2, 0, -1.4)); busy.R = 360 * 4 + 360 - (j.pts * 90 + 45);
@@ -306,13 +308,13 @@
         function loop() {
           if (!alive || !document.body.contains(r.domElement)) { alive = false; return; }
           var nowt = performance.now(), dt = Math.min(0.1, (nowt - prev) / 1000); prev = nowt; var sp = opts.speed ? opts.speed() : 1; dt *= sp;
-          if (!busy && jobs.length) startJob(jobs.shift());
+          if (!busy && jobs.length && pawnsIdle()) startJob(jobs.shift());
           if (busy) {
             busy.t += dt; var T1 = 2.6, u = Math.min(1, busy.t / T1);
             if (busy.phase === "roll") {
               var e = 1 - Math.pow(1 - u, 3); wheel.rotation.y = -(e * busy.R) * Math.PI / 180; holder.position.set(busy.at.x, 2.3 + Math.sin(u * 6) * 0.05 * (1 - u), busy.at.z);
               if (u >= 1) { busy.phase = "show"; busy.t = 0; say((busy.j.nom || "Équipe") + " : " + busy.j.pts + " point" + (busy.j.pts > 1 ? "s" : "") + (busy.j.bonus ? " (bonus)" : busy.j.pts ? " : le pion avance de " + busy.j.pts + " case" + (busy.j.pts > 1 ? "s" : "") : " : le pion reste"), busy.j.col); }
-            } else if (busy.t > 0.9) endJob();
+            } else if (busy.t > 2.0) endJob();
           }
           if (!busy) {
             var moving = false;
@@ -330,41 +332,118 @@
         loop();
         cb({ update: function (list) { lastList = list; if (busy || jobs.length) pending = list; else apply(list); },
           play: function (ev, list) { ev.list = list; lastList = list; jobs.push(ev); },
-          setAuto: function (v) { auto = !!v; }, idle: function () { return !busy && !jobs.length && Object.keys(pw).every(function (k) { return pw[k].idx === pw[k].want; }); } });
+          setAuto: function (v) { auto = !!v; }, idle: function () { return !busy && !jobs.length && pawnsIdle(); }, say: say,
+          flash: function (i) { var m = tiles[i]; if (!m) return; var c0 = m.material.color.clone(); m.material.color.offsetHSL(0, 0, 0.3); m.position.y = 0.35; setTimeout(function () { m.material.color.copy(c0); m.position.y = 0.15; }, 1300); } });
       } catch (e) { cb(null); }
     }
     if (window.THREE) return go();
     var s = document.createElement("script"); s.src = "three.min.js"; s.onload = go; s.onerror = function () { cb(null); }; document.head.appendChild(s);
   }
 
-  /* ---------- Partie démo : cinq équipes fictives, sans téléphones ---------- */
-  var DEMO_TEAMS = ["Les Pingouins", "Octet Club", "Team Sentinelle", "Les Zélés", "Alpha Cyber"];
+  /* ---------- Partie démo « jeu réel » : cinq équipes fictives, vraies cartes, réponses simulées, séquence stricte ---------- */
+  var DEMO_TEAMS = [["Alpha Cyber", 0.82], ["Les Pingouins", 0.7], ["Octet Club", 0.55], ["Team Sentinelle", 0.45], ["Les Zélés", 0.3]];
+  function mulberry(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function simAnswer(c, sk, rnd) {
+    if (c.t === "choix") { if (rnd() < sk) return c.ok; var o = []; c.opts.forEach(function (x, i) { if (i !== c.ok) o.push(i); }); return o[Math.floor(rnd() * o.length)]; }
+    if (c.t === "assoc") return c.items.map(function (it) { if (rnd() < sk) return it.ok; var k, g = 0; do { k = Math.floor(rnd() * c.labels.length); g++; } while (k === it.ok && g < 9); return k; });
+    if (c.t === "oral") return c.grille.map(function () { return rnd() < sk; });
+    var target = Math.round(3 * Math.max(0, Math.min(1, sk + (rnd() - 0.5) * 0.7))), words = c.modele.split(" "), best = "Nous n'avons rien trouvé de précis.", bd = 9;
+    for (var n = words.length; n >= Math.min(3, words.length); n--) { var cand = words.slice(0, n).join(" "), d = Math.abs(PE.score(c, cand).pts - target); if (d < bd) { bd = d; best = cand; } if (d === 0) break; }
+    if ((target === 0 && PE.score(c, best).pts > 0) || bd > 0 && PE.score(c, best).pts === 0) best = "Nous n'avons rien trouvé de précis.";
+    return best;
+  }
   function demoPage() {
-    var S = { teams: DEMO_TEAMS.map(function (n, i) { return { nom: n, col: COLS[i % COLS.length], pos: 0, score: 0, seen: {}, ci: i }; }), acte: 1, turn: 0, run: false, speed: 1, fin: false }, api = null, logBox = h("ol", { reversed: "reversed", style: "max-height:260px;overflow:auto;margin:0;padding-left:26px" }), info = h("p", { class: "big" }, ""), box = h("div", { style: "width:100%;height:560px;background:#F3F5F9;border-radius:10px;position:relative" }), fb = h("div", {}), tmr = null, btnRun, chips = h("p", {});
+    var ABORT = {}, S = null, api = null, gen = 0, seed = Math.floor(Math.random() * 90000) + 10000, speed = 1, box, fb = h("div", {}), banner = h("p", { class: "big" }, ""), clock = h("span", { class: "meta" }, ""), phone = h("div", {}), phoneHead = h("div", {}), phoneBody = h("div", {}), logBox = h("ol", { reversed: "reversed", style: "max-height:220px;overflow:auto;margin:0;padding-left:26px" }), tabsBar = h("div", { class: "card" }), views = {}, curTab = "plateau", btnRun, btnStep, seedLab = h("span", { class: "meta" }, ""), sel;
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms / speed); }); }
+    function chk(g) { if (g !== gen || !document.body.contains(box)) throw ABORT; }
+    function fresh() { var rnd = mulberry(seed); return { rnd: rnd, acte: 1, started: false, fin: false, run: false, step: false, turn: 0, min: 0, teams: DEMO_TEAMS.map(function (t, i) { return { nom: t[0], sk: t[1], col: COLS[i % COLS.length], pos: 0, score: 0, seen: {}, n: 0, good: 0, mins: 0, st: {}, last: null }; }), actes: [], log: [] }; }
     function list() { return S.teams.map(function (t) { return { sid: t.nom, nom: t.nom, label: t.nom, col: t.col, pos: t.pos }; }); }
     function say(txt) { logBox.insertBefore(h("li", {}, txt), logBox.firstChild); }
-    function showChips() { chips.innerHTML = ""; S.teams.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); }).forEach(function (t) { chips.appendChild(h("span", { class: "team", style: "background:" + t.col }, t.nom + " · case " + t.pos + " · " + t.score + " pt")); }); info.textContent = "Acte " + S.acte + " ouvert : " + D.actes[S.acte].nom + (S.fin ? " · partie terminée" : ""); }
-    function weighted() { var r = Math.random(); return r < 0.15 ? 0 : r < 0.4 ? 1 : r < 0.75 ? 2 : 3; }
-    function step() {
-      if (!S.run || S.fin || !document.body.contains(box)) return; var cap = PE.capFor(S.acte, D.caps), n = S.teams.length, t = null, k;
-      for (k = 0; k < n; k++) { var c = S.teams[(S.turn + k) % n]; if (c.pos < cap && c.pos < 31) { t = c; S.turn = (S.turn + k) % n; break; } }
-      if (!t) { if (S.acte < 3) { S.acte++; say("▶ L'animateur ouvre l'acte " + S.acte + " : " + D.actes[S.acte].nom); showChips(); tmr = setTimeout(step, 1200 / S.speed); } else { S.fin = true; S.run = false; btnRun.textContent = "Lancer"; say("★ Tous les pions sont à l'Examen"); showChips(); } return; }
-      var nx = nextGameCase(t.pos); if (!nx) { S.turn++; tmr = setTimeout(step, 100); return; }
-      var pts = weighted(), from = t.pos, np = PE.advance(from, pts, S.acte, D.caps), eff = PE.landing(D.cases, D.events, np, S.acte, D.caps); t.pos = eff ? eff.pos : np; t.score += pts; var rej = eff && eff.rejoue;
-      say(t.nom + " · jeu " + nx.jeu + " · roue " + pts + " → case " + t.pos + (eff ? " · événement « " + eff.ev.titre + " »" : ""));
-      if (!rej) S.turn = (S.turn + 1) % n;
-      var done = function () { showChips(); tmr = setTimeout(step, 500 / S.speed); };
-      if (api) api.play({ key: t.nom, pts: pts, nom: t.nom, col: t.col, done: done }, list()); else { fb.innerHTML = ""; fb.appendChild(boardSvg(list().map(function (p) { return p; }), { big: true })); tmr = setTimeout(done, 900 / S.speed); }
+    function cap() { return PE.capFor(S.acte, D.caps); }
+    function head(t, extra) { phoneHead.innerHTML = ""; if (!t) { phoneHead.appendChild(h("b", {}, "Écran d'une équipe (téléphone)")); return; } phoneHead.appendChild(h("span", { class: "team", style: "background:" + t.col }, t.nom)); phoneHead.appendChild(h("span", { class: "meta" }, "  case " + t.pos + " · " + t.score + " pt" + (extra ? " · " + extra : ""))); }
+    function drawTable() {
+      var v = views.table; v.innerHTML = ""; var rank = S.teams.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); });
+      var tb = h("table", {}, h("tr", {}, ["Rang", "Équipe", "Case", "Statut", "Points", "Dernier jeu", "Cartes jouées"].map(function (x) { return h("th", {}, x); })));
+      rank.forEach(function (t, i) { tb.appendChild(h("tr", {}, [h("td", {}, String(i + 1)), h("td", {}, h("span", { class: "team", style: "background:" + t.col }, t.nom)), h("td", {}, t.pos >= 31 ? "Examen ✓" : String(t.pos)), h("td", {}, t.pos >= 31 ? "Arrivée" : t.pos >= cap() ? "En attente des autres équipes" : "En jeu"), h("td", {}, String(t.score)), h("td", {}, t.last ? t.last.jeu + " · " + t.last.pts + " pt" : ""), h("td", {}, String(t.n))])); });
+      v.appendChild(h("p", { class: "meta" }, "Ce que l'animateur voit : acte " + S.acte + " ouvert · classement par case atteinte, puis par points.")); v.appendChild(tb);
     }
-    function reset() { clearTimeout(tmr); S.teams.forEach(function (t) { t.pos = 0; t.score = 0; }); S.acte = 1; S.turn = 0; S.fin = false; S.run = false; logBox.innerHTML = ""; if (btnRun) btnRun.textContent = "Lancer"; if (api) api.update(list()); showChips(); }
-    btnRun = h("button", { class: "ok", onclick: function () { if (S.fin) reset(); S.run = !S.run; btnRun.textContent = S.run ? "Pause" : "Lancer"; if (S.run) { clearTimeout(tmr); step(); } } }, "Lancer");
-    var sel = h("select", { onchange: function () { S.speed = +sel.value; } }, [["0.6", "Lent"], ["1", "Normal"], ["2.2", "Rapide"]].map(function (o) { return h("option", { value: o[0] }, o[1]); })); sel.value = "1"; sel.style.cssText = "width:auto;display:inline-block;max-width:150px";
+    function summary() {
+      var v = views.recap; v.innerHTML = ""; var rank = S.teams.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); }), jeux = Object.keys(D.jeux);
+      v.appendChild(h("p", { class: "meta" }, "Récapitulatif de la partie simulée (graine " + seed + "). Les équipes jouent en parallèle dans la réalité : la durée d'un acte est celle de l'équipe la plus lente."));
+      var tb = h("table", {}, h("tr", {}, ["Rang", "Équipe", "Case", "Points", "Cartes", "Réponses à 3 pts", "Temps de jeu simulé"].concat(jeux).map(function (x) { return h("th", {}, x); })));
+      rank.forEach(function (t, i) { tb.appendChild(h("tr", {}, [h("td", {}, String(i + 1)), h("td", {}, t.nom), h("td", {}, String(t.pos)), h("td", {}, String(t.score)), h("td", {}, String(t.n)), h("td", {}, String(t.good)), h("td", {}, t.mins + " min")].concat(jeux.map(function (k) { var x = t.st[k]; return h("td", {}, x ? (x.pts + " / " + x.n * 3) : "—"); })))); });
+      v.appendChild(tb);
+      v.appendChild(h("h3", {}, "Durées simulées par acte")); v.appendChild(h("ul", {}, S.actes.length ? S.actes.map(function (a) { return h("li", {}, "Acte " + a.acte + " : " + a.min + " min (équipe la plus lente : " + a.slow + ", " + a.cards + " cartes)"); }) : h("li", {}, "Aucun acte terminé pour l'instant.")));
+      v.appendChild(h("p", { class: "meta" }, "À comparer avec le temps réservé aux séances dans le support (séance 1 : 30 min, séance 2 : 30 min, séance 3 : 40 min). Temps simulé = durée indicative par carte de chaque jeu."));
+    }
+    function setTab(t) { curTab = t; Object.keys(views).forEach(function (k) { views[k].style.display = k === t ? "" : "none"; }); drawTabs(); if (t === "table") drawTable(); if (t === "recap") summary(); }
+    function drawTabs() { tabsBar.innerHTML = ""; [["plateau", "Plateau et carte"], ["table", "Tableau animateur"], ["recap", "Récapitulatif"]].forEach(function (t) { tabsBar.appendChild(h("button", { class: curTab === t[0] ? "" : "sec", onclick: function () { setTab(t[0]); } }, t[1])); }); }
+    function bandeau(txt, col) { banner.textContent = txt; banner.style.borderLeft = col ? "8px solid " + col : ""; banner.style.paddingLeft = col ? "10px" : ""; if (api) api.say(txt, col); }
+    function opt(txt, cls) { return h("div", { class: "opt " + (cls || ""), style: "text-align:left;margin:4px 0;padding:8px 10px;border-radius:8px;border:2px solid #C5CCE0;background:#fff" }, txt); }
+    async function playCard(t, g) {
+      var nx = nextGameCase(t.pos); if (!nx) return false; var j = D.jeux[nx.jeu], r = PE.pickCard(j, t.seen[nx.jeu] || [], t.nom + S.turn + seed); if (r.reset) t.seen[nx.jeu] = []; (t.seen[nx.jeu] = t.seen[nx.jeu] || []).push(r.card.id); var c = r.card;
+      head(t, "jeu " + nx.jeu); phoneBody.innerHTML = ""; bandeau("Au tour de « " + t.nom + " » · jeu " + nx.jeu + " · " + j.titre, t.col); if (api) api.focus && api.focus(t.nom);
+      phoneBody.appendChild(h("p", { class: "meta" }, h("span", { class: "team", style: "background:" + D.zones[j.zone].col }, j.zone), " " + D.zones[j.zone].nom + " · carte " + c.id));
+      await sleep(1500); chk(g);
+      phoneBody.appendChild(h("p", { class: "big" }, c.q)); var els = [];
+      if (c.t === "choix") c.opts.forEach(function (o) { var e = opt(o); els.push(e); phoneBody.appendChild(e); });
+      else if (c.t === "assoc") c.items.forEach(function (it) { var s2 = h("span", { class: "meta" }, " → ?"); els.push(s2); phoneBody.appendChild(h("div", { class: "card", style: "background:#fff;margin:4px 0;padding:6px 10px" }, it.txt, s2)); });
+      else if (c.t === "oral") { phoneBody.appendChild(h("p", { class: "meta" }, "L'équipe parle 60 secondes ; l'équipe voisine coche ce qu'elle a entendu :")); c.grille.forEach(function (gr) { var e = h("div", {}, "☐ " + gr); els.push(e); phoneBody.appendChild(e); }); }
+      else { var ta = h("div", { style: "border:2px solid #C5CCE0;border-radius:8px;background:#fff;min-height:48px;padding:8px;font-style:italic" }, "(l'équipe écrit sa réponse…)"); els.push(ta); phoneBody.appendChild(ta); }
+      await sleep(2600); chk(g);
+      var ans = simAnswer(c, t.sk, S.rnd); bandeau(t.nom + " répond…", t.col);
+      if (c.t === "choix") els[ans].style.borderColor = "#3B6FD8", els[ans].style.background = "#E3ECFC";
+      else if (c.t === "assoc") ans.forEach(function (a, i) { els[i].textContent = " → " + c.labels[a]; els[i].style.fontWeight = 700; });
+      else if (c.t === "oral") ans.forEach(function (a, i) { els[i].textContent = (a ? "☑ " : "☐ ") + c.grille[i]; });
+      else { els[0].textContent = ans; els[0].style.fontStyle = "normal"; }
+      await sleep(2600); chk(g);
+      var res = PE.score(c, ans); bandeau("Correction : " + res.pts + " point" + (res.pts > 1 ? "s" : "") + " sur 3", t.col);
+      if (c.t === "choix") { els[c.ok].style.borderColor = "#2E9E6B"; els[c.ok].style.background = "#E3F5EA"; if (ans !== c.ok) { els[ans].style.borderColor = "#E4572E"; els[ans].style.background = "#FCE6E0"; } }
+      phoneBody.appendChild(h("h3", {}, res.pts + " point" + (res.pts > 1 ? "s" : "") + " sur 3")); phoneBody.appendChild(h("ul", {}, res.detail.map(function (d) { return h("li", { style: "color:" + (d.ok ? "#1b6b45" : "#a33") }, (d.ok ? "✓ " : "✗ ") + d.lab); })));
+      if (c.modele) phoneBody.appendChild(h("p", {}, h("b", {}, "Réponse modèle : "), c.modele)); phoneBody.appendChild(h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl));
+      await sleep(4200); chk(g);
+      var from = t.pos, np = PE.advance(from, res.pts, S.acte, D.caps), eff = PE.landing(D.cases, D.events, np, S.acte, D.caps), mins = j.duree;
+      t.n++; t.mins += mins; t.score += res.pts; if (res.pts === 3) t.good++; var x = t.st[nx.jeu] = t.st[nx.jeu] || { n: 0, pts: 0 }; x.n++; x.pts += res.pts; t.last = { jeu: nx.jeu, pts: res.pts };
+      var line = t.nom + " · jeu " + nx.jeu + " · " + res.pts + " pt → case " + np; t.pos = np;
+      if (api) { await new Promise(function (ok) { api.play({ key: t.nom, pts: res.pts, nom: t.nom, col: t.col, done: ok }, list()); }); chk(g); await idle(g); api.flash(np); } else { fb.innerHTML = ""; fb.appendChild(boardSvg(list(), { big: true })); await sleep(1500); }
+      bandeau(t.nom + " : le pion est arrivé case " + np, t.col); head(t); await sleep(1200); chk(g);
+      if (eff) {
+        phoneBody.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Événement : " + eff.ev.titre), h("p", {}, eff.ev.txt))); bandeau("Événement « " + eff.ev.titre + " »", "#7A3FB5"); await sleep(3200); chk(g);
+        t.pos = eff.pos; line += " · événement « " + eff.ev.titre + " » → case " + eff.pos; if (api) { api.update(list()); await sleep(300); await idle(g); api.flash(eff.pos); } else { fb.innerHTML = ""; fb.appendChild(boardSvg(list(), { big: true })); }
+        bandeau(t.nom + " : case " + eff.pos, t.col); head(t); await sleep(1000); chk(g); if (eff.rejoue) S.again = true;
+      }
+      say(line); drawTable(); if (curTab === "recap") summary(); return true;
+    }
+    async function idle(g) { for (var i = 0; i < 400; i++) { if (api.idle()) return; await new Promise(function (r) { setTimeout(r, 60); }); chk(g); } }
+    async function turn(g) {
+      if (!S.started) { S.started = true; bandeau("Séance 0 : les cinq équipes rejoignent la partie", "#1F2A5C"); say("Séance 0 : formation des équipes (aucune carte jouée)"); head(null); phoneBody.innerHTML = ""; phoneBody.appendChild(h("p", {}, "Les équipes scannent le QR, saisissent le code de la table et leur nom : " + S.teams.map(function (t) { return t.nom; }).join(", ") + ".")); await sleep(3000); chk(g); bandeau("L'animateur ouvre l'acte 1 : " + D.actes[1].nom, "#1F2A5C"); say("▶ Séance 1 : acte 1 ouvert"); await sleep(2200); chk(g); return; }
+      var n = S.teams.length, t = null, k; for (k = 0; k < n; k++) { var c = S.teams[(S.turn + k) % n]; if (c.pos < cap() && c.pos < 31) { t = c; S.turn = (S.turn + k) % n; break; } }
+      if (!t) {
+        var mx = 0, slow = "", cards = 0; S.teams.forEach(function (q) { var m0 = q.mins - (q.m0 || 0); cards += q.n - (q.n0 || 0); if (m0 > mx) { mx = m0; slow = q.nom; } q.m0 = q.mins; q.n0 = q.n; }); S.actes.push({ acte: S.acte, min: mx, slow: slow, cards: cards });
+        if (S.acte < 3) { bandeau("Toutes les équipes sont en attente des autres équipes : fin de l'acte " + S.acte, "#E9A400"); await sleep(2400); chk(g); S.acte++; bandeau("L'animateur ouvre l'acte " + S.acte + " : " + D.actes[S.acte].nom, "#1F2A5C"); say("▶ Séance " + S.acte + " : acte " + S.acte + " ouvert (acte précédent : " + mx + " min simulées)"); drawTable(); await sleep(2400); chk(g); }
+        else { S.fin = true; S.run = false; bandeau("Partie terminée : toutes les équipes sont arrivées à l'Examen", "#1F2A5C"); say("★ Partie terminée"); btnRun.textContent = "Lancer"; summary(); setTab("recap"); }
+        return;
+      }
+      S.again = false; await playCard(t, g); if (!S.again) S.turn = (S.turn + 1) % n; await sleep(700); chk(g);
+    }
+    async function loop(g) {
+      try { while (!S.fin) { while (g === gen && !S.run && !S.step) await new Promise(function (r) { setTimeout(r, 120); }); chk(g); S.step = false; await turn(g); } } catch (e) { if (e !== ABORT) throw e; }
+    }
+    function reset(newSeed) {
+      gen++; if (newSeed) seed = Math.floor(Math.random() * 90000) + 10000; S = fresh(); logBox.innerHTML = ""; phoneBody.innerHTML = ""; head(null); bandeau("Prête : « Lancer » ou « Pas à pas »", "#1F2A5C"); seedLab.textContent = "Scénario n° " + seed; if (btnRun) btnRun.textContent = "Lancer"; if (api) api.update(list()); drawTable(); summary(); loop(gen);
+    }
+    btnRun = h("button", { class: "ok", onclick: function () { if (S.fin) reset(false); S.run = !S.run; btnRun.textContent = S.run ? "Pause (à la fin du tour)" : "Lancer"; } }, "Lancer");
+    btnStep = h("button", { class: "sec", onclick: function () { if (S.fin) reset(false); S.run = false; btnRun.textContent = "Lancer"; S.step = true; } }, "Pas à pas");
+    sel = h("select", { onchange: function () { speed = +sel.value; } }, [["1", "Lent (présentation)"], ["2", "Normal"], ["5", "Rapide"]].map(function (o) { return h("option", { value: o[0] }, o[1]); })); sel.style.cssText = "width:auto;display:inline-block;max-width:200px";
     var cam = h("input", { type: "checkbox", style: "width:auto" }); cam.checked = true; cam.addEventListener("change", function () { if (api) api.setAuto(cam.checked); });
-    mount(h("h1", {}, "Démo du plateau : cinq équipes fictives"), h("p", { class: "meta" }, "Aucun téléphone nécessaire : les équipes jouent seules (réponses simulées). On voit la roue tourner, les pions sauter de case en case et la caméra suivre l'équipe qui joue. Glisser pour tourner le plateau."),
-      h("div", { class: "card" }, btnRun, h("button", { class: "sec", onclick: reset }, "Recommencer"), h("label", { style: "margin-left:12px" }, "Vitesse : ", sel), h("label", { style: "margin-left:12px" }, cam, " Caméra automatique"), h("a", { href: "#/plateau", style: "margin-left:16px" }, "← Retour")), info, box, fb, chips, h("div", { class: "card" }, h("h2", {}, "Déroulé"), logBox));
-    showChips();
-    load3d(box, function (a) { if (a) { api = a; api.update(list()); } else { box.style.display = "none"; fb.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); fb.appendChild(boardSvg(list(), { big: true })); } }, { speed: function () { return S.speed; } });
-    window.PLATEAU._demo = { S: S, step: step };
+    box = h("div", { style: "width:100%;height:540px;background:#F3F5F9;border-radius:10px;position:relative" });
+    views.plateau = h("div", { style: "display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start" }, h("div", { style: "flex:1.7 1 460px;min-width:0" }, box, fb), h("div", { style: "flex:1 1 320px;max-width:440px" }, h("div", { class: "card", style: "border:3px solid #1F2A5C;border-radius:22px;padding:12px 14px" }, phoneHead, phoneBody)));
+    views.table = h("div", { style: "display:none" }); views.recap = h("div", { style: "display:none" });
+    mount(h("h1", {}, "Démo : une partie simulée, proche du réel"), h("p", { class: "meta" }, "Cinq équipes fictives de niveaux différents jouent avec les vraies cartes : carte tirée, réponse simulée, correction du vrai moteur, roue, déplacement du pion, événements. Une équipe à la fois, dans l'ordre. L'écran de droite est celui du téléphone de l'équipe qui joue. Glisser sur le plateau pour le tourner."),
+      h("div", { class: "card" }, btnRun, btnStep, h("button", { class: "sec", onclick: function () { reset(false); } }, "Rejouer le même scénario"), h("button", { class: "sec", onclick: function () { reset(true); } }, "Nouveau scénario"), h("label", { style: "margin-left:10px" }, "Vitesse : ", sel), h("label", { style: "margin-left:10px" }, cam, " Caméra automatique"), " ", seedLab, h("a", { href: "#/plateau", style: "margin-left:14px" }, "← Retour")),
+      banner, tabsBar, views.plateau, views.table, views.recap, h("div", { class: "card" }, h("h2", {}, "Déroulé"), logBox));
+    drawTabs(); reset(false); window.PLATEAU._demo = { S: function () { return S; } };
+    load3d(box, function (a) { if (a) { api = a; api.update(list()); } else { box.style.display = "none"; fb.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); fb.appendChild(boardSvg(list(), { big: true })); } }, { speed: function () { return speed; } });
   }
 
   window.PLATEAU = { route: function (p) { var a = p[0] || ""; if (a === "equipe") return teamJoinPage(); if (a === "anim") return animPage(); if (a === "regles") return rules(); if (a === "demo") return demoPage(); return entry(); } };
