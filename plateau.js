@@ -4,6 +4,8 @@
   var A = window.APP, h = A.h, mount = A.mount, LSget = A.LSget, LSset = A.LSset, BASE = A.BASE, D = window.PLATEAU_DATA, PE = window.PEngine;
   var COLS = ["#3B6FD8", "#2E9E6B", "#E9A400", "#E4572E", "#D6479B", "#1F2A5C", "#7A3FB5", "#0E8A9E"];
   var NS = "http://www.w3.org/2000/svg";
+  var SEANCE_MIN = { 1: 30, 2: 30, 3: 40 };
+  function mmss(ms) { var t = Math.max(0, Math.round(ms / 1000)); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); }
   function teamCol(name) { var x = 0; String(name).split("").forEach(function (c) { x = (x * 31 + c.charCodeAt(0)) >>> 0; }); return COLS[x % COLS.length]; }
   function abbr(n) { var w = String(n || "?").replace(/^(les|le|la|l')\s*/i, "").trim(); return (w.slice(0, 2) || "?").replace(/^./, function (c) { return c.toUpperCase(); }); }
   function rnd(n) { return "s" + Math.random().toString(36).slice(2, 9) + (n || ""); }
@@ -51,7 +53,7 @@
   }
   function rules() {
     mount(h("h1", {}, "Règles du plateau"),
-      h("div", { class: "card" }, h("ol", {}, h("li", {}, "Chaque équipe a un pion, posé sur « Départ »."), h("li", {}, "À son tour, l'équipe tire une carte du jeu de la prochaine case de jeu, répond sur son téléphone, puis lit le corrigé."), h("li", {}, "Le nombre de points (0 à 3) est le nombre de cases dont le pion avance."), h("li", {}, "Une case « ? » est un événement : il fait avancer, reculer ou rejouer."), h("li", {}, "Une roue tourne puis s'arrête sur les points gagnés : le pion avance exactement de ce nombre de cases, même au-delà de la fin de l'acte."), h("li", {}, "Le plateau a trois actes. Une équipe qui a terminé l'acte ouvert est « en attente des autres équipes » : l'animateur ouvre l'acte suivant à chaque séance."), h("li", {}, "Arriver à « Examen » termine la partie. Le classement : la case atteinte, puis les points."))),
+      h("div", { class: "card" }, h("ol", {}, h("li", {}, "Chaque équipe a un pion, posé sur « Départ »."), h("li", {}, "À son tour, l'équipe tire une carte du jeu de la prochaine case de jeu, répond sur son téléphone, puis lit le corrigé."), h("li", {}, "Le nombre de points (0 à 3) est le nombre de cases dont le pion avance."), h("li", {}, "Une case « ? » est un événement : il fait avancer, reculer ou rejouer."), h("li", {}, "Une roue tourne puis s'arrête sur les points gagnés : le pion avance exactement de ce nombre de cases, même au-delà de la fin de l'acte."), h("li", {}, "Le plateau a trois actes, un par séance chronométrée (30, 30 et 40 minutes). Une équipe qui a terminé l'acte est « en attente des autres équipes ». À la fin du temps, l'animateur ouvre l'acte suivant et les équipes en retard sont replacées au début de cet acte."), h("li", {}, "Arriver à « Examen » termine la partie. Le classement : la case atteinte, puis les points."))),
       h("div", { class: "card" }, h("h2", {}, "Les cinq zones du syllabus"), Object.keys(D.zones).map(function (z) { return h("p", {}, h("span", { class: "team", style: "background:" + D.zones[z].col }, z), D.zones[z].syl); })),
       Object.keys(D.jeux).map(function (k) { var j = D.jeux[k]; return h("div", { class: "card" }, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", { class: "meta" }, "Zone " + j.zone + " · acte " + j.acte + " · " + j.duree + " min par carte environ"), h("p", {}, j.regle)); }),
       h("p", {}, h("a", { href: "#/plateau" }, "← Retour")));
@@ -72,7 +74,7 @@
         conn = peer.connect("cpro-p-" + st.code, { reliable: true });
         conn.on("open", function () { setLink(true); conn.send({ t: "hello", sid: st.sid, nom: st.nom, table: st.table, pos: st.pos, score: st.score, done: st.done, n: st.log.length }); });
         conn.on("data", function (m) {
-          if (m.t === "cfg") { st.cfg = { mode: m.mode, acte: m.acte, bonus: !!m.bonus }; LSset(TK, st); if (onCfg) onCfg(); }
+          if (m.t === "cfg") { st.cfg = { mode: m.mode, acte: m.acte, bonus: !!m.bonus, end: m.end || 0 }; LSset(TK, st); if (onCfg) onCfg(); }
           else if (m.t === "adj") { st.pos = Math.max(0, Math.min(31, st.pos + (m.delta || 0))); st.log.push({ jeu: "—", pts: m.delta, note: "ajustement animateur" }); LSset(TK, st); teamSend(); if (onCfg) onCfg(true); }
         });
         conn.on("close", function () { again(4000); }); conn.on("error", function () { again(6000); });
@@ -99,11 +101,14 @@
     return null;
   }
   function teamPlay() {
-    var top = h("div", {}), board = h("div", {}), main = h("div", {}), ans = null;
+    var top = h("div", {}), board = h("div", {}), main = h("div", {}), ans = null, tmEl = null, over = false;
+    function timeUp() { return !!(st.cfg.end && Date.now() > st.cfg.end); }
+    A.timers.push(setInterval(function () { if (!tmEl || !st.cfg.end) return; var left = st.cfg.end - Date.now(); tmEl.textContent = left > 0 ? mmss(left) : "0:00"; tmEl.style.color = left < 120000 ? "#E4572E" : ""; if (left <= 0 && !over) { over = true; if (!st.cur && !st.res) draw(); } if (left > 0) over = false; }, 500));
     linkEl = h("p", { class: "warn" }, "○ Connexion à l'animateur…");
     function fresh() {
       top.innerHTML = ""; var cap = PE.capFor(st.cfg.acte, D.caps);
-      top.appendChild(h("div", { class: "card" }, h("b", {}, st.nom), st.table ? "  ·  table " + st.table : "", h("div", { class: "big" }, "Case " + st.pos + " / 31  ·  " + st.score + " point" + (st.score > 1 ? "s" : "")), linkEl,
+      tmEl = h("div", { class: "timer", style: "font-size:30px" }, "");
+      top.appendChild(h("div", { class: "card" }, h("b", {}, st.nom), st.table ? "  ·  table " + st.table : "", h("div", { class: "big" }, "Case " + st.pos + " / 31  ·  " + st.score + " point" + (st.score > 1 ? "s" : "")), st.cfg.end ? h("div", {}, h("span", { class: "meta" }, "Temps restant dans la séance : "), tmEl) : null, linkEl,
         h("p", { class: "meta" }, "Acte " + st.cfg.acte + " ouvert : " + D.actes[st.cfg.acte].nom + " · " + (st.cfg.mode === "physique" ? "plateau physique : vous déplacez votre pion à la main" : "plateau numérique : le pion avance seul"))));
       board.innerHTML = ""; board.appendChild(boardSvg([{ pos: st.pos, col: teamCol(st.nom), label: st.nom }]));
       return cap;
@@ -116,6 +121,7 @@
       if (st.cur) return drawCard();
       if (st.pos >= 31) { main.appendChild(h("div", { class: "card" }, h("h2", {}, "Arrivée à l'Examen !"), h("p", {}, "Votre équipe a terminé la route. Total : " + st.score + " points."))); return; }
       var nx = nextGameCase(st.pos);
+      if (timeUp() && st.pos < cap) { main.appendChild(h("div", { class: "warn" }, "Temps de la séance écoulé : l'animateur ouvre l'acte suivant. Votre pion sera replacé au début de cet acte si vous n'avez pas fini celui-ci.")); return; }
       if (st.pos >= cap) {
         main.appendChild(h("div", { class: "warn" }, "En attente des autres équipes : fin de l'acte " + st.cfg.acte + ". L'animateur ouvrira l'acte suivant."));
         if (st.cfg.bonus) { var js = D.actes[st.cfg.acte].jeux, code = js[(st.bonusN || 0) % js.length], jb = jeuOf(code);
@@ -188,7 +194,7 @@
   function animPage() {
     var infoP = null, P = LSget(PK) || { code: "", mode: "numerique", acte: 1, teams: {} }, hpeer = null, online = {}, view = "plateau", big = false, dirty = true, three = null, content = h("div", {}), status = h("p", { class: "meta" }, "");
     function persist() { LSset(PK, P); }
-    function cfgMsg() { return { t: "cfg", mode: P.mode, acte: P.acte, bonus: !!P.bonus }; }
+    function cfgMsg() { return { t: "cfg", mode: P.mode, acte: P.acte, bonus: !!P.bonus, end: P.end || 0 }; }
     function bcast() { Object.keys(online).forEach(function (sid) { try { online[sid].send(cfgMsg()); } catch (e) {} }); }
     function ingest(m, c) {
       if (m.t !== "hello" && m.t !== "state") return;
@@ -213,7 +219,8 @@
       var box = h("div", { class: "card" }, h("h2", {}, "Partie"), code, h("button", { class: "ok", onclick: function () { if (code.value.trim()) { open(code.value.trim().toUpperCase()); drawQr(); } } }, "Ouvrir la partie"), status,
         h("div", {}, h("b", {}, "Mode : "), [["numerique", "Plateau numérique (projeté)"], ["physique", "Plateaux physiques (un par table)"]].map(function (m) { return h("button", { class: P.mode === m[0] ? "" : "sec", onclick: function () { P.mode = m[0]; persist(); bcast(); rebuild(); } }, m[1]); })),
         h("div", {}, h("b", {}, "Acte ouvert : "), [1, 2, 3].map(function (a) { return h("button", { class: P.acte === a ? "" : "sec", onclick: function () { P.acte = a; persist(); bcast(); rebuild(); } }, "Acte " + a + " · " + D.actes[a].nom + " (" + D.actes[a].jeux.join(", ") + ")"); })),
-        h("div", {}, h("button", { class: "sec", onclick: pushLate }, "Passer les retardataires au début de l'acte " + Math.min(3, Math.max(2, P.acte))),
+        chronoRow(),
+        h("div", {}, h("button", { class: "sec", onclick: function () { pushLate(); } }, "Passer les retardataires au début de l'acte " + Math.min(3, Math.max(2, P.acte))),
           h("button", { class: P.bonus ? "" : "sec", onclick: function () { P.bonus = !P.bonus; persist(); bcast(); rebuild(); } }, "Cartes bonus pour les équipes en avance : " + (P.bonus ? "activées" : "désactivées")), h("a", { href: "#/plateau/demo", target: "_blank", style: "margin-left:12px" }, "Partie démo 3D (autre onglet)")));
       return box;
     }
@@ -239,11 +246,18 @@
           h("td", {}, h("button", { class: "sec", onclick: function () { adj(t.sid, -1); } }, "−1"), h("button", { class: "sec", onclick: function () { adj(t.sid, 1); } }, "+1"))])); });
       content.appendChild(tb); content.appendChild(h("p", { class: "meta" }, "Classement : case atteinte, puis points. « Ajuster » déplace le pion de l'équipe (arbitrage d'une réponse orale, par exemple)."));
     }
-    function pushLate() {
+    var chronoOut = h("span", { class: "big", style: "margin:0 10px;font-variant-numeric:tabular-nums" }, ""), chronoMin = h("input", { type: "number", min: 1, max: 90, style: "width:80px;display:inline-block" }), clos = h("button", { class: "ok", style: "display:none", onclick: function () { closeActe(); } }, "Clôturer : ouvrir l'acte suivant et passer les retardataires");
+    function chronoRow() {
+      chronoMin.value = SEANCE_MIN[P.acte] || 30;
+      return h("div", {}, h("b", {}, "Chrono de la séance : "), chronoMin, " min ", h("button", { onclick: function () { P.end = Date.now() + (+chronoMin.value || 30) * 60000; persist(); bcast(); tickChrono(); } }, "Démarrer le chrono"), h("button", { class: "sec", onclick: function () { P.end = 0; persist(); bcast(); tickChrono(); } }, "Arrêter"), chronoOut, clos);
+    }
+    function tickChrono() { var left = (P.end || 0) - Date.now(); if (!P.end) { chronoOut.textContent = ""; clos.style.display = "none"; return; } chronoOut.textContent = left > 0 ? mmss(left) : "Temps écoulé"; chronoOut.style.color = left <= 0 ? "#E4572E" : ""; clos.style.display = left <= 0 && P.acte < 3 ? "" : "none"; }
+    function closeActe() { if (P.acte >= 3) return; P.acte++; P.end = 0; persist(); bcast(); rebuild(); pushLate(true); }
+    function pushLate(skip) {
       if (P.acte < 2) { alert("Ouvrez d'abord l'acte suivant, puis passez les retardataires."); return; }
       var lim = D.caps[P.acte - 2], late = teams().filter(function (t) { return (t.pos || 0) < lim; });
       if (!late.length) { status.textContent = "Aucun retardataire : toutes les équipes ont terminé l'acte " + (P.acte - 1) + "."; return; }
-      if (!confirm(late.length + " équipe(s) n'ont pas fini l'acte " + (P.acte - 1) + " : elles passent à la case " + lim + ", début de l'acte " + P.acte + ". Confirmer ?")) return;
+      if (!skip && !confirm(late.length + " équipe(s) n'ont pas fini l'acte " + (P.acte - 1) + " : elles passent à la case " + lim + ", début de l'acte " + P.acte + ". Confirmer ?")) return;
       late.forEach(function (t) { adj(t.sid, lim - (t.pos || 0)); }); status.textContent = late.length + " équipe(s) passée(s) au début de l'acte " + P.acte + ".";
     }
     function adj(sid, d) { var t = P.teams[sid]; if (!t) return; t.pos = Math.max(0, Math.min(31, (t.pos || 0) + d)); persist(); try { online[sid] && online[sid].send({ t: "adj", delta: d }); } catch (e) {} dirty = true; draw(); }
@@ -255,7 +269,7 @@
     window.PLATEAU._ingest = function (m, c) { ingest(m, c); draw(); }; window.PLATEAU._teams = function () { return P.teams; };
     mount(h("h1", {}, "Plateau : tableau de bord animateur"), h("p", { class: "meta" }, h("a", { href: "#/animateur" }, "Fiche animateur"), "  ·  ", h("a", { href: "#/plateau/regles" }, "Règles")), ctrlBox, qrBox, bar, content);
     rebuild(); tabs(); drawQr(); draw(); if (P.code) open(P.code);
-    A.timers.push(setInterval(function () { if (dirty) draw(); else if (view === "3d" && three) three.update(pawns()); }, 700));
+    A.timers.push(setInterval(tickChrono, 500)); A.timers.push(setInterval(function () { if (dirty) draw(); else if (view === "3d" && three) three.update(pawns()); }, 700));
   }
 
   /* ---------- 3D (Three.js chargé à la demande) : tuiles, pions qui sautent, dé qui roule, caméra qui suit ---------- */
@@ -356,7 +370,7 @@
     var ABORT = {}, S = null, api = null, gen = 0, seed = Math.floor(Math.random() * 90000) + 10000, speed = 1, box, fb = h("div", {}), banner = h("p", { class: "big" }, ""), clock = h("span", { class: "meta" }, ""), phone = h("div", {}), phoneHead = h("div", {}), phoneBody = h("div", {}), logBox = h("ol", { reversed: "reversed", style: "max-height:220px;overflow:auto;margin:0;padding-left:26px" }), tabsBar = h("div", { class: "card" }), views = {}, curTab = "plateau", btnRun, btnStep, seedLab = h("span", { class: "meta" }, ""), sel;
     function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms / speed); }); }
     function chk(g) { if (g !== gen || !document.body.contains(box)) throw ABORT; }
-    function fresh() { var rnd = mulberry(seed); return { rnd: rnd, acte: 1, started: false, fin: false, run: false, step: false, turn: 0, min: 0, teams: DEMO_TEAMS.map(function (t, i) { return { nom: t[0], sk: t[1], col: COLS[i % COLS.length], pos: 0, score: 0, seen: {}, n: 0, good: 0, mins: 0, st: {}, last: null }; }), actes: [], log: [] }; }
+    function fresh() { var rnd = mulberry(seed); return { rnd: rnd, acte: 1, started: false, fin: false, run: false, step: false, turn: 0, min: 0, teams: DEMO_TEAMS.map(function (t, i) { return { nom: t[0], sk: t[1], col: COLS[i % COLS.length], pos: 0, score: 0, seen: {}, n: 0, good: 0, mins: 0, st: {}, last: null, el: 0, nA: 0 }; }), actes: [], log: [] }; }
     function list() { return S.teams.map(function (t) { return { sid: t.nom, nom: t.nom, label: t.nom, col: t.col, pos: t.pos }; }); }
     function say(txt) { logBox.insertBefore(h("li", {}, txt), logBox.firstChild); }
     function cap() { return PE.capFor(S.acte, D.caps); }
@@ -370,11 +384,11 @@
     function summary() {
       var v = views.recap; v.innerHTML = ""; var rank = S.teams.slice().sort(function (a, b) { return (b.pos - a.pos) || (b.score - a.score); }), jeux = Object.keys(D.jeux);
       v.appendChild(h("p", { class: "meta" }, "Récapitulatif de la partie simulée (graine " + seed + "). Les équipes jouent en parallèle dans la réalité : la durée d'un acte est celle de l'équipe la plus lente."));
-      var tb = h("table", {}, h("tr", {}, ["Rang", "Équipe", "Case", "Points", "Cartes", "Réponses à 3 pts", "Temps de jeu simulé"].concat(jeux).map(function (x) { return h("th", {}, x); })));
+      var tb = h("table", {}, h("tr", {}, ["Rang", "Équipe", "Case", "Points", "Cartes", "Réponses à 3 pts", "Temps de jeu simulé (total)"].concat(jeux).map(function (x) { return h("th", {}, x); })));
       rank.forEach(function (t, i) { tb.appendChild(h("tr", {}, [h("td", {}, String(i + 1)), h("td", {}, t.nom), h("td", {}, String(t.pos)), h("td", {}, String(t.score)), h("td", {}, String(t.n)), h("td", {}, String(t.good)), h("td", {}, t.mins + " min")].concat(jeux.map(function (k) { var x = t.st[k]; return h("td", {}, x ? (x.pts + " / " + x.n * 3) : "—"); })))); });
       v.appendChild(tb);
-      v.appendChild(h("h3", {}, "Durées simulées par acte")); v.appendChild(h("ul", {}, S.actes.length ? S.actes.map(function (a) { return h("li", {}, "Acte " + a.acte + " : " + a.min + " min (équipe la plus lente : " + a.slow + ", " + a.cards + " cartes)"); }) : h("li", {}, "Aucun acte terminé pour l'instant.")));
-      v.appendChild(h("p", { class: "meta" }, "À comparer avec le temps réservé aux séances dans le support (séance 1 : 30 min, séance 2 : 30 min, séance 3 : 40 min). Temps simulé = durée indicative par carte de chaque jeu."));
+      v.appendChild(h("h3", {}, "Séances plafonnées")); v.appendChild(h("ul", {}, S.actes.length ? S.actes.map(function (a) { return h("li", {}, "Séance " + a.acte + " plafonnée à " + a.budget + " min : " + a.cards + " cartes jouées, " + a.late + " équipe(s) replacée(s) au début de l'acte suivant"); }) : h("li", {}, "Aucun acte terminé pour l'instant.")));
+      v.appendChild(h("p", { class: "meta" }, "Chaque séance a un temps fixe (30, 30 et 40 minutes) : à la fin, l'animateur ouvre l'acte suivant et les équipes en retard avancent. Temps simulé = durée indicative par carte de chaque jeu."));
     }
     function setTab(t) { curTab = t; Object.keys(views).forEach(function (k) { views[k].style.display = k === t ? "" : "none"; }); drawTabs(); if (t === "table") drawTable(); if (t === "recap") summary(); }
     function drawTabs() { tabsBar.innerHTML = ""; [["plateau", "Plateau et carte"], ["table", "Tableau animateur"], ["recap", "Récapitulatif"]].forEach(function (t) { tabsBar.appendChild(h("button", { class: curTab === t[0] ? "" : "sec", onclick: function () { setTab(t[0]); } }, t[1])); }); }
@@ -403,7 +417,7 @@
       if (c.modele) phoneBody.appendChild(h("p", {}, h("b", {}, "Réponse modèle : "), c.modele)); phoneBody.appendChild(h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl));
       await sleep(4200); chk(g);
       var from = t.pos, np = PE.advance(from, res.pts, S.acte, D.caps), eff = PE.landing(D.cases, D.events, np, S.acte, D.caps), mins = j.duree;
-      t.n++; t.mins += mins; t.score += res.pts; if (res.pts === 3) t.good++; var x = t.st[nx.jeu] = t.st[nx.jeu] || { n: 0, pts: 0 }; x.n++; x.pts += res.pts; t.last = { jeu: nx.jeu, pts: res.pts };
+      t.n++; t.nA++; t.el += mins; t.mins += mins; t.score += res.pts; if (res.pts === 3) t.good++; var x = t.st[nx.jeu] = t.st[nx.jeu] || { n: 0, pts: 0 }; x.n++; x.pts += res.pts; t.last = { jeu: nx.jeu, pts: res.pts };
       var line = t.nom + " · jeu " + nx.jeu + " · " + res.pts + " pt → case " + np; t.pos = np;
       if (api) { await new Promise(function (ok) { api.play({ key: t.nom, pts: res.pts, nom: t.nom, col: t.col, done: ok }, list()); }); chk(g); await idle(g); api.flash(np); } else { fb.innerHTML = ""; fb.appendChild(boardSvg(list(), { big: true })); await sleep(1500); }
       bandeau(t.nom + " : le pion est arrivé case " + np, t.col); head(t); await sleep(1200); chk(g);
@@ -417,11 +431,18 @@
     async function idle(g) { for (var i = 0; i < 400; i++) { if (api.idle()) return; await new Promise(function (r) { setTimeout(r, 60); }); chk(g); } }
     async function turn(g) {
       if (!S.started) { S.started = true; bandeau("Séance 0 : les cinq équipes rejoignent la partie", "#1F2A5C"); say("Séance 0 : formation des équipes (aucune carte jouée)"); head(null); phoneBody.innerHTML = ""; phoneBody.appendChild(h("p", {}, "Les équipes scannent le QR, saisissent le code de la table et leur nom : " + S.teams.map(function (t) { return t.nom; }).join(", ") + ".")); await sleep(3000); chk(g); bandeau("L'animateur ouvre l'acte 1 : " + D.actes[1].nom, "#1F2A5C"); say("▶ Séance 1 : acte 1 ouvert"); await sleep(2200); chk(g); return; }
-      var n = S.teams.length, t = null, k; for (k = 0; k < n; k++) { var c = S.teams[(S.turn + k) % n]; if (c.pos < cap() && c.pos < 31) { t = c; S.turn = (S.turn + k) % n; break; } }
+      var n = S.teams.length, t = null, budget = SEANCE_MIN[S.acte];
+      S.teams.forEach(function (q) { if (q.pos < cap() && q.pos < 31 && q.el < budget && (!t || q.el < t.el)) t = q; });
+      if (t) { clock.textContent = "Séance " + S.acte + " · temps écoulé (simulé) : " + t.el + " / " + budget + " min"; }
       if (!t) {
-        var mx = 0, slow = "", cards = 0; S.teams.forEach(function (q) { var m0 = q.mins - (q.m0 || 0); cards += q.n - (q.n0 || 0); if (m0 > mx) { mx = m0; slow = q.nom; } q.m0 = q.mins; q.n0 = q.n; }); S.actes.push({ acte: S.acte, min: mx, slow: slow, cards: cards });
-        if (S.acte < 3) { bandeau("Toutes les équipes sont en attente des autres équipes : fin de l'acte " + S.acte, "#E9A400"); await sleep(2400); chk(g); S.acte++; bandeau("L'animateur ouvre l'acte " + S.acte + " : " + D.actes[S.acte].nom, "#1F2A5C"); say("▶ Séance " + S.acte + " : acte " + S.acte + " ouvert (acte précédent : " + mx + " min simulées)"); drawTable(); await sleep(2400); chk(g); }
-        else { S.fin = true; S.run = false; bandeau("Partie terminée : toutes les équipes sont arrivées à l'Examen", "#1F2A5C"); say("★ Partie terminée"); btnRun.textContent = "Lancer"; summary(); setTab("recap"); }
+        var mx = 0, slow = "", cards = 0, late = []; S.teams.forEach(function (q) { if (q.el > mx) { mx = q.el; slow = q.nom; } cards += q.nA; if (q.pos < cap() && q.pos < 31) late.push(q); });
+        S.actes.push({ acte: S.acte, min: mx, slow: slow, cards: cards, budget: budget, late: late.length });
+        if (S.acte < 3) {
+          bandeau("Temps de la séance " + S.acte + " écoulé (" + budget + " min) : l'animateur clôture l'acte", "#E9A400"); say("⏱ Séance " + S.acte + " terminée (" + budget + " min) : " + late.length + " équipe(s) en retard"); await sleep(2600); chk(g);
+          var lim = cap(); S.acte++; S.teams.forEach(function (q) { q.el = 0; q.nA = 0; });
+          bandeau("L'animateur ouvre l'acte " + S.acte + " : " + D.actes[S.acte].nom, "#1F2A5C"); say("▶ Séance " + S.acte + " : acte " + S.acte + " ouvert"); await sleep(2000); chk(g);
+          if (late.length) { bandeau("Retardataires : " + late.map(function (q) { return q.nom; }).join(", ") + " passent au début de l'acte " + S.acte + " (case " + lim + ")", "#E9A400"); late.forEach(function (q) { say(q.nom + " : retardataire, case " + q.pos + " → case " + lim); q.pos = lim; }); if (api) { api.update(list()); await sleep(400); await idle(g); } else { fb.innerHTML = ""; fb.appendChild(boardSvg(list(), { big: true })); } drawTable(); await sleep(1800); chk(g); }
+        } else { S.fin = true; S.run = false; bandeau("Fin de la séance 3 : classement final", "#1F2A5C"); say("★ Partie terminée (temps écoulé)"); btnRun.textContent = "Lancer"; summary(); setTab("recap"); }
         return;
       }
       S.again = false; await playCard(t, g); if (!S.again) S.turn = (S.turn + 1) % n; await sleep(700); chk(g);
@@ -440,7 +461,7 @@
     views.plateau = h("div", { style: "display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start" }, h("div", { style: "flex:1.7 1 460px;min-width:0" }, box, fb), h("div", { style: "flex:1 1 320px;max-width:440px" }, h("div", { class: "card", style: "border:3px solid #1F2A5C;border-radius:22px;padding:12px 14px" }, phoneHead, phoneBody)));
     views.table = h("div", { style: "display:none" }); views.recap = h("div", { style: "display:none" });
     mount(h("h1", {}, "Démo : une partie simulée, proche du réel"), h("p", { class: "meta" }, "Cinq équipes fictives de niveaux différents jouent avec les vraies cartes : carte tirée, réponse simulée, correction du vrai moteur, roue, déplacement du pion, événements. Une équipe à la fois, dans l'ordre. L'écran de droite est celui du téléphone de l'équipe qui joue. Glisser sur le plateau pour le tourner."),
-      h("div", { class: "card" }, btnRun, btnStep, h("button", { class: "sec", onclick: function () { reset(false); } }, "Rejouer le même scénario"), h("button", { class: "sec", onclick: function () { reset(true); } }, "Nouveau scénario"), h("label", { style: "margin-left:10px" }, "Vitesse : ", sel), h("label", { style: "margin-left:10px" }, cam, " Caméra automatique"), " ", seedLab, h("a", { href: "#/plateau", style: "margin-left:14px" }, "← Retour")),
+      h("div", { class: "card" }, btnRun, btnStep, h("button", { class: "sec", onclick: function () { reset(false); } }, "Rejouer le même scénario"), h("button", { class: "sec", onclick: function () { reset(true); } }, "Nouveau scénario"), h("label", { style: "margin-left:10px" }, "Vitesse : ", sel), h("label", { style: "margin-left:10px" }, cam, " Caméra automatique"), " ", seedLab, h("a", { href: "#/plateau", style: "margin-left:14px" }, "← Retour"), h("div", {}, clock)),
       banner, tabsBar, views.plateau, views.table, views.recap, h("div", { class: "card" }, h("h2", {}, "Déroulé"), logBox));
     drawTabs(); reset(false); window.PLATEAU._demo = { S: function () { return S; } };
     load3d(box, function (a) { if (a) { api = a; api.update(list()); } else { box.style.display = "none"; fb.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); fb.appendChild(boardSvg(list(), { big: true })); } }, { speed: function () { return speed; } });
