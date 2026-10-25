@@ -199,26 +199,32 @@ window.DATA = {
     ],
     "rows": [
      [
+      "1",
       "Conclusion",
       "Ajouter une copie hors site des sauvegardes"
      ],
      [
+      "2",
       "Argument 1",
       "Disque unique de trois ans : risque de panne estimé à 10 % par an"
      ],
      [
+      "2",
       "Argument 2",
       "Restauration actuelle : 9 h, contre 3 h avec la copie hors site"
      ],
      [
+      "2",
       "Argument 3",
       "Coût : 150 × 12 = 1 800 € par an ; perte attendue sans copie : 10 % × 40 000 = 4 000 € par an"
      ],
      [
+      "3",
       "Réserve",
       "La probabilité est une estimation de l'administrateur ; le coût d'un arrêt est une hypothèse"
      ],
      [
+      "3",
       "Décision demandée",
       "Valider 1 800 € par an avant la fin du mois"
      ]
@@ -232,7 +238,17 @@ window.DATA = {
      "Objet : Décision avant fin du mois : copie hors site des sauvegardes",
      "Je recommande d'ajouter une copie hors site (1 800 € par an). Le disque unique a trois ans, avec une panne estimée à 10 % par an ; la restauration prendrait 9 h, contre 3 h avec la copie. Une journée d'arrêt coûterait environ 40 000 € (hypothèse), soit une perte attendue de 4 000 € par an. Réserve : la probabilité est une estimation à confirmer par un test. Décision demandée : valider avant le 30."
     ],
-    "retenir": "Une note de synthèse se lit en une minute : conclusion, trois arguments chiffrés, réserve, décision demandée."
+    "retenir": "Une note de synthèse se lit en une minute : conclusion, trois arguments chiffrés, réserve, décision demandée.",
+    "cols": [
+     "N°",
+     "Question",
+     "Réponse"
+    ],
+    "widths": [
+     0.7,
+     4.05,
+     4.05
+    ]
    },
    "types": [
     null,
@@ -266,31 +282,38 @@ window.DATA = {
      "Donner à l'IA le contexte, la langue et le format attendu, puis trier ses propositions."
     ],
     "cols": [
+     "N°",
      "Concept",
      "Synonymes (FR / EN)"
     ],
     "widths": [
-     2.6,
-     6.2
+     0.7,
+     2.39,
+     5.71
     ],
     "rows": [
      [
+      "1-2",
       "Mises à jour automatiques",
       "« mise à jour automatique » OR « automatic update » OR « auto-update »"
      ],
      [
+      "1-2",
       "Correctifs de sécurité",
       "correctif OR « patch » OR « security update »"
      ],
      [
+      "1-2",
       "Postes de travail",
       "« poste de travail » OR « endpoint » OR « workstation »"
      ],
      [
+      "3-4",
       "Avec une IA",
       "L'IA propose en général 2 à 4 mots-clés de plus (par exemple « patch management », « endpoint ») et 1 à 2 hors sujet. Elle aide à élargir le vocabulaire ; c'est vous qui triez, puis la requête finale est testée dans un moteur ou une base : on peut la refaire et la citer, pas la conversation avec l'IA."
      ],
      [
+      "5",
       "Requête assemblée",
       "(« mise à jour automatique » OR « automatic update ») (« poste de travail » OR « endpoint ») sécurité OR security"
      ]
@@ -334,35 +357,43 @@ window.DATA = {
      "Noter la trace de la recherche."
     ],
     "cols": [
+     "N°",
      "Étape",
      "Ce qui est attendu"
     ],
     "widths": [
-     2.2,
-     6.6
+     0.7,
+     2.02,
+     6.07
     ],
     "rows": [
      [
+      "1",
       "Requête simple",
       "Souvent des dizaines de milliers de résultats : inutilisable telle quelle"
      ],
      [
+      "2-3",
       "Requête précisée",
       "Quelques centaines ou milliers : on peut lire les premières pages"
      ],
      [
+      "2",
       "Exemple d'opérateurs",
       "« authentification forte » OR « multi-factor authentication » -banque, avec le filtre « depuis 2021 » (menu de gauche)"
      ],
      [
+      "4",
       "Natures à repérer",
       "Article de revue, actes de conférence, rapport, thèse, page commerciale, presse"
      ],
      [
+      "4",
       "Trace",
       "Requête, date, nombre de résultats : une recherche doit pouvoir être refaite"
      ],
      [
+      "5",
       "IA · références retrouvées",
       "Souvent 3 ou 4 sur 5. Une référence qu'on ne retrouve pas par son titre exact est à écarter (voir EX15). L'IA donne des pistes, la base permet de refaire la recherche."
      ]
@@ -406,35 +437,43 @@ window.DATA = {
      "Distinguer recommandation, norme et loi."
     ],
     "cols": [
+     "N°",
      "Type",
      "Ce que c'est, et exemple"
     ],
     "widths": [
-     2.4,
-     6.4
+     0.7,
+     2.21,
+     5.89
     ],
     "rows": [
      [
+      "3",
       "Recommandation",
       "Guide de bonnes pratiques : pas obligatoire, mais fait référence (guides d'une agence nationale, par exemple)"
      ],
      [
+      "3",
       "Norme",
       "Texte consensuel de normalisation (ISO, AFNOR) : applicable si on s'y engage, parfois payante"
      ],
      [
+      "3",
       "Obligation légale",
       "Loi ou règlement : s'impose (par exemple le RGPD pour les données personnelles)"
      ],
      [
+      "3",
       "Rapport d'étude",
       "Observations ou statistiques : à lire avec la méthode et la date"
      ],
      [
+      "3",
       "Expert reconnu",
       "Spécialiste identifiable, travaux cités par d'autres : à lire avec la grille (qui le finance, lien avec un éditeur, recoupement). Il appuie un argument mais ne remplace pas un texte officiel pour établir un fait."
      ],
      [
+      "4",
       "IA · organismes cités",
       "L'IA cite souvent des organismes réels mais leur attribue parfois des documents qu'ils n'ont pas publiés : ouvrez le site de l'organisme et cherchez le titre."
      ]
@@ -477,35 +516,43 @@ window.DATA = {
      "Classer dès l'enregistrement."
     ],
     "cols": [
+     "N°",
      "Geste",
      "Résultat attendu"
     ],
     "widths": [
-     3.0,
-     5.8
+     0.7,
+     2.76,
+     5.34
     ],
     "rows": [
      [
+      "2",
       "Enregistrer",
       "Icône de l'extension dans le navigateur : la référence apparaît dans la bibliothèque"
      ],
      [
+      "2",
       "Vérifier",
       "Les champs vides (année, auteurs) se complètent à la main"
      ],
      [
+      "2",
       "Classer",
       "Un dossier par question, des étiquettes pour l'état (retenue, à recouper)"
      ],
      [
+      "3",
       "Bibliographie",
       "Clic droit sur les références, puis « Créer une bibliographie » : style, format, copier"
      ],
      [
+      "1",
       "Sans Zotero",
       "Tableur : auteur, année, titre, lien, note sur 12"
      ],
      [
+      "4",
       "IA · mise en forme",
       "Quelques différences (ponctuation, initiales, majuscules). Zotero tire les données de la page ou du DOI : plus fiable qu'une IA, qui peut déformer un nom ou une année."
      ]
@@ -631,31 +678,38 @@ window.DATA = {
      "Justifier : une phrase, un fait."
     ],
     "cols": [
+     "N°",
      "Cas (fictif)",
      "Notation et décision"
     ],
     "widths": [
-     3.0,
-     5.8
+     0.7,
+     2.76,
+     5.34
     ],
     "rows": [
      [
+      "1-2",
       "Rapport d'agence, 2023, méthode publiée",
       "2 / 1 / 2 / 2 / 1 / 2 = 10 : fiable, retenue"
      ],
      [
+      "1-2",
       "Brochure d'éditeur, 2025, sans méthode",
       "1 / 2 / 0 / 0 / 0 / 0 = 3 : citer comme position de l'éditeur"
      ],
      [
+      "1-2",
       "Article de revue relue, 2021, 3 organisations",
       "2 / 1 / 2 / 2 / 1 / 2 = 10 : retenue ; date à discuter selon le sujet"
      ],
      [
+      "1-2",
       "Page de presse reprenant la brochure",
       "1 / 2 / 1 / 0 / 0 / 0 = 4 : écartée (source circulaire)"
      ],
      [
+      "4",
       "IA · écart de notation",
       "Souvent 2 à 4 points : l'IA surestime « Recoupé » et « Reproductible » qu'elle ne peut pas vérifier. Votre note, sourcée, fait foi."
      ]
@@ -697,31 +751,38 @@ window.DATA = {
      "À défaut de source primaire : ne pas citer comme un fait."
     ],
     "cols": [
+     "N°",
      "Situation trouvée",
      "Que faire ?"
     ],
     "widths": [
-     3.2,
-     5.6
+     0.7,
+     2.95,
+     5.15
     ],
     "rows": [
      [
+      "2",
       "Source d'origine trouvée et claire",
       "Citer la source d'origine, avec ce qu'elle mesure vraiment"
      ],
      [
+      "2",
       "Source d'origine trouvée mais différente de l'affirmation",
       "Corriger la formulation : citer ce qui est réellement mesuré"
      ],
      [
+      "2",
       "Aucune source primaire trouvée",
       "Écrire « chiffre fréquemment cité, sans source d'origine vérifiable » ou l'écarter"
      ],
      [
+      "3",
       "Phrase de réponse à la directrice",
       "« Je n'ai pas pu retrouver l'étude d'origine : je propose de citer le chiffre comme non sourcé, ou de ne pas l'utiliser. »"
      ],
      [
+      "4",
       "IA · origine du chiffre",
       "Souvent non : l'IA cite une étude plausible mais introuvable. Un chiffre sans source retrouvable ne se cite pas comme un fait."
      ]
@@ -790,51 +851,63 @@ window.DATA = {
      "Toujours regarder qui finance."
     ],
     "cols": [
+     "N°",
      "Question",
      "Réponses pour l'article du plan B (Meyer et al., 2023)"
     ],
     "widths": [
-     1.5,
-     6.5
+     0.7,
+     1.52,
+     6.58
     ],
     "rows": [
      [
+      "1",
       "Référence",
       "Meyer L. A., Romero S., Bertoli G., Burt T., Weinert A., Ferres J. L. (2023). How effective is multifactor authentication at deterring cyberattacks? arXiv:2305.00945. Tous les auteurs sont employés de Microsoft."
      ],
      [
+      "1",
       "Question",
       "L'authentification multifacteur (MFA) réduit-elle le risque de compromission d'un compte ?"
      ],
      [
+      "2",
       "Méthode",
       "Comptes d'entreprise du service Azure AD de Microsoft présentant une activité suspecte, du 22 avril au 22 septembre 2022 ; un échantillon est examiné à la main par une équipe spécialisée, puis le taux de compromission est estimé par une méthode statistique avec intervalle à 95 %."
      ],
      [
+      "2",
       "Résultat",
       "Le risque de compromission est réduit de 99,22 % pour les comptes avec MFA ; de 98,56 % pour 128 000 comptes dont le mot de passe avait fuité."
      ],
      [
+      "3",
       "Limites",
       "Aucune section « limites ». Les auteurs signalent seulement que les compromissions sont sous-déclarées (d'où l'échantillon) et que leur estimateur est corrigé d'un biais. À ajouter vous-même : un seul service (Azure AD) ; comptes à activité suspecte seulement ; pas de comparaison indépendante."
      ],
      [
+      "4",
       "Financement et conflit",
       "Aucune déclaration de conflit d'intérêts. Les auteurs travaillent pour l'éditeur du service étudié, qui vend le produit : à dire dans votre phrase."
      ],
      [
+      "5",
       "Formulation honnête",
       "« Dans une étude de Microsoft sur des comptes Azure AD (2022), le risque de compromission est réduit de 99,22 % avec l'authentification multifacteur ; l'étude est réalisée par l'éditeur du service, sans déclaration de conflit d'intérêts (Meyer et al., 2023). »"
      ],
      [
+      "—",
       "Lien avec EX18",
       "Ce n'est pas le « 99,9 % » de 2019 : un autre chiffre (99,22 %), une autre mesure (risque de compromission), la même source (Microsoft). Citer le bon chiffre avec sa mesure."
      ],
      [
+      "—",
       "Sur votre article",
       "Mêmes questions, mêmes réponses à chercher : l'enseignant circule et vérifie une fiche par équipe."
      ],
      [
+      "6",
       "IA · résumé de l'article",
       "Souvent oui : limites réduites ou chiffre déformé. Comparez avec votre fiche de lecture, rédigée à partir du texte."
      ]
@@ -878,39 +951,48 @@ window.DATA = {
      "Vérifier les auteurs, l'année, les pages."
     ],
     "cols": [
+     "N°",
      "Indice",
      "Pourquoi c'est suspect"
     ],
     "widths": [
-     3.0,
-     5.8
+     0.7,
+     2.76,
+     5.34
     ],
     "rows": [
      [
+      "3",
       "DOI qui ne s'ouvre pas",
       "Le préfixe ou le suffixe est inventé, ou renvoie à un autre article"
      ],
      [
+      "3",
       "Vrais auteurs, faux titre",
       "Mélange fréquent : la référence « ressemble » à ce que l'auteur a écrit"
      ],
      [
+      "3",
       "Titre trop parfait",
       "« Le guide absolu… », « A complete survey of every… » : un titre qui répond exactement à votre question"
      ],
      [
+      "3",
       "Pages incohérentes",
       "Un article de 300 pages, un survey complet en 12 pages"
      ],
      [
+      "3",
       "Revue ou conférence introuvable",
       "Nom vague, aucune page officielle"
      ],
      [
+      "4",
       "Règle",
       "Aucune référence donnée par une IA n'est citée avant d'avoir été ouverte et lue à son origine"
      ],
      [
+      "2-3",
       "Résultat de votre test",
       "Il varie selon l'IA et la question : l'important est la méthode de vérification, pas le score"
      ]
@@ -1029,43 +1111,53 @@ window.DATA = {
      "Fondement, réfutation, qualificatif : ce qui rend l'argument solide et honnête."
     ],
     "cols": [
+     "N°",
      "Case",
      "Contenu"
     ],
     "widths": [
-     1.8,
-     7.0
+     0.7,
+     1.66,
+     6.44
     ],
     "rows": [
      [
+      "1",
       "Affirmation",
       "Activer la double authentification partout"
      ],
      [
+      "1",
       "Données",
       "« 80 % des compromissions viennent de mots de passe volés » : chiffre non sourcé"
      ],
      [
+      "1",
       "Garantie",
       "Si la plupart des compromissions viennent de mots de passe volés, un second facteur en bloque la plupart"
      ],
      [
+      "1",
       "Fondement",
       "Manquant : la source du chiffre"
      ],
      [
+      "1",
       "Réfutation",
       "Manquante : vol du second facteur (SMS détourné, fatigue d'authentification), coût d'assistance"
      ],
      [
+      "1",
       "Qualificatif",
       "Manquant : « probablement, d'abord pour les comptes à privilèges »"
      ],
      [
+      "2",
       "Pas un argument",
       "« Tout le monde le fait » : appel à la popularité"
      ],
      [
+      "4",
       "IA · cartographie",
       "Souvent 1 à 3 cases : l'IA complète les cases manquantes avec du plausible (fondement, réfutation). Repérez ce qu'elle a inventé : une case vide est plus honnête."
      ]
@@ -1254,39 +1346,48 @@ window.DATA = {
      "Citer le chiffre comme une position, avec sa source."
     ],
     "cols": [
+     "N°",
      "Phrase",
      "Ce que les 5 questions révèlent"
     ],
     "widths": [
-     1.5,
-     6.5
+     0.7,
+     1.52,
+     6.58
     ],
     "rows": [
      [
+      "2",
       "Les 5 questions",
       "Par rapport à quoi (base) ? Mesuré comment ? Sur quel échantillon ? Par qui ? Sur quelle durée ?"
      ],
      [
+      "1-4",
       "A · 99,9 %",
       "Cas réel (EX11b, D4) : « études » de Microsoft non nommées, attaques automatisées ; le titre généralise. Phrase : « Selon Microsoft (2019, relayé par Slaw.ca), l'authentification multifacteur bloquerait 99,9 % des connexions frauduleuses automatisées ; méthode non publiée. »"
      ],
      [
+      "1-4",
       "B · −70 %",
       "Base : 70 % de quoi (10 h → 3 h ?) ; mesure, échantillon, durée non indiqués ; auteur = le fournisseur. 4 questions sans réponse. Phrase : « Le fournisseur annonce −70 % de temps de restauration, sans méthode publiée ; à confirmer par notre test. »"
      ],
      [
+      "1-4",
       "C · 9 sur 10",
       "Échantillon inconnu (combien, lesquelles ?) ; « tentative » non définie ; auteur = un éditeur qui vend une protection ; période vague. Phrase : « Selon l'enquête d'un éditeur (échantillon non précisé), 90 % des entreprises auraient reçu une tentative d'hameçonnage. »"
      ],
      [
+      "1-4",
       "D · −40 %",
       "Base : quelle facture de départ ? Moyenne de quels clients (les satisfaits seulement : biais du survivant) ? Auteur = le fournisseur. Phrase : « Le fournisseur indique −40 % en moyenne ; clients et méthode non précisés : à recouper. »"
      ],
      [
+      "5",
       "E · votre recherche",
       "Même démarche. Beaucoup de pages commerciales laissent 3 à 5 questions sans réponse : c'est le résultat attendu."
      ],
      [
+      "6",
       "IA · questions",
       "Souvent oui : l'IA oublie l'auteur ou la durée. Gardez les cinq questions du cours comme liste de contrôle."
      ]
@@ -1324,39 +1425,48 @@ window.DATA = {
      "Le qualificatif dit la portée."
     ],
     "cols": [
+     "N°",
      "Case",
      "Exemple (sauvegarde de TransLor, fictif)"
     ],
     "widths": [
-     1.8,
-     7.0
+     0.7,
+     1.66,
+     6.44
     ],
     "rows": [
      [
+      "1",
       "Affirmation",
       "TransLor devrait ajouter une copie hors site de ses sauvegardes"
      ],
      [
+      "2",
       "Données",
       "Disque unique de 3 ans ; restauration de 9 h lors du test de juin (interne)"
      ],
      [
+      "3",
       "Garantie",
       "Une copie hors site permet de restaurer même si le local est touché, et réduit le temps d'arrêt"
      ],
      [
+      "3",
       "Fondement",
       "Règle 3-2-1 des bonnes pratiques de sauvegarde (à sourcer : guide d'organisme public)"
      ],
      [
+      "4",
       "Réfutation",
       "Sauf si les données sont peu critiques, ou si le débit empêche de restaurer vite"
      ],
      [
+      "4",
       "Qualificatif",
       "Probablement, pour les données d'exploitation ; sous réserve de tester la restauration depuis le cloud"
      ],
      [
+      "5",
       "IA · données proposées",
       "Souvent 0 ou 1 : des chiffres plausibles mais sans source. Une donnée utilisable porte une référence que vous avez ouverte."
      ]
@@ -1405,27 +1515,33 @@ window.DATA = {
      "Une IA propose des objections plausibles : c'est à vous de juger leur pertinence."
     ],
     "cols": [
+     "N°",
      "Type de réponse",
      "Exemple"
     ],
     "widths": [
-     2.2,
-     6.6
+     0.7,
+     2.02,
+     6.07
     ],
     "rows": [
      [
+      "4",
       "Un fait",
       "« Le test de juin donne 9 h de restauration ; le prestataire annonce 3 h. »"
      ],
      [
+      "4",
       "Une concession",
       "« Vous avez raison : le coût mensuel s'ajoute. Je précise la conclusion : rentable si le risque dépasse 5 %. »"
      ],
      [
+      "4",
       "Une réserve",
       "« Je n'ai pas le chiffre du débit : je le vérifie par un test avant la décision. »"
      ],
      [
+      "1-2",
       "Piège IA",
       "Si l'IA propose un chiffre pour réfuter une objection : le chercher et le sourcer avant de l'utiliser"
      ]
@@ -1482,42 +1598,50 @@ window.DATA = {
      "Conclure avec une réserve : les scores sont à sourcer."
     ],
     "cols": [
+     "N°",
      "Solution",
      "Poids de départ (30/30/25/15)",
      "Poids coût 50 % (50/20/20/10)"
     ],
     "widths": [
-     1.5,
-     3.4,
-     3.6
+     0.7,
+     1.43,
+     3.24,
+     3.43
     ],
     "rows": [
      [
+      "4",
       "Disque local",
       "5×0,30 + 2×0,30 + 2×0,25 + 5×0,15 = 1,5 + 0,6 + 0,5 + 0,75 = 3,35",
       "5×0,5 + 2×0,2 + 2×0,2 + 5×0,1 = 2,5 + 0,4 + 0,4 + 0,5 = 3,80"
      ],
      [
+      "1",
       "Cloud seul",
       "3×0,30 + 4×0,30 + 4×0,25 + 4×0,15 = 0,9 + 1,2 + 1,0 + 0,6 = 3,70",
       "3×0,5 + 4×0,2 + 4×0,2 + 4×0,1 = 1,5 + 0,8 + 0,8 + 0,4 = 3,50"
      ],
      [
+      "2",
       "Hybride",
       "2×0,30 + 5×0,30 + 5×0,25 + 3×0,15 = 0,6 + 1,5 + 1,25 + 0,45 = 3,80",
       "2×0,5 + 5×0,2 + 5×0,2 + 3×0,1 = 1,0 + 1,0 + 1,0 + 0,3 = 3,30"
      ],
      [
+      "3-5",
       "Classement",
       "1. Hybride (3,80) · 2. Cloud (3,70) · 3. Disque local (3,35)",
       "1. Disque local (3,80) · 2. Cloud (3,50) · 3. Hybride (3,30) : le classement s'inverse"
      ],
      [
+      "—",
       "Dans un tableur",
       "Une ligne par solution (notes en B à E), les poids en ligne 6 : =SOMMEPROD(B2:E2;$B$6:$E$6)",
       ""
      ],
      [
+      "7",
       "IA · calcul sans tableur",
       "Les modèles de langage se trompent parfois sur les calculs enchaînés : refaites le calcul vous-même. L'IA peut en revanche proposer la formule.",
       ""
@@ -1615,35 +1739,43 @@ window.DATA = {
      "Test de sensibilité sur le point faible."
     ],
     "cols": [
+     "N°",
      "Critère de qualité",
      "Ce qui vaut le maximum"
     ],
     "widths": [
-     2.6,
-     6.2
+     0.7,
+     2.39,
+     5.71
     ],
     "rows": [
      [
+      "1",
       "Critères",
       "Comparables, mesurables, utiles à la décision"
      ],
      [
+      "1",
       "Poids",
       "Justifiés par un besoin, somme égale à 100 %"
      ],
      [
+      "2",
       "Scores",
       "Sourcés ; les estimations sont signalées"
      ],
      [
+      "4",
       "Sensibilité",
       "Au moins un autre jeu de poids testé, résultat commenté"
      ],
      [
+      "3",
       "Conclusion",
       "Recommandation avec qualificatif et réserve"
      ],
      [
+      "5",
       "IA · critères proposés",
       "Gardez un critère s'il est mesurable, comparable et sourcé (voir « Choisir des critères mesurables »). Une IA propose souvent des critères flous (« innovation »)."
      ]
@@ -1916,39 +2048,48 @@ window.DATA = {
      "S'entraîner à voix haute, chronomètre en main."
     ],
     "cols": [
+     "N°",
      "Étape",
      "Exemple (fictif)"
     ],
     "widths": [
-     2.0,
-     6.8
+     0.7,
+     1.84,
+     6.26
     ],
     "rows": [
      [
+      "1",
       "Message clé",
       "« Une copie hors site coûte 1 800 € par an et évite une perte attendue de 4 000 €. »"
      ],
      [
+      "2",
       "Accroche",
       "« En juin, restaurer la sauvegarde a pris 9 heures. »"
      ],
      [
+      "2",
       "Problème",
       "« Un seul disque de 3 ans porte toute notre sauvegarde. »"
      ],
      [
+      "2",
       "Solution",
       "« Ajouter une copie hors site, avec un test de restauration. »"
      ],
      [
+      "2",
       "Preuve",
       "« 9 h contre 3 h ; 10 % de risque annuel (estimation). »"
      ],
      [
+      "2",
       "Appel",
       "« Validez 1 800 € par an avant la fin du mois. »"
      ],
      [
+      "5",
       "IA · jury simulé",
       "Gardez la question la plus difficile et préparez une réponse en trois temps : reformuler, fait, réserve."
      ]
@@ -1988,42 +2129,50 @@ window.DATA = {
      "Équipe : message clé, preuve, réserve."
     ],
     "cols": [
+     "N°",
      "Critère",
      "Points",
      "Ce qui vaut le maximum"
     ],
     "widths": [
-     2.4,
-     0.9,
-     5.5
+     0.7,
+     2.21,
+     0.83,
+     5.06
     ],
     "rows": [
      [
+      "3",
       "Message clé",
       "3",
       "Une phrase claire, répétée à la fin"
      ],
      [
+      "3",
       "Structure",
       "3",
       "Accroche, problème, solution, preuve, appel enchaînés"
      ],
      [
+      "3",
       "Clarté et vulgarisation",
       "3",
       "Aucun jargon non expliqué ; une analogie"
      ],
      [
+      "3",
       "Preuves et sources",
       "4",
       "Chiffres sourcés, sources citées oralement"
      ],
      [
+      "3",
       "Réponse aux questions",
       "4",
       "Reformule, répond par un fait, une concession ou une réserve"
      ],
      [
+      "3",
       "Voix et posture",
       "3",
       "Débit calme, regard, pas de lecture (total 20)"
@@ -2492,34 +2641,42 @@ window.DATA = {
     ],
     "rows": [
      [
+      "1",
       "Les 6 questions attendues (QQOQCCP, en entonnoir)",
       "1. Racontez-moi une matinée type. (large)  2. Qui utilise ces tournées, et qui décide ensuite ? (qui)  3. À quelle fréquence et à quelle heure cherchez-vous ces données ? (quand)  4. Où se trouvent ces données aujourd'hui ? (où)  5. Combien de temps y consacrez-vous, et que coûte un retard ? (combien)  6. À quoi servira l'export ? Comment saurez-vous que c'est réussi ? (pourquoi, confirmation)"
      ],
      [
+      "2",
       "Ce que Marc répond (fiche de rôle)",
       "Il ressaisit chaque matin les tournées dans Excel pour repérer celles qui risquent d'être en retard (45 minutes par jour) et prévenir les clients avant 7 h."
      ],
      [
+      "3",
       "Besoin réel",
       "Voir avant 7 h les tournées à risque de retard, pour prévenir les clients à temps"
      ],
      [
+      "2",
       "Fréquence du problème",
       "20 tournées × 12 % = 2,4 tournées en retard par jour ; 2,4 × 225 = 540 par an"
      ],
      [
+      "4",
       "Coût actuel de la ressaisie",
       "0,75 h × 225 j × 32 € = 5 400 € par gestionnaire ; × 15 = 81 000 € par an"
      ],
      [
+      "2",
       "Critère de réussite",
       "Alerte au moins 30 minutes avant le créneau, budget ≤ 2 k€"
      ],
      [
+      "3",
       "Phrase de reformulation",
       "« Vous voulez être alerté 30 minutes avant un retard probable pour prévenir vos clients, sans ressaisie ; l'export n'est qu'un moyen. »"
      ],
      [
+      "5",
       "IA · questions oubliées",
       "Souvent 1 à 3 (budget, contraintes de sécurité, qui accède aux données). Gardez celles qui servent la décision ; les questions génériques n'apportent rien."
      ]
@@ -2528,6 +2685,16 @@ window.DATA = {
      "Proposer « on vous fait un export » dès la première minute : la solution précède le besoin.",
      "Enchaîner des questions fermées : on obtient oui ou non, pas le contexte.",
      "Oublier de chiffrer : sans 81 000 €, la demande ne passe pas l'arbitrage du budget."
+    ],
+    "cols": [
+     "N°",
+     "Question",
+     "Réponse"
+    ],
+    "widths": [
+     0.7,
+     4.05,
+     4.05
     ]
    },
    "types": [
@@ -2565,22 +2732,27 @@ window.DATA = {
     ],
     "rows": [
      [
+      "1",
       "E1 : défauts",
       "Objet vide ; idée vague (« autrement ») ; pas d'action ni d'échéance"
      ],
      [
+      "2",
       "E1 : objet",
       "« Décision avant jeudi : changer l'ordre des tournées ? »"
      ],
      [
+      "2",
       "E1 : corps",
       "« Je propose d'inverser les tournées 3 et 4 pour gagner 20 minutes. Votre accord est nécessaire avant jeudi 12 h. Contexte : deux retards cette semaine. Je vous détaille en annexe. »"
      ],
      [
+      "2",
       "E2 : traitement",
       "Trois e-mails séparés, chacun avec son objet : « Planning lundi : validation », « Tablette Léa : panne », « Facture carburant : justificatif »"
      ],
      [
+      "1",
       "E3 : conseil",
       "Ne pas répondre à tous ; pour remercier, utiliser une réaction ou répondre à l'expéditeur seul"
      ]
@@ -2589,6 +2761,16 @@ window.DATA = {
      "Laisser un fil « Re: Re: Fwd » qui ne reflète plus le sujet.",
      "Mettre la demande à la fin d'un long paragraphe.",
      "Aucune échéance : la demande n'est jamais traitée."
+    ],
+    "cols": [
+     "N°",
+     "Question",
+     "Réponse"
+    ],
+    "widths": [
+     0.7,
+     4.05,
+     4.05
     ]
    },
    "outil": "e-mail réel, IA générative (test de lisibilité)",
@@ -4296,43 +4478,53 @@ window.DATA = {
      "Noter avec la grille, puis décider : garder, citer avec prudence, écarter."
     ],
     "cols": [
+     "N°",
      "Doc.",
      "Ce qu'on peut dire (notation indicative, discutable)"
     ],
     "widths": [
-     0.8,
-     8.0
+     0.7,
+     0.74,
+     7.36
     ],
     "rows": [
      [
+      "1-5",
       "Verdicts attendus",
       "D1 origine, à retenir · D2 origine, à retenir · D3 relais : citer le guide D2 · D4 position d'un acteur, à citer avec réserve · D5 origine, à retenir (noter version et date)"
      ],
      [
+      "1",
       "D1",
       "Source d'origine : organisme américain de normalisation, version finale (juillet 2025) qui remplace celle de mars 2020. Périmètre : systèmes d'identité de l'administration américaine ; référence technique mondiale. Indicatif : 10 à 11 / 12."
      ],
      [
+      "2",
       "D2",
       "Source d'origine : agence nationale française ; guide de 2021 (42 recommandations selon IT-Connect) qui recommande l'authentification multifacteur et déconseille le SMS comme second facteur (attaque par échange de carte SIM). Vérifier qu'une version plus récente n'existe pas. Indicatif : 10 / 12."
      ],
      [
+      "3",
       "D3",
       "Source secondaire : article qui relaie le guide D2. Utile pour le trouver, à ne pas citer à sa place : citer le guide. Indicatif : 6 / 12."
      ],
      [
+      "4",
       "D4",
       "Relais d'une annonce de Microsoft (2019) : le chiffre est attribué à des « études » non nommées ; l'article précise qu'il vise surtout des attaques automatisées mais son titre généralise. À citer comme « selon Microsoft (2019), non sourcé » ou à écarter. Indicatif : 4 / 12."
      ],
      [
+      "5",
       "D5",
       "Source d'origine (agence européenne, période du 1er juillet 2024 au 30 juin 2025 d'après sa page de présentation) : relever la version et la date, car plusieurs versions existent."
      ],
      [
+      "6-7",
       "Décision",
       "Fait : citer D1 ou D2 (d'origine). Position d'un acteur : D4, avec réserve. D3 : piste, pas une preuve."
      ],
      [
+      "8",
       "IA · note de D4",
       "Une IA note souvent D4 plus haut que vous : elle voit le titre et la date, pas l'absence d'étude nommée ni le financement. Elle résume ; vérifier la source reste votre travail."
      ]
@@ -4381,39 +4573,48 @@ window.DATA = {
      "Garder la date et l'adresse : une offre disparaît, la trace reste."
     ],
     "cols": [
+     "N°",
      "Extrait de l'offre",
      "Objectif du syllabus"
     ],
     "widths": [
-     4.6,
-     4.2
+     0.7,
+     4.23,
+     3.87
     ],
     "rows": [
      [
+      "2",
       "ANSSI : « assurer une veille quotidienne sur les vulnérabilités »",
       "O3 : chercher, évaluer, valider (et projet tutoré)"
      ],
      [
+      "2",
       "ANSSI : « rédiger les synthèses et les avis de sécurité »",
       "P2 : restituer par écrit ; O1 : un avis recommande, donc argumente"
      ],
      [
+      "2",
       "ANSSI : échanges avec les CERT et CSIRT homologues",
       "P1 : communiquer en posture d'ingénieur"
      ],
      [
+      "2",
       "Bouygues Telecom : rapports orientés risques",
       "P2 : restituer ; O1 : argumenter à partir de faits"
      ],
      [
+      "2",
       "Bouygues Telecom : vulgariser des sujets techniques",
       "O2 : maîtriser l'information spécialisée, puis la traduire"
      ],
      [
+      "—",
       "Limite",
       "Deux offres ne forment pas un échantillon : l'objectif est d'apprendre à lire une offre, pas de conclure sur « le » marché"
      ],
      [
+      "6",
       "IA · compétences ajoutées",
       "Souvent 1 à 3 : écrire des synthèses, vulgariser, travailler avec d'autres équipes. Retenez celles que l'offre dit réellement ; rejetez celles que l'IA invente."
      ]
@@ -4467,43 +4668,53 @@ window.DATA = {
      "Trier : signal fort ou faible, puis noter date et action."
     ],
     "cols": [
+     "N°",
      "Point",
      "À retenir"
     ],
     "widths": [
-     2.4,
-     6.4
+     0.7,
+     2.21,
+     5.89
     ],
     "rows": [
      [
+      "1",
       "1 · Requête",
       "Écrivez la requête comme à l'EX8 : passkeys OR « passwordless authentication » -banque. Trop large = du bruit ; trop étroite = rien."
      ],
      [
+      "1",
       "2 · Google Alerts",
       "Ouvrir google.com/alerts avec un compte Google ; saisir la requête ; « Afficher les options » : choisir la fréquence et l'envoi par e-mail ou par flux RSS ; créer l'alerte. Elle apparaît dans la liste de vos alertes."
      ],
      [
+      "2",
       "3 · Lecteur de flux",
       "Créer un compte gratuit Inoreader ; ajouter trois flux de types différents : une institutionnelle (CERT-FR : https://cert.cyber.gouv.fr/flux-rss/), une scientifique (flux d'un dépôt d'articles), une presse ou éditeur (à pondérer)."
      ],
      [
+      "2",
       "4 · Plan gratuit",
       "Inoreader : 150 abonnements, 30 règles, 50 filtres en gratuit d'après sa page tarifs (consultée le 23/10/2026) : largement suffisant ici."
      ],
      [
+      "3",
       "5 · Lecture après 5 minutes",
       "Le nombre d'articles non lus dépend des flux (de quelques dizaines à quelques centaines) ; ne pas tout lire : trier."
      ],
      [
+      "4",
       "6 · Export OPML",
       "L'export OPML (menu des préférences ou de l'import/export du lecteur) donne un fichier de votre liste de flux. Un outil peut disparaître (Pocket a fermé le 8 juillet 2025, Netvibes le 2 juin 2025) ; le format reste."
      ],
      [
+      "5",
       "7 · Signal fort ou faible",
       "Fort : cité par plusieurs sources indépendantes. Faible : rare, ambigu, mais qui pourrait changer la décision. Un signal faible se vérifie avant de s'y fier : on cherche une deuxième source."
      ],
      [
+      "—",
       "8 · Carnet de veille",
       "Notez date de lecture, source, une ligne de résumé et l'action (garder, recouper, écarter) : une veille se refait et se date."
      ]
@@ -4812,39 +5023,48 @@ window.DATA = {
      "Citer avec sa nature."
     ],
     "cols": [
+     "N°",
      "Type de page",
      "Comment la traiter"
     ],
     "widths": [
-     3.0,
-     5.8
+     0.7,
+     2.76,
+     5.34
     ],
     "rows": [
      [
+      "3",
       "Témoignage client publié par le fournisseur",
       "Position du fournisseur ; sans chiffre vérifiable (cas Colas / Sindup lu le 23/10/2026)"
      ],
      [
+      "3",
       "Comparatif avec liens d'affiliation",
       "Le revenu dépend du clic : à pondérer, chercher une autre source"
      ],
      [
+      "3",
       "Classement d'un cabinet d'analystes",
       "Vérifier qui l'a commandé et si la méthode est publiée (selon le classement choisi)"
      ],
      [
+      "3",
       "Site d'avis d'utilisateurs",
       "Nombre d'avis, avis vérifiés ou non, biais de sélection"
      ],
      [
+      "5",
       "Phrase possible",
       "« Selon <site> (date), <produit> est classé premier ; la méthode n'est pas publiée et le site perçoit une commission : position à recouper. »"
      ],
      [
+      "6",
       "IA · meilleur choix selon l'IA",
       "Rarement. Une IA réécrit des classements existants sans dire qui les finance : remontez à la page d'origine."
      ],
      [
+      "1-3",
       "Où chercher",
       "« À propos », « Méthodologie », mentions légales, mentions « affilié » ou « sponsorisé ». Absence d'indication = « non indiqué », à signaler dans la citation."
      ]
@@ -4911,39 +5131,48 @@ window.DATA = {
      "Conclure avec prudence : cinq mesures, c'est peu."
     ],
     "cols": [
+     "N°",
      "Comparaison",
      "Résultat"
     ],
     "widths": [
-     2.6,
-     6.2
+     0.7,
+     2.39,
+     5.71
     ],
     "rows": [
      [
+      "2",
       "Écart-type de A, pas à pas",
       "Moyenne : 200 ÷ 5 = 40. Écarts à la moyenne : +1, −2, +5, 0, −4. Carrés : 1, 4, 25, 0, 16 ; somme = 46. Variance : 46 ÷ (5−1) = 11,5. Écart-type : √11,5 = 3,4. (Même résultat que =ECARTYPE.)"
      ],
      [
+      "1-4",
       "A et B",
       "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9. L'écart (0,4) est bien plus petit que l'écart-type (3,4) : bruit. Conclusion : aucune différence établie."
      ],
      [
+      "5-6",
       "C et D",
       "Moyennes 52,0 et 42,0 : écart 10 ; écarts-types 1,6 et 1,6 : l'écart vaut plus de 6 écarts-types : probablement réel. Conclusion : D est plus rapide d'environ 10 minutes sur ces cinq mesures."
      ],
      [
+      "—",
       "Test statistique (facultatif)",
       "Un test de Student (fonction de tableur, ou avis d'un statisticien) donne environ 0,87 pour A–B et 0,00001 pour C–D (calcul fait à la construction du cours). Plus ce nombre est petit, moins l'écart s'explique par le hasard."
      ],
      [
+      "—",
       "t-test et ANOVA",
       "À connaître de nom : le t-test compare deux groupes, l'ANOVA plus de deux. Pour les utiliser correctement, demandez conseil à un statisticien."
      ],
      [
+      "7",
       "Phrases possibles",
       "A–B : « l'écart observé (0,4 min) est inférieur à la dispersion des mesures ; aucune différence n'est établie. » C–D : « D est plus rapide d'environ 10 min sur ces cinq mesures ; à confirmer avec plus de mesures. »"
      ],
      [
+      "8",
       "IA · B meilleur que A ?",
       "Une IA répond souvent « oui, B est légèrement meilleur » en comparant 39,6 à 40,0, sans parler de la dispersion. Refaites le calcul : l'écart est du bruit."
      ]
@@ -5118,37 +5347,44 @@ window.DATA = {
      "Ajouter filetype:pdf si vous voulez le document, puis l'ouvrir : titre, date, version."
     ],
     "cols": [
+     "N°",
      "Document",
      "Requête efficace (exemple)",
      "À contrôler"
     ],
     "widths": [
-     1.4,
-     3.4,
-     3.2
+     0.7,
+     1.42,
+     3.44,
+     3.24
     ],
     "rows": [
      [
+      "1",
       "① Guide ANSSI",
       "« authentification multifacteur » « mots de passe » site:cyber.gouv.fr filetype:pdf",
       "Titre exact « Recommandations relatives à l'authentification multifacteur et aux mots de passe », version de 2021 (ancien domaine : ssi.gouv.fr)."
      ],
      [
+      "2",
       "② NIST",
       "« 800-63B » site:nist.gov",
       "Prendre la version la plus récente : SP 800-63B-4 (juillet 2025) ; les anciennes versions restent en ligne."
      ],
      [
+      "3",
       "③ NIS2",
       "directive 2022/2555 site:eur-lex.europa.eu",
       "Numéro (UE) 2022/2555 ; texte du Journal officiel de l'Union européenne ; choisir la langue française."
      ],
      [
+      "4",
       "Opérateur gagnant",
       "site: pour presque tous les cas ; filetype:pdf pour le guide.",
       "Sans site:, les premiers résultats sont souvent des blogs ou des résumés."
      ],
      [
+      "5",
       "IA · adresse proposée",
       "Souvent une adresse plausible mais fausse ou périmée (page déplacée, version ancienne).",
       "Ouvrez toujours l'adresse : une IA propose, le site officiel prouve."
@@ -5201,31 +5437,38 @@ window.DATA = {
      "Tester une archive ouverte (HAL, arXiv), puis Unpaywall ; sinon noter « accès payant »."
     ],
     "cols": [
+     "N°",
      "Étape",
      "Résultat attendu (article 1)"
     ],
     "widths": [
-     1.8,
-     6.2
+     0.7,
+     1.82,
+     6.28
     ],
     "rows": [
      [
+      "1",
       "Recherche",
       "Titre exact entre guillemets dans Scholar : la page de résultats propose une version arXiv (arxiv.org/abs/2305.00945) et la page de l'éditeur."
      ],
      [
+      "2",
       "Version gratuite",
       "arXiv : arxiv.org/abs/2305.00945 (version 1 du 1er mai 2023), PDF libre."
      ],
      [
+      "3",
       "Voies pour l'article 2",
       "1. Lien [PDF] à droite du résultat. 2. « Toutes les versions ». 3. HAL (hal.science) pour les travaux français, arXiv en informatique. 4. L'extension Unpaywall (unpaywall.org) signale une version légale gratuite. 5. Le bouton « Find Available PDF » de Zotero fait la même recherche."
      ],
      [
+      "4",
       "Si aucune version",
       "Ne pas contourner l'accès payant : citer le résumé comme tel, ou demander l'article par la bibliothèque de l'école."
      ],
      [
+      "5",
       "IA · lien proposé",
       "Souvent un lien inventé ou un site pirate : n'ouvrez que des adresses d'éditeurs, d'archives ouvertes ou d'institutions."
      ]
@@ -5272,31 +5515,38 @@ window.DATA = {
      "Un verbe prudent : « indique », « annonce », « suggère »."
     ],
     "cols": [
+     "N°",
      "Fait",
      "Phrase possible"
     ],
     "widths": [
-     1.2,
-     7.0
+     0.7,
+     1.19,
+     6.91
     ],
     "rows": [
      [
+      "1",
       "①",
       "« Selon une étude de Microsoft sur ses propres comptes Azure AD (Meyer et al., 2023), l'authentification multifacteur réduit de 99,22 % le risque de compromission ; l'étude est réalisée par l'éditeur du service. »"
      ],
      [
+      "2",
       "②",
       "« Le fournisseur annonce une restauration 70 % plus rapide (brochure, 2025) ; la méthode et la base de comparaison ne sont pas publiées : à confirmer par un test. »"
      ],
      [
+      "3",
       "③",
       "« Lors d'un test interne en juin, la restauration a pris 9 heures (un seul essai) ; à confirmer par plusieurs mesures. »"
      ],
      [
+      "4",
       "④ votre sujet",
       "L'enseignant vérifie une phrase par équipe : la source est-elle ouverte et lue ? Le chiffre est-il bien celui de la source ? La limite est-elle dite ?"
      ],
      [
+      "5",
       "IA · plus percutant",
       "Une IA enlève souvent la limite et durcit le verbe (« prouve »). Remettez la limite : une phrase honnête est plus crédible qu'une phrase forte."
      ]
@@ -5344,27 +5594,33 @@ window.DATA = {
      "Citer avec la date de consultation ; archiver soi-même si la page est importante."
     ],
     "cols": [
+     "N°",
      "Étape",
      "Ce que vous devez constater"
     ],
     "widths": [
-     1.8,
-     6.2
+     0.7,
+     1.82,
+     6.28
     ],
     "rows": [
      [
+      "1",
       "Copies",
       "Une page très consultée a souvent des centaines de copies ; une page récente ou peu visible peut n'en avoir aucune."
      ],
      [
+      "2",
       "Comparaison",
       "Les chiffres, les prix, les promesses (« −70 % ») et la date de mise à jour changent souvent : c'est la preuve que citer sans date est fragile."
      ],
      [
+      "3",
       "Page modifiée ?",
       "Si oui, citez la version que vous avez lue, avec sa date."
      ],
      [
+      "4",
       "Citation modèle",
       "« Nom de l'organisme, titre de la page, adresse, consulté le jj/mm/aaaa (copie archivée : adresse web.archive.org). »"
      ]
