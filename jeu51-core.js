@@ -57,6 +57,7 @@
   function counts(G, jeu) { var cs = D.jeux[jeu].cartes; return { base: cs.filter(function (c) { return !c.extra; }).length, extra: cs.filter(function (c) { return c.extra; }).length }; }
   function setExtra(G, on) { G.extra = !!on; }
   /* Jeu suivant (dir = 1) ou précédent (dir = -1) : les positions et les points sont conservés ; la question ouverte se termine normalement. */
+  function setJeu(G, k) { if (D.jeux[k]) G.jeux = [k]; return G.jeux[0]; }
   function nextJeu(G, dir) { var ks = Object.keys(D.jeux), i = ks.indexOf(G.jeux[0]), n = Math.max(0, Math.min(ks.length - 1, (i < 0 ? 0 : i) + (dir || 1))); G.jeux = [ks[n]]; return ks[n]; }
   function draw(G, sid, now) {
     if (!canDraw(G, sid, now)) return false;
@@ -146,6 +147,6 @@
         cur: T.cur ? { jeu: T.cur.jeu, id: T.cur.id, at: T.cur.at, answered: Object.keys(T.cur.ans), mine: !!T.cur.ans[sid] } : null,
         last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res } : null } };
   }
-  var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, nextJeu: nextJeu, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur };
+  var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, nextJeu: nextJeu, setJeu: setJeu, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);

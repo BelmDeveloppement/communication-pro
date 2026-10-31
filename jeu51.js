@@ -223,9 +223,11 @@
       if (m.t === "draw") C.draw(G, real, t); else if (m.t === "ans") C.answer(G, real, m.ans, t);
       if (net) net.send(sid, C.snapshot(G, real, t)); dirty = true;
     }
+    var ctl = null;
+    try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "jeu") { C.setJeu(G, m.jeu); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
     net = hostNet(G.code, onmsg, function (s) { status = s; refresh(); });
     var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); refresh(); }, 1000);
-    onLeave(function () { dead = true; clearInterval(flush); if (net) net.close(); document.body.classList.remove("jx-full"); });
+    onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
 
     /* simulation (démo) */
     function simStart() {
@@ -331,13 +333,19 @@
     var list = [], jk = Object.keys(D.jeux), ix = 0;
     jk.forEach(function (k) { D.jeux[k].cartes.forEach(function (c) { list.push({ jeu: k, c: c }); }); });
     var saved = parseInt(LSget("j-test") || 0, 10); if (saved > 0 && saved < list.length) ix = saved;
-    var box = h("div", {});
-    function go(i) { ix = Math.max(0, Math.min(list.length - 1, i)); LSset("j-test", ix); draw(); window.scrollTo(0, 0); }
+    var box = h("div", {}), sync = true, tower = null, ctl = null, info = h("p", { class: "meta" }, "");
+    try { ctl = new BroadcastChannel("cpro-j-ctl-" + CODE); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "pong") { tower = m.jeu; showInfo(); } }; ctl.postMessage({ t: "ping" }); } catch (e) {}
+    function showInfo() { info.textContent = tower ? (sync ? "● Synchronisé avec la tour de contrôle : les joueurs jouent le jeu " + tower + " (au prochain tirage)." : "○ Tour détectée (jeu " + tower + ") mais synchronisation désactivée : aperçu seulement.") : "○ Aucune tour de contrôle ouverte dans ce navigateur : aperçu seulement."; info.className = tower && sync ? "meta" : "warn"; }
+    function pushJeu() { if (sync && ctl) try { ctl.postMessage({ t: "jeu", jeu: list[ix].jeu }); } catch (e) {} }
+    function go(i) { ix = Math.max(0, Math.min(list.length - 1, i)); LSset("j-test", ix); var before = list[ix].jeu; draw(); if (before !== lastJeu) { lastJeu = before; pushJeu(); } window.scrollTo(0, 0); }
+    var lastJeu = list[ix].jeu;
     function jump(dir) { var cur = list[ix].jeu, j = jk.indexOf(cur), t = jk[Math.max(0, Math.min(jk.length - 1, j + dir))]; for (var i = 0; i < list.length; i++) if (list[i].jeu === t) return go(i); }
     function draw() {
       var it = list[ix], c = it.c, j = D.jeux[it.jeu], n = list.filter(function (x) { return x.jeu === it.jeu; }), pos = n.indexOf(it) + 1;
       box.innerHTML = "";
-      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Rien n'est envoyé aux joueurs."));
+      var cb = h("input", { type: "checkbox", style: "width:auto" }); cb.checked = sync; cb.addEventListener("change", function () { sync = cb.checked; if (sync) pushJeu(); showInfo(); });
+      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être."));
+      box.appendChild(h("label", { style: "display:block;margin:6px 0" }, cb, " Synchroniser la partie : changer de jeu ici change le jeu des joueurs"), info); showInfo();
       box.appendChild(h("h1", {}, "Jeu " + it.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "meta" }, "Zone " + j.zone + " · carte " + pos + " / " + n.length + (c.extra ? " · carte supplémentaire" : "") + " · type " + c.t + " · " + (ix + 1) + " / " + list.length + " au total"));
       var card = h("div", { class: "card" }); box.appendChild(card);
       card.appendChild(h("p", { class: "big" }, c.q));
@@ -351,7 +359,7 @@
     var bar = h("div", { class: "jx-fab" },
       h("button", { class: "sec", onclick: function () { jump(-1); } }, "⏮ Jeu"), h("button", { onclick: function () { go(ix - 1); } }, "◀ Carte"), h("button", { onclick: function () { go(ix + 1); } }, "Carte ▶"), h("button", { class: "sec", onclick: function () { jump(1); } }, "Jeu ⏭"));
     function key(e) { if (e.key === "ArrowRight") go(ix + 1); else if (e.key === "ArrowLeft") go(ix - 1); else if (e.key === "ArrowDown") jump(1); else if (e.key === "ArrowUp") jump(-1); }
-    document.addEventListener("keydown", key); onLeave(function () { document.removeEventListener("keydown", key); bar.remove(); });
+    document.addEventListener("keydown", key); onLeave(function () { document.removeEventListener("keydown", key); bar.remove(); try { ctl && ctl.close(); } catch (e) {} });
     mount(box); document.body.appendChild(bar); draw();
   }
 
