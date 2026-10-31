@@ -44,18 +44,17 @@
   function entry() {
     var jeux = Object.keys(D.jeux);
     mount(h("h1", {}, "5 · La route de l'état de l'art"),
-      h("p", { class: "meta" }, "Un plateau de 30 cases en trois actes. Chaque équipe joue sur son téléphone ; la bonne réponse fait avancer le pion."),
-      h("div", { class: "grid" }, h("a", { class: "tile", href: "#/plateau/equipe" }, h("b", {}, "Je suis une équipe"), h("div", { class: "meta" }, "Rejoindre la partie avec le code de la table")),
-        h("a", { class: "tile g", href: "#/plateau/anim" }, h("b", {}, "Je suis l'animateur"), h("div", { class: "meta" }, "Ouvrir la partie, projeter le plateau, suivre les tables")),
+      h("p", { class: "meta" }, "Un plateau de 30 cases en trois actes. Chaque joueur répond sur son téléphone ou son ordinateur ; la table avance ensemble."),
+      h("div", { class: "grid" }, h("a", { class: "tile", href: "#/j" }, h("b", {}, "Je suis un joueur"), h("div", { class: "meta" }, "Rejoindre la partie : prénom, numéro de table, code ROUTE")),
         h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, jeux.length + " jeux : 5.1 à 5.8")),
         h("a", { class: "tile r", href: "#/plateau/demo" }, h("b", {}, "Partie démo en 3D"), h("div", { class: "meta" }, "Une partie simulée avec les vraies cartes, la roue et les pions (sans téléphones)"))),
       h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_5_A2.pdf" }, "Plateau A2 (impression chez un imprimeur)"), " · ", h("a", { href: "Plateau_5_A3.pdf" }, "A3 (essai)"), " · ", h("a", { href: "Plateau_5_pions.pdf" }, "Pions à découper (A4)"))));
   }
   function rules() {
     mount(h("h1", {}, "Règles du plateau"),
-      h("div", { class: "card" }, h("ol", {}, h("li", {}, "Chaque équipe a un pion, posé sur « Départ »."), h("li", {}, "À son tour, l'équipe tire une carte du jeu de la prochaine case de jeu, répond sur son téléphone, puis lit le corrigé."), h("li", {}, "Le nombre de points (0 à 3) est le nombre de cases dont le pion avance."), h("li", {}, "Une case « ? » est un événement : il fait avancer, reculer ou rejouer."), h("li", {}, "Une roue tourne puis s'arrête sur les points gagnés : le pion avance exactement de ce nombre de cases, même au-delà de la fin de l'acte."), h("li", {}, "Le plateau a trois actes, un par séance chronométrée (30, 30 et 40 minutes). Une équipe qui a terminé l'acte est « en attente des autres équipes ». À la fin du temps, l'animateur ouvre l'acte suivant et les équipes en retard sont replacées au début de cet acte."), h("li", {}, "Arriver à « Examen » termine la partie. Le classement : la case atteinte, puis les points."))),
+      h("div", { class: "card" }, h("ol", {}, h("li", {}, "Un joueur = un étudiant, sur son téléphone ou son ordinateur. Une table réunit jusqu'à 5 joueurs autour du même plateau (tables 1 à 5). Chaque joueur a son pion, de la couleur affichée sur son écran."), h("li", {}, "À tour de rôle, un joueur tire la carte pour la table. Tous les joueurs de la table répondent à la même carte, en même temps, sur leur écran."), h("li", {}, "Chaque réponse est corrigée seule : 0 à 3 points, c'est le nombre de cases dont votre pion avance."), h("li", {}, "Une roue tourne puis s'arrête sur vos points (aucun hasard : le résultat vient de votre réponse). Vous déplacez ensuite votre pion de ce nombre de cases."), h("li", {}, "Une case « ? » est un événement : il fait avancer ou reculer le pion de celui qui s'y arrête."), h("li", {}, "La séance est chronométrée. À la fin du temps, plus de nouvelle carte. Le score d'une table est la somme des cases atteintes par ses joueurs ; le classement des tables se fait sur ce score, puis sur les points."), h("li", {}, "Arriver à « Examen » termine la route d'un joueur."))),
       h("div", { class: "card" }, h("h2", {}, "Les cinq zones du syllabus"), Object.keys(D.zones).map(function (z) { return h("p", {}, h("span", { class: "team", style: "background:" + D.zones[z].col }, z), D.zones[z].syl); })),
-      Object.keys(D.jeux).map(function (k) { var j = D.jeux[k]; return h("div", { class: "card" }, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", { class: "meta" }, "Zone " + j.zone + " · acte " + j.acte + " · " + j.duree + " min par carte environ"), h("p", {}, j.regle)); }),
+      h("div", {}, Object.keys(D.jeux).map(function (k) { var j = D.jeux[k]; return h("div", { class: "card" }, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", { class: "meta" }, "Zone " + j.zone + " · acte " + j.acte + " · " + j.duree + " min par carte environ"), h("p", {}, j.regle)); })),
       h("p", {}, h("a", { href: "#/plateau" }, "← Retour")));
   }
 
@@ -467,6 +466,6 @@
     load3d(box, function (a) { if (a) { api = a; api.update(list()); } else { box.style.display = "none"; fb.appendChild(h("p", { class: "warn" }, "La 3D n'est pas disponible sur cet appareil : plateau 2D affiché.")); fb.appendChild(boardSvg(list(), { big: true })); } }, { speed: function () { return speed; } });
   }
 
-  window.PLATEAU = { route: function (p) { var a = p[0] || ""; if (a === "equipe") return teamJoinPage(); if (a === "anim") return animPage(); if (a === "regles") return rules(); if (a === "demo") return demoPage(); return entry(); } };
+  window.PLATEAU = { boardSvg: boardSvg, route: function (p) { var a = p[0] || ""; if (a === "equipe") return teamJoinPage(); if (a === "anim") return animPage(); if (a === "regles") return rules(); if (a === "demo") return demoPage(); return entry(); } };
   if ((location.hash || "").indexOf("#/plateau") === 0) window.dispatchEvent(new Event("hashchange"));
 })();
