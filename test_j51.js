@@ -24,3 +24,12 @@ ok(J.snapshot(G,"a",t+10).table.players.length===5,"snap");
 J.draw(G,"p0",t+11);J.tick(G,t+11+400000);ok(!G.tables.T1.cur,"timeout clôture");
 J.tick(G,t+31*60000);ok(G.status==="ended"&&!J.canDraw(G,"p1",t+31*60000),"fin séance");
 JSON.parse(JSON.stringify(G));console.log(n+" assertions");
+// --- cartes supplémentaires et jeu suivant
+var G2=J.newGame({}),t2=5000;J.join(G2,{sid:"a",nom:"A",table:"1"},t2);J.start(G2,t2);
+var seen={};for(var k=0;k<8;k++){J.draw(G2,"a",t2);var cu=G2.tables.T1.cur;seen[cu.id]=1;ok(+cu.id<=8,"base seulement "+cu.id);J.answer(G2,"a","x",t2);G2.players.a.last=t2;}
+ok(Object.keys(seen).length===8,"8 cartes de base distinctes");
+J.setExtra(G2,true);var ex=0;for(var k=0;k<12;k++){J.draw(G2,"a",t2);ex+= +G2.tables.T1.cur.id>8?1:0;J.answer(G2,"a","x",t2);}
+ok(ex>=10,"cartes supplémentaires tirées : "+ex);
+ok(J.nextJeu(G2,1)==="5.2"&&G2.jeux[0]==="5.2","jeu suivant");ok(J.nextJeu(G2,-1)==="5.1"&&J.nextJeu(G2,-1)==="5.1","jeu précédent borné");
+J.nextJeu(G2,1);J.draw(G2,"a",t2);ok(G2.tables.T1.cur.jeu==="5.2","tirage 5.2");
+console.log(n+" assertions (total)");

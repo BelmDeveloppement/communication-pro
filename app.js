@@ -587,7 +587,7 @@
     if (a === "session") return sessionPage();
     if (a === "prof") return profPage();
     if (a === "animateur") return aidePage();
-    if ((a === "j" || a === "tour") && window.J51) return window.J51.route(a);
+    if ((a === "j" || a === "tour" || a === "test") && window.J51) return window.J51.route(a);
     if (a === "plateau" && window.PLATEAU) return window.PLATEAU.route(p.slice(1));
     if (a === "outils") return outilsPage();
     if (a === "sujets") return sujetsPage();
