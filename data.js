@@ -6614,25 +6614,31 @@ window.DATA = {
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
+   "route": "j",
    "page": 15,
    "titre": "Le plateau : votre fil conducteur sur les 2,5 jours (séance 0 : former les équipes, 5 min)"
   },
   {
+   "t": "jeu5",
+   "route": "j",
+   "page": 16,
+   "titre": "Plateau · règles en 1 minute : recul, pari, cases à effet"
+  },
+  {
    "t": "page",
    "route": "sujets",
-   "page": 18,
+   "page": 19,
    "titre": "19 sujets pour votre état de l'art"
   },
   {
    "t": "ex",
    "id": "EX1",
-   "page": 19
+   "page": 20
   },
   {
    "t": "page",
    "route": "dossier",
-   "page": 21,
+   "page": 22,
    "titre": "Votre fil rouge : le dossier d'état de l'art"
   },
   {
@@ -6642,17 +6648,17 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX5",
-   "page": 25
+   "page": 26
   },
   {
    "t": "ex",
    "id": "EX6",
-   "page": 28
+   "page": 29
   },
   {
    "t": "ex",
    "id": "EX4",
-   "page": 32
+   "page": 33
   },
   {
    "t": "module",
@@ -6661,37 +6667,37 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX7",
-   "page": 37
+   "page": 38
   },
   {
    "t": "ex",
    "id": "M1",
-   "page": 40
+   "page": 41
   },
   {
    "t": "ex",
    "id": "EX8",
-   "page": 43
+   "page": 44
   },
   {
    "t": "ex",
    "id": "EX9",
-   "page": 49
+   "page": 50
   },
   {
    "t": "ex",
    "id": "M2",
-   "page": 51
+   "page": 52
   },
   {
    "t": "ex",
    "id": "EX10",
-   "page": 54
+   "page": 55
   },
   {
    "t": "ex",
    "id": "V4",
-   "page": 57
+   "page": 58
   },
   {
    "t": "module",
@@ -6700,22 +6706,22 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX11b",
-   "page": 61
+   "page": 62
   },
   {
    "t": "ex",
    "id": "EX12",
-   "page": 63
+   "page": 64
   },
   {
    "t": "ex",
    "id": "EX13",
-   "page": 66
+   "page": 67
   },
   {
    "t": "ex",
    "id": "M4",
-   "page": 68
+   "page": 69
   },
   {
    "t": "module",
@@ -6724,33 +6730,33 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX14",
-   "page": 72
+   "page": 73
   },
   {
    "t": "ex",
    "id": "F6",
-   "page": 75
+   "page": 76
   },
   {
    "t": "ex",
    "id": "EX15",
-   "page": 79
+   "page": 80
   },
   {
    "t": "seance",
    "titre": "Plateau · séance 1 : retour sur le jour 1",
-   "page": 81
+   "page": 82
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 82,
+   "route": "j",
+   "page": 83,
    "titre": "Jeu 5.1 · Course aux requêtes"
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 83,
+   "route": "j",
+   "page": 84,
    "titre": "Jeu 5.2 · La source tient-elle ?"
   },
   {
@@ -6760,27 +6766,27 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX16",
-   "page": 87
+   "page": 88
   },
   {
    "t": "ex",
    "id": "EX17",
-   "page": 90
+   "page": 91
   },
   {
    "t": "ex",
    "id": "EX18",
-   "page": 93
+   "page": 94
   },
   {
    "t": "ex",
    "id": "EX19",
-   "page": 96
+   "page": 97
   },
   {
    "t": "ex",
    "id": "EX20",
-   "page": 98
+   "page": 99
   },
   {
    "t": "module",
@@ -6789,59 +6795,59 @@ window.DATA = {
   {
    "t": "ex",
    "id": "V7",
-   "page": 103
+   "page": 104
   },
   {
    "t": "ex",
    "id": "V8",
-   "page": 106
+   "page": 107
   },
   {
    "t": "ex",
    "id": "EX21",
-   "page": 109
+   "page": 110
   },
   {
    "t": "ex",
    "id": "EX22",
-   "page": 111
+   "page": 112
   },
   {
    "t": "ex",
    "id": "EX23",
-   "page": 114
+   "page": 115
   },
   {
    "t": "ex",
    "id": "M3",
-   "page": 117
+   "page": 118
   },
   {
    "t": "ex",
    "id": "EX24",
-   "page": 120
+   "page": 121
   },
   {
    "t": "seance",
    "titre": "Plateau · séance 2 : argumenter",
-   "page": 122
+   "page": 123
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 123,
+   "route": "j",
+   "page": 124,
    "titre": "Jeu 5.3 · La chasse aux biais et aux sophismes"
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 124,
+   "route": "j",
+   "page": 125,
    "titre": "Jeu 5.4 · Reconstituer l'argument"
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 125,
+   "route": "j",
+   "page": 126,
    "titre": "Jeu 5.5 · Le chiffre piégé"
   },
   {
@@ -6851,39 +6857,39 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX25",
-   "page": 128
+   "page": 129
   },
   {
    "t": "ex",
    "id": "EX26",
-   "page": 133
+   "page": 134
   },
   {
    "t": "ex",
    "id": "EX27",
-   "page": 136
+   "page": 137
   },
   {
    "t": "seance",
    "titre": "Plateau · séance 3 : écrire et défendre",
-   "page": 138
+   "page": 139
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 139,
+   "route": "j",
+   "page": 140,
    "titre": "Jeu 5.6 · Le mail qui obtient une réponse"
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 140,
+   "route": "j",
+   "page": 141,
    "titre": "Jeu 5.7 · La phrase honnête"
   },
   {
    "t": "jeu5",
-   "route": "plateau/equipe",
-   "page": 141,
+   "route": "j",
+   "page": 142,
    "titre": "Jeu 5.8 · Le pitch éclair"
   },
   {
@@ -6893,18 +6899,66 @@ window.DATA = {
   {
    "t": "ex",
    "id": "EX29",
-   "page": 144
+   "page": 145
   },
   {
    "t": "ex",
    "id": "F9",
-   "page": 146
+   "page": 147
   },
   {
    "t": "page",
    "route": "outils",
-   "page": 147,
+   "page": 148,
    "titre": "Boîte à outils (1/2) : chercher, vérifier, lire"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 161,
+   "titre": "Jeu 5.9 · Détective de la fausse référence"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 163,
+   "titre": "Jeu 5.10 · Triangulation"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 166,
+   "titre": "Jeu 5.11 · Lire un article scientifique"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 168,
+   "titre": "Jeu 5.12 · Jury contradictoire"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 171,
+   "titre": "Jeu 5.13 · Ordre de grandeur"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 173,
+   "titre": "Jeu 5.14 · Résumé pour le directeur"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 175,
+   "titre": "Jeu 5.15 · Citer sans plagier"
+  },
+  {
+   "t": "jeu5",
+   "route": "j",
+   "page": 176,
+   "titre": "Jeu 5.16 · Questions du jury"
   }
  ],
  "labels": {
