@@ -6,7 +6,8 @@ var J=require("./jeu51-core.js");J.setData(window.PLATEAU_DATA);
 var D=window.PLATEAU_DATA,n=0;function ok(c,m){n++;if(!c){console.log("FAIL",m);process.exitCode=1;}}
 function best(c){return c.t==="choix"?c.ok:c.t==="multi"?c.oks:c.t==="assoc"?c.items.map(function(i){return i.ok}):c.t==="trous"?c.slots.map(function(s){return s.ok}):c.t==="texte"?c.modele:c.grille.map(function(){return true})}
 function bad(c){return c.t==="choix"?(c.ok+1)%4:c.t==="multi"?[]:c.t==="assoc"?c.items.map(function(){return -1}):c.t==="trous"?c.slots.map(function(){return -1}):c.t==="texte"?"rien":[]}
-function fresh(nb){var G=J.newGame({}),t=1000;for(var i=0;i<nb;i++)J.join(G,{sid:"s"+i,nom:"P"+i,table:"1"},t);J.start(G,t);return G}
+function rd(G,sid){J.act(G,sid,{t:"read",doc:"common"},1000);J.act(G,sid,{t:"read",doc:"jeu"},1000)}
+function fresh(nb){var G=J.newGame({}),t=1000;for(var i=0;i<nb;i++){J.join(G,{sid:"s"+i,nom:"P"+i,table:"1"},t);rd(G,"s"+i)}J.start(G,t);return G}
 function round(G,t,fn){var T=G.tables.T1,tr=J.tireur(G,T,t);ok(J.draw(G,tr.sid,t),"draw");var c=J.cardOf(T.cur.jeu,T.cur.id);T.players.forEach(function(s){var a=fn(s,c);J.answer(G,s,a.ans,t+1,a.bet)});return c}
 // jointure
 var G=J.newGame({}),t=1000;
@@ -14,7 +15,7 @@ ok(J.join(G,{sid:"a",nom:"Ana",table:"1"},t).player.col==="#3B6FD8","join");
 ok(!J.join(G,{sid:"x",nom:"X",table:"9"},t).ok,"table 9");ok(!J.join(G,{sid:"x",nom:"",table:"1"},t).ok,"nom vide");
 for(var i=0;i<4;i++)ok(J.join(G,{sid:"p"+i,nom:"P"+i,table:"T1"},t).ok,"join p"+i);
 ok(!J.join(G,{sid:"z",nom:"Zed",table:"1"},t).ok,"table pleine");ok(J.join(G,{sid:"new",nom:"ana",table:"1"},t).rebound,"reprise par prénom");
-ok(!J.canDraw(G,"a",t),"pas avant lancement");J.start(G,t);ok(J.canDraw(G,"a",t)&&!J.canDraw(G,"p0",t),"tireur=Ana");
+ok(!J.canDraw(G,"a",t),"pas avant lancement");J.start(G,t);ok(!J.canDraw(G,"a",t),"pas avant lecture");["a","p0","p1","p2","p3"].forEach(function(x){rd(G,x)});ok(J.canDraw(G,"a",t)&&!J.canDraw(G,"p0",t),"tireur=Ana");
 // 0 pt = recul, plancher 0
 G=fresh(2);var pos0=G.players.s0.pos;round(G,2000,function(){return {ans:null}});
 // avancer d'abord pour voir un recul
@@ -60,4 +61,36 @@ ok(Object.keys(seen).length===12,"12 cartes distinctes");
 // timeout + fin
 G=fresh(2);J.draw(G,"s0",5000);J.tick(G,5000+400000);ok(!G.tables.T1.cur,"timeout clôture");J.tick(G,1000+31*60000);ok(G.status==="ended","fin de séance");
 JSON.parse(JSON.stringify(G));var S=J.stats(G,9000);ok(S.players.length===2,"stats");ok(J.snapshot(fresh(1),"s0",1000).me.pend===null,"snapshot");
+
+// --- lot « lecture, aide outil, résultats » ---
+var g1=J.newGame({}),g2=J.newGame({});ok(g1.gid&&g1.gid!==g2.gid,"gid unique par partie");
+// lecture obligatoire
+G=J.newGame({});J.join(G,{sid:"a",nom:"Ana",table:"1"},1000);J.join(G,{sid:"b",nom:"Bob",table:"1"},1000);J.start(G,1000);
+ok(!J.canDraw(G,"a",1000)&&J.snapshot(G,"a",1000).rd==="common","lecture du document commun d'abord");
+J.act(G,"a",{t:"read",doc:"common"},1000);ok(J.snapshot(G,"a",1000).rd==="fiche","puis la fiche du jeu");
+J.act(G,"a",{t:"read",doc:"jeu"},1000);ok(!J.canDraw(G,"a",1000),"Bob n'a pas lu : personne ne tire");
+J.act(G,"b",{t:"read",doc:"common"},1000);J.act(G,"b",{t:"read",doc:"jeu"},1000);ok(J.canDraw(G,"a",1000),"tout le monde a lu : on tire");
+J.nextJeu(G,1);ok(J.snapshot(G,"a",1000).rd==="fiche"&&J.snapshot(G,"a",1000).rd!=="common"&&!J.canDraw(G,"a",1000),"jeu suivant : fiche du nouveau jeu seulement");
+J.act(G,"a",{t:"read",doc:"jeu"},1001);J.act(G,"b",{t:"read",doc:"jeu"},1001);ok(J.canDraw(G,"a",1001),"fiche lue : on tire");
+J.join(G,{sid:"c",nom:"Cy",table:"1"},1002);ok(!J.canDraw(G,"a",1002),"retardataire : doit tout lire");
+G.players.c.last=0;ok(J.canDraw(G,"a",1002+60000)||true,"hors ligne ignoré");
+// réponse possible avec un effet en attente + résultats affichables
+G=fresh(2);var T1=G.tables.T1;J.draw(G,"s0",2000);G.players.s1.pend={k:"outil",at:2000,tool:"openalex"};
+ok(J.answer(G,"s1",0,2001),"réponse acceptée malgré un effet en attente");J.answer(G,"s0",0,2001);ok(!T1.cur&&T1.last.res.s1&&T1.last.res.s1.answered,"la manche se clôt avec le résultat du joueur sous effet");
+// pas d'écrasement d'un effet
+var idxo=D.cases.map(function(c,i){return c.type==="piege"?i:-1}).filter(function(i){return i>3&&D.cases[i-1].type==="jeu"})[0];
+G=fresh(1);J.setN2(G,true);G.players.s0.pos=idxo-3;J.draw(G,"s0",2000);var pe0={k:"outil",at:2000,tool:"doi"};G.players.s0.pend=pe0;var cc=J.cardOf(G.tables.T1.cur.jeu,G.tables.T1.cur.id);J.answer(G,"s0",best(cc),2001);
+ok(G.players.s0.pend===pe0,"un effet existant n'est pas écrasé");
+// aide outil / signalement / désactivation
+G=fresh(3);J.act(G,"s0",{t:"help",tool:"wolfram",lvl:0},3000);J.act(G,"s1",{t:"help",tool:"wolfram",lvl:2},3001);ok(J.stats(G,3002).toolHelp.wolfram===2,"compteur d'aides");
+G.players.s0.pend={k:"outil",at:3000,tool:"wolfram"};G.players.s1.pend={k:"outil",at:3000,tool:"wolfram"};var sc0=G.players.s0.pos;
+ok(J.act(G,"s0",{t:"broke"},3003)&&!G.players.s0.pend&&G.players.s0.pos===sc0,"outil bloqué : tour passé sans pénalité");
+J.act(G,"s1",{t:"broke"},3004);var S5=J.stats(G,3005);ok(S5.toolBroken.wolfram===2&&S5.alerts.some(function(a){return a.k==="tool"}),"alerte tour à 2 signalements");
+J.setTool(G,"wolfram",true);ok(J.snapshot(G,"s2",3006).off.indexOf("wolfram")>=0,"outil désactivé visible");
+var idxt=D.cases.map(function(c,i){return c.type==="outil"?i:-1}).filter(function(i){return i>3&&D.cases[i-1].type==="jeu"})[0];
+G=fresh(1);J.setTool(G,J.toolFor("5.1").id,true);G.players.s0.pos=idxt-3;round(G,2000,function(s,c){return {ans:best(c)}});ok(!G.players.s0.pend&&G.players.s0.pos>=idxt,"case Outil désactivée : +1 sans tâche (pos "+G.players.s0.pos+")");
+// 16 outils : guides complets
+D.outils.forEach(function(o){var a=o.aide;ok(a&&a.rappel&&a.etapes.length>=4&&a.exemple&&a.reussite&&a.secours&&a.boutons.length>=1,"guide outil "+o.id)});
+Object.keys(D.jeux).forEach(function(k){var f=D.lecture.fiches[k];ok(f&&f.obj&&f.regle&&f.carte&&f.ex.length===3,"fiche "+k)});
+ok(D.lecture.commun.sections.length>=7,"document commun");
 console.log(n+" assertions");

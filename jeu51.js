@@ -88,15 +88,18 @@
   }
   function play(me) {
     LSset(MK, me);
-    var snap = null, net = null, key = "", linkOk = false, rolled = (LSget("j-roll") || {})[me.code + me.sid] || -1, ack = (LSget("j-ack") || {})[me.code + me.sid] || 0, answers = null, tmr = null;
+    var snap = null, net = null, key = "", linkOk = false, gidCur = null, rolled = -1, ack = 0, answers = null, tmr = null;
     var head = h("div", {}), board = h("div", {}), body = h("div", {}), info = h("p", { class: "meta" }, "○ Connexion à l'enseignant…");
-    function saveFlags() { var r = LSget("j-roll") || {}, a = LSget("j-ack") || {}; r[me.code + me.sid] = rolled; a[me.code + me.sid] = ack; LSset("j-roll", r); LSset("j-ack", a); }
+    function fk() { return me.code + me.sid + ":" + gidCur; }
+    function loadFlags() { var r = LSget("j-roll") || {}, a = LSget("j-ack") || {}; rolled = r[fk()] != null ? r[fk()] : -1; ack = a[fk()] || 0; }
+    function saveFlags() { var r = {}, a = {}; r[fk()] = rolled; a[fk()] = ack; LSset("j-roll", r); LSset("j-ack", a); }
     function send(m) { m.sid = me.sid; if (net) net.send(m); }
     function hello() { send({ t: "join", nom: me.nom, table: me.table }); }
     function onmsg(m) {
       if (m.t === "err") { try { localStorage.removeItem(MK); } catch (e) {} mount(h("h1", {}, "Rejoindre la partie"), h("div", { class: "warn" }, m.msg), h("p", {}, h("a", { href: "#/j" }, "← Réessayer"))); stopAll(); return; }
       if (m.t !== "snap") return; snapAt = Date.now();
       if (m.me.sid !== me.sid) { me.sid = m.me.sid; LSset(MK, me); }
+      if (m.gid !== gidCur) { gidCur = m.gid; loadFlags(); key = ""; hold = null; }
       snap = m; render();
     }
     function stopAll() { if (net) net.close(); net = null; clearInterval(tmr); }
@@ -116,12 +119,15 @@
         h("div", { class: "big" }, "Case " + m.pos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "") + "  ·  " + Object.keys(m.tools || {}).length + "/16 outils"), h("div", {}, h("span", { class: "meta" }, "Temps de la séance : "), clockEl), info));
       board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns()));
       var T = snap.table, k, pe = snap.me.pend, last = T.last && T.last.res[m.sid] && T.last.round >= ack ? T.last : null;
+      var needRead = snap.rd !== "ok" && snap.status !== "ended" && !m.done && !(T.cur && T.cur.mine);
       if (last) k = "res:" + last.round + ":" + (rolled >= last.round ? 1 : 0);
-      else if (pe) k = "pend:" + pe.k + ":" + (pe.st || "") + ":" + (pe.mine ? 1 : 0) + ":" + (pe.opp ? pe.opp.nom + pe.opp.done : "") + ":" + (pe.card ? pe.card.id : "") + ":" + (pe.id || "") + ":" + T.round;
+      else if (needRead) k = "read:" + snap.rd + ":" + snap.jeux[0] + ":" + snap.nudge;
       else if (T.cur && T.cur.mine === false) k = "card:" + T.round + ":" + T.cur.id;
+      else if (pe) k = "pend:" + pe.k + ":" + (pe.st || "") + ":" + (pe.mine ? 1 : 0) + ":" + (pe.opp ? pe.opp.nom + pe.opp.done : "") + ":" + (pe.card ? pe.card.id : "") + ":" + (pe.id || "") + ":" + T.round + ":" + (pe.tool ? pe.tool.off : "");
       else if (T.cur) k = "wait:" + T.round + ":" + T.cur.answered.length + ":" + T.players.length;
       else k = "idle:" + snap.jeux.join("+") + ":" + T.round + ":" + snap.canDraw + ":" + snap.status + ":" + T.players.length + ":" + snap.tireur;
       clockTick(); if (hold) return; if (k === key) return; key = k; body.innerHTML = "";
+      if (k.indexOf("read:") === 0) return drawRead();
       if (k.indexOf("pend:") === 0) return drawPend(pe);
       if (k.indexOf("card:") === 0) return drawCard(T.cur);
       if (k.indexOf("res:") === 0) return drawResult(last);
@@ -129,6 +135,46 @@
       drawIdle(T);
     }
     function chips(T) { return h("div", {}, T.players.map(function (p) { return pastille(p.st, p.nom, p.col); })); }
+    /* ----- lecture obligatoire ----- */
+    function docEl(doc) { return h("div", {}, doc.sections.map(function (sc) { return h("div", {}, h("h3", {}, sc[0]), h("ul", {}, sc[1].map(function (l) { return h("li", {}, l); }))); })); }
+    function toolBlock(to) {
+      var a = to.aide;
+      return h("div", { class: "card", style: "background:#EEF7F7" }, h("h3", {}, "Outil du jeu : " + to.nom), h("p", {}, h("b", {}, "À quoi il sert : "), a.rappel), h("p", {}, h("b", {}, "Tâche : "), to.tache),
+        h("ol", {}, a.etapes.map(function (e) { return h("li", {}, e); })), h("p", {}, h("b", {}, "Réussite : "), a.reussite), h("p", {}, h("b", {}, "Si l'outil est inaccessible : "), "appuyez sur « Cet outil ne marche pas » : vous passez votre tour sans pénalité. " + a.secours));
+    }
+    function ficheEl(k) {
+      var f = D.lecture.fiches[k], j = D.jeux[k], to = C.toolFor(k);
+      return h("div", {}, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", {}, h("b", {}, "Objectif : "), f.obj), h("p", {}, h("b", {}, "Règle : "), f.regle), h("p", {}, h("b", {}, "Cartes et points : "), f.carte),
+        h("div", { class: "card", style: "background:#FFF6DD" }, h("h3", {}, "Exemple résolu"), h("p", {}, h("b", {}, "Situation : "), f.ex[0]), h("p", {}, h("b", {}, "Réponse : "), f.ex[1]), h("p", {}, h("b", {}, "Pourquoi : "), f.ex[2])), toolBlock(to));
+    }
+    function drawRead() {
+      var common = snap.rd === "common", wait = common ? 10 : 8, left = wait, k = snap.jeux[0];
+      var btn = h("button", { class: "ok", disabled: "disabled" }, "J'ai lu (" + left + " s)");
+      var tm = setInterval(function () { left--; if (left <= 0) { clearInterval(tm); btn.removeAttribute("disabled"); btn.textContent = "J'ai lu"; } else btn.textContent = "J'ai lu (" + left + " s)"; }, 1000); A.timers.push(tm);
+      btn.onclick = function () { clearInterval(tm); send({ t: "read", doc: common ? "common" : "jeu" }); btn.disabled = true; btn.textContent = "Merci, en attente de la table…"; };
+      body.appendChild(h("div", { class: "card", style: "border-left:6px solid #E9A400" }, h("b", {}, common ? "Lecture obligatoire avant le premier jeu" : "Lecture obligatoire : nouveau jeu " + k),
+        h("p", { class: "meta" }, "Personne ne peut tirer une carte tant que tous les joueurs connectés de la table n'ont pas lu." + (snap.nudge ? " L'enseignant vous demande de terminer la lecture." : ""))));
+      body.appendChild(h("div", { class: "card" }, common ? h("div", {}, h("h2", {}, D.lecture.commun.titre), docEl(D.lecture.commun)) : ficheEl(k), btn));
+      body.appendChild(chips(snap.table));
+    }
+    /* ----- aide outil ----- */
+    function helpModal(to, lvl0) {
+      var a = to.aide, lvl = lvl0 || 0, ov = h("div", { style: "position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;overflow:auto;padding:12px" }), box = h("div", { class: "card", style: "max-width:560px;margin:0 auto" });
+      function show() {
+        box.innerHTML = ""; box.appendChild(h("h2", {}, "Aide · " + to.nom));
+        box.appendChild(h("p", { class: "meta" }, "Niveau " + (lvl + 1) + " / 3 · demander de l'aide ne coûte aucun point"));
+        if (lvl === 0) { box.appendChild(h("p", { class: "big" }, a.rappel)); box.appendChild(h("p", {}, h("b", {}, "Tâche : "), to.tache)); }
+        if (lvl === 1) { box.appendChild(h("ol", {}, a.etapes.map(function (e) { return h("li", {}, e); }))); box.appendChild(h("p", {}, h("b", {}, "Réussite : "), a.reussite)); box.appendChild(h("p", { class: "meta" }, a.limites)); }
+        if (lvl === 2) { box.appendChild(h("div", { class: "corr" }, h("b", {}, "Exemple résolu : "), a.exemple)); box.appendChild(h("p", { class: "meta" }, "Si l'outil reste inaccessible : " + a.secours)); }
+        box.appendChild(h("p", {}, a.boutons.map(function (b) { return h("a", { href: b[1], target: "_blank", rel: "noopener", class: "btn", style: "margin:3px;display:inline-block" }, b[0] + " ↗"); })));
+        (a.copier || []).forEach(function (c) { box.appendChild(h("p", {}, h("b", {}, c[0] + " : "), h("code", {}, c[1]))); });
+        var row = h("p", {});
+        if (lvl < 2) row.appendChild(h("button", { class: "ok", onclick: function () { lvl++; send({ t: "help", tool: to.id, lvl: lvl }); show(); } }, lvl === 0 ? "Voir les étapes" : "Voir un exemple résolu"));
+        row.appendChild(h("button", { class: "sec", onclick: function () { ov.remove(); } }, "Fermer")); box.appendChild(row);
+      }
+      send({ t: "help", tool: to.id, lvl: lvl }); show(); ov.appendChild(box); document.body.appendChild(ov);
+    }
+    function helpBtn(to) { return h("button", { class: "sec", onclick: function () { helpModal(to, 0); } }, "Aide outil · " + to.nom); }
     function drawIdle(T) {
       if (snap.status === "lobby") return body.appendChild(h("div", { class: "card" }, h("h2", {}, "En attente du lancement"), h("p", {}, "L'enseignant lance la séance. Joueurs déjà à la table :"), chips(T)));
       if (snap.me.done) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Arrivée à l'Examen !"), h("p", {}, "Vous avez terminé la route : " + snap.me.score + " points.")));
@@ -136,7 +182,7 @@
       var j = D.jeux[snap.jeux[0]], nt = snap.me.notes && snap.me.notes[0] && snap.now - snap.me.notes[0].at < 120000 ? snap.me.notes[0].txt : null;
       if (nt) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Dernier événement : "), nt));
       if (!snap.n2 && snap.me.pos >= snap.gate) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : fin du niveau 1."), h("p", {}, "Vous attendez que l'enseignant ouvre le niveau 2. Vous pouvez continuer à jouer pour gagner des points.")));
-      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Jeu " + snap.jeux.join(" · ") + (snap.jeux.length === 1 ? " · " + j.titre : "")), snap.jeux.length === 1 ? h("p", {}, j.regle) : null,
+      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Jeu " + snap.jeux.join(" · ") + (snap.jeux.length === 1 ? " · " + j.titre : "")), snap.jeux.length === 1 ? h("p", {}, j.regle) : null, snap.jeux.length === 1 ? h("p", {}, helpBtn(C.toolFor(snap.jeux[0]))) : null,
         snap.canDraw ? h("div", {}, h("p", { class: "big" }, "C'est à vous de tirer la carte pour la table."), h("button", { class: "ok", onclick: function () { send({ t: "draw" }); } }, "Tirer la carte"))
           : h("p", { class: "big" }, "Au tour de " + (snap.tireur || "…") + " de tirer la carte."), chips(T)));
     }
@@ -178,6 +224,7 @@
     function drawCard(cur) {
       var c = C.cardOf(cur.jeu, cur.id), j = D.jeux[cur.jeu], box = h("div", { class: "card" });
       box.appendChild(h("h2", {}, "Jeu " + cur.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "big" }, c.q));
+      if (cur.jeu !== "P") box.appendChild(h("p", {}, helpBtn(C.toolFor(cur.jeu))));
       var f = cardForm(c, me.sid + c.id, box), bet = h("input", { type: "checkbox", style: "width:auto;margin-right:8px" });
       box.appendChild(h("label", { class: "card", style: "background:#FFF6DD;display:block;cursor:pointer" }, bet, h("b", {}, "Je mise"), " : 3 points = +1 case de plus ; 0 ou 1 point = −1 case de plus."));
       var msg = h("p", { class: "warn", style: "display:none" }, "Répondez avant de valider.");
@@ -220,10 +267,12 @@
       var box = h("div", { class: "card", style: "border-left:6px solid #0F8B8D" });
       if (pe.k === "outil") {
         box.appendChild(h("h2", {}, "Case Outil : " + pe.tool.nom)); box.appendChild(h("p", { class: "big" }, pe.tool.tache));
-        box.appendChild(h("p", {}, h("a", { href: pe.tool.url, target: "_blank", rel: "noopener", class: "btn" }, "Ouvrir " + pe.tool.nom + " ↗")));
-        box.appendChild(h("p", { class: "meta" }, "Essayez l'outil quelques minutes. Si vous avez réussi la tâche : +1 case et un jeton de votre couleur à poser sur l'atelier du plateau."));
+        var to = D.outils.filter(function (o) { return o.id === pe.tool.id; })[0];
+        box.appendChild(h("p", {}, h("a", { href: pe.tool.url, target: "_blank", rel: "noopener", class: "btn" }, "Ouvrir " + pe.tool.nom + " ↗"), " ", helpBtn(to)));
+        box.appendChild(h("p", { class: "meta" }, "Si l'outil est inaccessible, passez votre tour sans pénalité. Essayez l'outil quelques minutes. Si vous avez réussi la tâche : +1 case et un jeton de votre couleur à poser sur l'atelier du plateau."));
         box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "outil", ok: true }); feedback("Outil validé", ["+1 case. Posez un jeton de votre couleur sur la case « " + pe.tool.nom + " » de l'atelier du plateau."]); } }, "J'ai réussi la tâche"));
         box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "outil", ok: false }); feedback("Tour passé", ["L'outil sera pour une prochaine fois."]); } }, "Passer mon tour"));
+        box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "broke" }); feedback("Merci", ["Votre tour est passé sans pénalité. L'enseignant est prévenu que l'outil « " + pe.tool.nom + " » ne marche pas."]); } }, "Cet outil ne marche pas"));
       } else if (pe.k === "piege") {
         var c = C.cardOf("P", pe.card.id); box.appendChild(h("h2", {}, "Case Piège")); box.appendChild(h("p", { class: "big" }, c.q)); var f = cardForm(c, me.sid + "P" + c.id, box), msg = h("p", { class: "warn", style: "display:none" }, "Répondez avant de valider.");
         box.appendChild(h("button", { class: "ok", onclick: function () { if (!f.ok()) { msg.style.display = "block"; return; } var a = f.get(), pts = PE.score(c, a).pts; send({ t: "pans", ans: a }); feedback(pts >= 2 ? "Piège évité" : "Piège : −1 case", [pts >= 2 ? "Vous restez sur votre case." : "Reculez d'une case.", h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)], pts >= 2 ? "#2E9E6B" : "#C0392B"); } }, "Valider"), msg);
@@ -293,7 +342,7 @@
       if (net) net.send(sid, C.snapshot(G, real, t)); dirty = true;
     }
     var ctl = null;
-    try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "jeu") { C.setJeu(G, m.jeu); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
+    try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "tool") { C.setTool(G, m.tool, !!m.off); dirty = true; refresh(); } if (m.t === "jeu") { C.setJeu(G, m.jeu); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
     net = hostNet(G.code, onmsg, function (s) { status = s; refresh(); });
     var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); refresh(); }, 1000);
     onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
@@ -380,17 +429,23 @@
         Object.keys(byPos).forEach(function (k) { byPos[k].forEach(function (el, i) { el.style.top = (3 + i * 4) + "px"; el.style.marginLeft = (i * 7) + "px"; }); });
         var mx = Math.max.apply(null, [1].concat(T.players.map(function (s) { return G.players[s].score; })));
         R.chips.innerHTML = ""; T.players.forEach(function (s) { var p = G.players[s], sp = S.players.filter(function (y) { return y.sid === s; })[0]; var c = pastille(sp.st, p.nom, p.col);
-          c.appendChild(h("span", { class: "jx-gauge" }, h("u", { style: "width:" + Math.round(p.score / mx * 100) + "%;background:" + p.col }))); if (!sp.online) c.className += " off"; R.chips.appendChild(c); });
+          c.appendChild(h("span", { class: "jx-gauge" }, h("u", { style: "width:" + Math.round(p.score / mx * 100) + "%;background:" + p.col }))); if (!sp.online) c.className += " off"; if (sp.rd !== "ok" && G.status !== "lobby") c.appendChild(h("small", { style: "color:#B36B00;font-weight:700" }, " 📖 lit " + (sp.rd === "common" ? "(règles)" : "(fiche)"))); else if (G.status !== "lobby") c.appendChild(h("small", { style: "color:#1b6b45" }, " ✓ a lu")); R.chips.appendChild(c); });
         if (view === "prof" && T.cur) R.chips.appendChild(h("button", { class: "sec jx-mini", onclick: function () { C.closeRound(G, id, now()); dirty = true; refresh(); } }, "Clôturer la question (" + x.answered + "/" + T.players.length + ")"));
       });
       /* panneau latéral */
       sideEl.innerHTML = "";
       sideEl.appendChild(h("div", { class: "jx-qr" }, h("img", { src: "qr-j.svg", alt: "QR de connexion" }), h("div", {}, h("b", {}, "Connexion perdue ? Scannez à nouveau"), h("small", {}, "même prénom, même table · code " + G.code))));
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Atelier d\'outils (" + D.outils.filter(function (o) { return S.tools[o.id].length; }).length + "/16)"), h("div", { class: "jx-ateliers" }, D.outils.map(function (o) { return h("div", { class: "jx-at" + (S.tools[o.id].length ? " on" : ""), title: o.nom }, h("span", {}, o.nom), h("div", {}, S.tools[o.id].map(function (x) { return h("i", { style: "background:" + x.col, title: x.nom }); }))); })), h("p", { class: "meta" }, "Paris : " + S.betsWon + "/" + S.bets + " gagnés · duels : " + Math.round(S.duels / 2) + " · relectures justes : " + S.revOk + "/" + S.revs + " · pièges évités : " + S.trapOk + "/" + S.traps)));
+      var nrd = S.players.filter(function (p) { return p.rd !== "ok" && p.online && !p.done; }).length;
+      if (G.status !== "lobby") sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Lecture des règles"), h("p", {}, nrd ? nrd + " joueur(s) n'ont pas fini de lire (pastille 📖 sur chaque table)." : "Tous les joueurs connectés ont lu."),
+        nrd ? h("button", { class: "sec jx-mini", onclick: function () { S.players.forEach(function (p) { if (p.rd !== "ok") C.nudge(G, p.sid, now()); }); dirty = true; refresh(); } }, "Relancer") : null));
+      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Aide outils"), h("div", {}, D.outils.map(function (o) { var hn = S.toolHelp[o.id], bn = S.toolBroken[o.id]; if (!hn && !bn && !S.toolOff[o.id]) return null;
+        return h("p", { class: "meta" }, o.nom + " : " + hn + " ouverture(s) d'aide" + (bn ? " · " + bn + " signalement(s)" : "") + (S.toolOff[o.id] ? " · DÉSACTIVÉ " : " "), S.toolOff[o.id] ? h("button", { class: "sec jx-mini", onclick: function () { C.setTool(G, o.id, false); dirty = true; refresh(); } }, "Réactiver") : null); })),
+        h("a", { href: "#/outils-test", target: "_blank", class: "btn sec", style: "text-decoration:none;display:inline-block;margin-top:4px" }, "Test des outils")));
       var ck = Object.keys(S.crit).sort(function (a, b) { return S.crit[a].ok / S.crit[a].n - S.crit[b].ok / S.crit[b].n; });
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Réussite par critère"), ck.length ? ck.map(function (k) { var r = S.crit[k].ok / S.crit[k].n; return h("div", { class: "jx-bar" }, h("span", {}, k), h("div", {}, h("u", { style: "width:" + Math.round(r * 100) + "%;background:" + (r < .4 ? "#E4572E" : r < .7 ? "#E9A400" : "#2E9E6B") })), h("b", {}, pct(r))); }) : h("p", { class: "meta" }, "Dès la première carte corrigée.")));
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Points gagnés par carte"), h("div", { class: "jx-dist" }, S.dist.map(function (n, i) { var tot = S.dist.reduce(function (a, b) { return a + b; }, 0) || 1; return h("div", {}, h("u", { style: "height:" + Math.round(n / tot * 70) + "px" }), h("b", {}, String(i)), h("small", {}, String(n))); }))));
-      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Alertes"), S.alerts.length ? S.alerts.slice(0, 6).map(function (a) { return h("p", { class: "jx-al" }, "⚠ " + a.txt); }) : h("p", { class: "meta" }, "Rien à signaler.")));
+      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Alertes"), S.alerts.length ? S.alerts.slice(0, 6).map(function (a) { return h("p", { class: "jx-al" }, "⚠ " + a.txt, a.k === "tool" ? h("button", { class: "r jx-mini", onclick: function () { C.setTool(G, a.tool, true); dirty = true; refresh(); } }, "Désactiver cet outil") : null); }) : h("p", { class: "meta" }, "Rien à signaler.")));
       /* onglets enseignant */
       tabsEl.innerHTML = detEl.innerHTML = ""; if (view !== "prof") return;
       [["ens", "Joueurs"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); } }, a[1])); });
@@ -445,6 +500,28 @@
     mount(box); document.body.appendChild(bar); draw();
   }
 
-  window.J51 = { route: function (a) { if (a === "tour") return towerGate(); if (a === "test") return towerGate(testPage); return joinPage(); } };
-  var hs = location.hash || ""; if (/^#\/(j|tour|test)(\?|\/|$)/.test(hs)) window.dispatchEvent(new Event("hashchange"));
+  /* ---------- Test des outils depuis le réseau de la salle ---------- */
+  function toolsTestPage() {
+    var st = LSget("j-tooltest") || {}, ctl = null; var G0 = LSget(GK);
+    try { ctl = new BroadcastChannel("cpro-j-ctl-" + CODE); } catch (e) {}
+    var rows = h("div", {});
+    function save() { LSset("j-tooltest", st); }
+    function draw() {
+      rows.innerHTML = "";
+      D.outils.forEach(function (o) {
+        var a = o.aide, sel = st[o.id] || "";
+        function mark(v) { st[o.id] = v; save(); if (ctl) try { ctl.postMessage({ t: "tool", tool: o.id, off: v === "ko" }); } catch (e) {} draw(); }
+        rows.appendChild(h("div", { class: "card", style: "border-left:6px solid " + (sel === "ok" ? "#2E9E6B" : sel === "ko" ? "#C0392B" : "#bbb") }, h("b", {}, "Jeu " + o.jeu + " · " + o.nom), h("p", { class: "meta" }, o.tache),
+          h("p", {}, h("a", { href: o.url, target: "_blank", rel: "noopener", class: "btn" }, "Ouvrir " + o.nom + " ↗"), " ", a.boutons.slice(1).map(function (b) { return h("a", { href: b[1], target: "_blank", rel: "noopener", class: "btn sec", style: "margin-left:4px" }, b[0] + " ↗"); })),
+          h("p", {}, h("button", { class: sel === "ok" ? "ok" : "sec", onclick: function () { mark("ok"); } }, "✓ Accessible"), h("button", { class: sel === "ko" ? "r" : "sec", onclick: function () { mark("ko"); } }, "✗ Bloqué"), h("small", { class: "meta" }, sel === "ko" ? " Cet outil sera proposé à la désactivation dans la tour." : ""))));
+      });
+    }
+    draw();
+    var nbko = function () { return D.outils.filter(function (o) { return st[o.id] === "ko"; }).length; };
+    mount(h("h1", {}, "Test des outils"), h("p", {}, "À faire depuis le réseau de la salle, avant le cours. Ouvrez chaque outil dans un nouvel onglet : s'il s'affiche et répond, cochez « Accessible » ; sinon « Bloqué ». Un outil bloqué est désactivé dans la partie en cours (la case Outil donne alors +1 case sans tâche)."),
+      h("p", { class: "meta" }, "Certains outils demandent un compte gratuit ou limitent l'offre gratuite : à vérifier aussi. Si l'outil est inaccessible, les joueurs passent leur tour sans pénalité."), rows,
+      h("button", { class: "sec", onclick: function () { st = {}; save(); draw(); } }, "Tout effacer"), h("p", {}, h("a", { href: "#/tour" }, "← Tour de contrôle")));
+  }
+  window.J51 = { route: function (a) { if (a === "outils-test") return towerGate(toolsTestPage); if (a === "tour") return towerGate(); if (a === "test") return towerGate(testPage); return joinPage(); } };
+  var hs = location.hash || ""; if (/^#\/(j|tour|test|outils-test)(\?|\/|$)/.test(hs)) window.dispatchEvent(new Event("hashchange"));
 })();

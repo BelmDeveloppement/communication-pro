@@ -11,7 +11,8 @@ Ne pas renommer le dépôt ni le compte : les QR codes du PowerPoint casseraient
 Les jeux utilisent une connexion directe entre téléphones (PeerJS, WebRTC) : le serveur public de mise en relation de PeerJS est nécessaire au démarrage. Cas fictif : chiffres inventés.
 
 ## Plateau « 5 · La route de l'état de l'art » (16 jeux)
-Pages : `#/plateau` (accueil), `#/plateau/regles`, `#/j` (joueurs, code ROUTE), `#/tour` (tour de contrôle enseignant, PIN), `#/test` (mode test sur les 16 jeux).
+Pages : `#/plateau` (accueil), `#/plateau/regles`, `#/j` (joueurs, code ROUTE), `#/tour` (tour de contrôle enseignant, PIN), `#/test` (mode test sur les 16 jeux), `#/outils-test` (test des 16 outils depuis le réseau de la salle). Un seul plateau 80 × 60 cm pour toute la classe.
 63 cases en deux niveaux (0 à 31 puis 32 à 62), recul à 0 point, pari, cases Aléa, Outil, Piège, Duel et Relecture, atelier de 16 outils. Données : `plateau-data.js` (générées, 16 jeux, 366 cartes) ; moteur : `plateau-engine.js` (notation) et `jeu51-core.js` (règles).
+Lecture obligatoire : document commun (10 s) avant le premier jeu, fiche du jeu (8 s) quand on y arrive ; personne ne tire tant qu'un joueur connecté de la table n'a pas lu. Aide outil à trois niveaux par outil, bouton « Cet outil ne marche pas » (tour passé sans pénalité), désactivation d'un outil depuis la tour. Les guides des outils sont rédigés sans test en direct : à vérifier.
 Tests : `node test_plateau.js` (contenu, notation, équilibrage des réponses, ordre du jeu 5.4) et `node test_j51.js` (règles).
 PDF à imprimer : `Plateau_5_80x60.pdf` (5 tables + vierge, fond perdu 5 mm), `Plateau_5_A3.pdf` (essai), `Plateau_5_pions.pdf`. La fiche enseignant (corrigés) n'est pas publiée ici.
