@@ -47,7 +47,7 @@
         h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, Object.keys(D.jeux).length + " JEUX, numérotés de 1 à " + Object.keys(D.jeux).length)),
         h("a", { class: "tile r", href: "#/tour" }, h("b", {}, "Tour de contrôle"), h("div", { class: "meta" }, "Enseignant : PIN, partie, simulation, mode test"))),
       h("div", { class: "card" }, h("h2", {}, "Le plateau"), boardSvg([])),
-      h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_spirale_80x60.pdf" }, "Plateau unique 80 × 60 cm (le même pour les 5 tables)"))));
+      h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_80x60.pdf?v=2" }, "Plateau unique 80 × 60 cm (le même pour les 5 tables)"))));
   }
   function rules() {
     mount(h("h1", {}, "Règles du plateau"),
