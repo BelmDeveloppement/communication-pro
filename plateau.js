@@ -7,7 +7,7 @@
   function abbr(n) { var w = String(n || "?").trim(); return (w.slice(0, 1) || "?").toUpperCase(); }
   /* symbole et couleur de chaque type de case */
   var TS = { depart: ["▶", "#5B6478"], exam: ["★", "#1F2A5C"], gate: ["🔒", "#1F2A5C"], aleas: ["?", "#7A3FB5"], outil: ["⚙", "#0F8B8D"], piege: ["!", "#C0392B"], duel: ["VS", "#B8860B"], pairs: ["✎", "#8E5A2B"] };
-  function zcol(c) { return c.type === "jeu" ? D.zones[c.zone].col : (TS[c.type] || ["", "#5B6478"])[1]; }
+  function zcol(c) { return (c.type === "jeu" || (c.zone && D.zones[c.zone])) ? D.zones[c.zone].col : (TS[c.type] || ["", "#5B6478"])[1]; }
   function glyph(c) { return c.type === "jeu" ? c.jeu : TS[c.type][0]; }
 
   /* Plateau 2D : le carré de la route (600 × 600 mm), y vers le haut comme sur le PDF */
@@ -37,7 +37,7 @@
 
   function legend() {
     var rows = [["jeu", "Case JEU (numéro = JEU du cours)", "Jalon du cours : l'enseignant ouvre le JEU, toute la classe le joue."], ["aleas", "Aléa", "Un événement de la vie professionnelle : +2, +1 ou −1 point."], ["outil", "Outil", "Un vrai outil à essayer 2 minutes ; réussi, il vous donne +1 point."], ["piege", "Piège", "Une question individuelle : une erreur coûte 1 point."], ["duel", "Duel", "Un adversaire d'une autre table, même question : le gagnant gagne 1 point, le perdant en perd 1."], ["pairs", "Relecture", "Un camarade de table relit vos critères cochés et donne son verdict (+1 point pour lui)."]];
-    return h("table", {}, h("tr", {}, ["Symbole", "Case", "Effet"].map(function (t) { return h("th", {}, t); })), rows.map(function (r) { var c = r[0] === "jeu" ? { type: "jeu", jeu: "1", zone: "O3" } : { type: r[0] }; return h("tr", {}, h("td", {}, h("span", { class: "team", style: "background:" + zcol(c) }, glyph(c))), h("td", {}, r[1]), h("td", {}, r[2])); }));
+    return h("table", {}, h("tr", {}, ["Symbole", "Case", "Effet"].map(function (t) { return h("th", {}, t); })), rows.map(function (r) { var c = r[0] === "jeu" ? { type: "jeu", jeu: "1", zone: "P1" } : { type: r[0] }; return h("tr", {}, h("td", {}, h("span", { class: "team", style: "background:" + zcol(c) }, glyph(c))), h("td", {}, r[1]), h("td", {}, r[2])); }));
   }
 
   function entry() {

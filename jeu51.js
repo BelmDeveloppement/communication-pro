@@ -419,7 +419,11 @@
       else { var em = racesEl.querySelector(".jx-empty"); if (em) em.remove(); }
       ids.forEach(function (id) {
         var T = G.tables[id], x = S.tables.filter(function (y) { return y.id === id; })[0], R = rows[id];
-        if (!R) { R = rows[id] = { pawns: {} }; R.el = h("div", { class: "jx-row" }); R.lab = h("div", { class: "jx-tlab" }); R.track = h("div", { class: "jx-track" }, h("i", { class: "a1" }), h("i", { class: "a2" }), h("i", { class: "a3" }), h("i", { class: "a4" }), h("i", { class: "a5" }), h("i", { class: "a6" }), h("s", { class: "gate", title: "Case 31 : mi-parcours" }), h("em", {}, "Examen")); R.sum = h("div", { class: "jx-sum" }); R.chips = h("div", { class: "jx-chips" });
+        if (!R) { R = rows[id] = { pawns: {} }; R.el = h("div", { class: "jx-row" }); R.lab = h("div", { class: "jx-tlab" }); R.track = (function () {
+          var t = h("div", { class: "jx-track" }), seg = [], cur = null;
+          D.cases.forEach(function (c, i) { var z = c.zone || (cur ? cur.z : "P1"); if (c.type === "depart") z = "P1"; if (c.type === "gate" || c.type === "exam") z = cur ? cur.z : "P1"; if (!cur || cur.z !== z) { cur = { z: z, a: i }; seg.push(cur); } });
+          seg.forEach(function (g, k) { var end = k + 1 < seg.length ? seg[k + 1].a : 63, i = h("i", {}); i.style.left = (g.a / 62 * 100) + "%"; i.style.width = ((end - g.a) / 62 * 100) + "%"; i.style.background = D.zones[g.z].col + "30"; t.appendChild(i); });
+          t.appendChild(h("s", { class: "gate", title: "Case 31 : mi-parcours" })); t.appendChild(h("em", {}, "Examen")); return t; })(); R.sum = h("div", { class: "jx-sum" }); R.chips = h("div", { class: "jx-chips" });
           R.el.appendChild(R.lab); R.el.appendChild(h("div", { class: "jx-mid" }, R.track, R.chips)); R.el.appendChild(R.sum); racesEl.appendChild(R.el); }
         R.lab.innerHTML = ""; R.lab.appendChild(h("b", {}, id)); R.lab.appendChild(h("small", {}, "#" + (rank.indexOf(id) + 1)));
         R.el.className = "jx-row" + (x.stuck ? " stuck" : "");

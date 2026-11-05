@@ -32,7 +32,7 @@ eq(visited, Array.from({ length: 61 }, function (_, i) { return i + 2; }), "tout
 var S4 = J.stats(G4, NOW); S4.tables[0].gauges.forEach(function (g) { eq(g.lvl, 10, "jauge pleine " + g.z); }); S4.players[0].mast.forEach(function (m) { eq(m.lvl, "Expert", "niveau Expert " + m.z); });
 var sn = J.snapshot(G4, "s10", NOW); ok(sn.mast && sn.mast.length === 5, "niveaux visibles à l'arrivée");
 // niveaux : zéro partout = Débutant ; les seuils ne sont pas dans l'instantané
-var G5 = game(2); G5.jeux = ["1"]; play(G5, "T1", 0); var m5 = J.stats(G5, NOW).players[0].mast.filter(function (m) { return m.z === "O3"; })[0]; eq(m5.lvl, "Débutant", "0 point = Débutant"); eq(J.snapshot(G5, "s10", NOW).mast, null, "niveaux cachés pendant la séance");
+var G5 = game(2); G5.jeux = ["1"]; play(G5, "T1", 0); var m5 = J.stats(G5, NOW).players[0].mast.filter(function (m) { return m.z === "P1"; })[0]; eq(m5.lvl, "Débutant", "0 point = Débutant"); eq(J.snapshot(G5, "s10", NOW).mast, null, "niveaux cachés pendant la séance");
 eq(J.levelOf(0.44), "Débutant", "seuil"); eq(J.levelOf(0.45), "Confirmé", "seuil"); eq(J.levelOf(0.75), "Expert", "seuil");
 // effets (points) : case 4 = Outil
 var G6 = game(2); for (var j = 1; j <= 3; j++) { J.setJeu(G6, String(j)); play(G6, "T1", 3); } eq(G6.tables.T1.pos, 5, "traverse la case Outil 4 puis JEU 4 en case 5"); var p0 = G6.players.s10; eq(p0.pend && p0.pend.k, "outil", "effet Outil en attente"); var before = p0.score; J.act(G6, "s10", { t: "outil", ok: true }, NOW); eq(p0.score, before + 1, "outil réussi +1 point");
