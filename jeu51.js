@@ -144,7 +144,7 @@
     }
     function ficheEl(k) {
       var f = D.lecture.fiches[k], j = D.jeux[k], to = C.toolFor(k);
-      return h("div", {}, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", {}, h("b", {}, "Objectif : "), f.obj), h("p", {}, h("b", {}, "Règle : "), f.regle), h("p", {}, h("b", {}, "Cartes et points : "), f.carte),
+      return h("div", {}, h("h2", {}, "JEU " + k + " · " + j.titre), h("p", {}, h("b", {}, "Objectif : "), f.obj), h("p", {}, h("b", {}, "Règle : "), f.regle), h("p", {}, h("b", {}, "Cartes et points : "), f.carte),
         h("div", { class: "card", style: "background:#FFF6DD" }, h("h3", {}, "Exemple résolu"), h("p", {}, h("b", {}, "Situation : "), f.ex[0]), h("p", {}, h("b", {}, "Réponse : "), f.ex[1]), h("p", {}, h("b", {}, "Pourquoi : "), f.ex[2])), toolBlock(to));
     }
     function drawRead() {
@@ -181,8 +181,8 @@
       if (snap.status === "ended") return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Séance terminée"), h("p", {}, "Case " + snap.me.pos + ", " + snap.me.score + " points. Classement de la table :"), h("ol", {}, T.players.slice().sort(function (a, b) { return b.pos - a.pos || b.score - a.score; }).map(function (p) { return h("li", {}, p.nom + " : case " + p.pos + ", " + p.score + " pt"); }))));
       var j = D.jeux[snap.jeux[0]], nt = snap.me.notes && snap.me.notes[0] && snap.now - snap.me.notes[0].at < 120000 ? snap.me.notes[0].txt : null;
       if (nt) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Dernier événement : "), nt));
-      if (!snap.n2 && snap.me.pos >= snap.gate) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : fin du niveau 1."), h("p", {}, "Vous attendez que l'enseignant ouvre le niveau 2. Vous pouvez continuer à jouer pour gagner des points.")));
-      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Jeu " + snap.jeux.join(" · ") + (snap.jeux.length === 1 ? " · " + j.titre : "")), snap.jeux.length === 1 ? h("p", {}, j.regle) : null, snap.jeux.length === 1 ? h("p", {}, helpBtn(C.toolFor(snap.jeux[0]))) : null,
+      if (snap.lim < snap.max && snap.me.pos >= snap.lim) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Vous avez de l'avance sur le cours."), h("p", {}, "Votre pion attend le prochain JEU. Vous pouvez continuer à jouer pour gagner des points.")));
+      body.appendChild(h("div", { class: "card" }, h("h2", {}, "JEU " + snap.jeux.join(" · ") + (snap.jeux.length === 1 ? " · " + j.titre : "")), snap.jeux.length === 1 ? h("p", {}, j.regle) : null, snap.jeux.length === 1 ? h("p", {}, helpBtn(C.toolFor(snap.jeux[0]))) : null,
         snap.canDraw ? h("div", {}, h("p", { class: "big" }, "C'est à vous de tirer la carte pour la table."), h("button", { class: "ok", onclick: function () { send({ t: "draw" }); } }, "Tirer la carte"))
           : h("p", { class: "big" }, "Au tour de " + (snap.tireur || "…") + " de tirer la carte."), chips(T)));
     }
@@ -223,7 +223,7 @@
     }
     function drawCard(cur) {
       var c = C.cardOf(cur.jeu, cur.id), j = D.jeux[cur.jeu], box = h("div", { class: "card" });
-      box.appendChild(h("h2", {}, "Jeu " + cur.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "big" }, c.q));
+      box.appendChild(h("h2", {}, "JEU " + cur.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "big" }, c.q));
       if (cur.jeu !== "P") box.appendChild(h("p", {}, helpBtn(C.toolFor(cur.jeu))));
       var f = cardForm(c, me.sid + c.id, box), bet = h("input", { type: "checkbox", style: "width:auto;margin-right:8px" });
       box.appendChild(h("label", { class: "card", style: "background:#FFF6DD;display:block;cursor:pointer" }, bet, h("b", {}, "Je mise"), " : 3 points = +1 case de plus ; 0 ou 1 point = −1 case de plus."));
@@ -236,7 +236,7 @@
     function moveText(r, m) {
       var t = [], pawn = C.COLNAMES[m.ci];
       if (r.pts === 0) t.push(r.from === 0 ? "0 point : votre pion reste au départ." : "0 point : reculez d'une case.");
-      else if (r.to === r.from) t.push(r.pts + " point(s) : le pion ne bouge pas (barrière de la case 31 : attendez l'ouverture du niveau 2).");
+      else if (r.to === r.from) t.push(r.pts + " point(s) : le pion ne bouge pas (vous avez de l'avance sur le cours : le pion attend le prochain JEU).");
       else t.push(r.pts + " point" + (r.pts > 1 ? "s" : "") + " : avancez de " + r.pts + " case" + (r.pts > 1 ? "s" : "") + ".");
       if (r.bet && r.bet.on) t.push(r.bet.d > 0 ? "Pari gagné : encore +1 case." : r.bet.d < 0 ? "Pari perdu : encore −1 case." : "Pari neutre (2 points).");
       return "Pion " + pawn + " : " + t.join(" ");
@@ -250,7 +250,7 @@
           h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)));
         body.appendChild(h("div", { class: "warn big" }, moveText(r, m) + " → case " + r.to + "."));
         if (r.ev && r.ev.k === "aleas") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Aléa : " + r.ev.titre), h("p", {}, r.ev.txt), h("p", { class: "big" }, "Puis " + (r.ev.move > 0 ? "avancez" : "reculez") + " de " + Math.abs(r.ev.move) + " → case " + r.final + ".")));
-        if (r.ev && r.ev.k === "gate") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : fin du niveau 1"), h("p", {}, r.ev.open ? "Le niveau 2 est ouvert : continuez vers l'intérieur du plateau." : "Félicitations. Vous attendez l'ouverture du niveau 2 par l'enseignant.")));
+        if (r.ev && r.ev.k === "gate") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : mi-parcours"), h("p", {}, "Bravo, vous êtes à mi-chemin du plateau. Continuez.")));
         if (r.ev && ["outil", "piege", "duel", "pairs"].indexOf(r.ev.k) >= 0) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Case à effet : " + D.types[r.ev.k]), h("p", {}, r.ev.k === "pairs" && !r.ev.par ? "Personne n'est disponible pour relire votre réponse : l'effet est annulé." : "L'effet se règle à l'écran suivant.")));
         body.appendChild(h("p", { class: "meta" }, "Autres joueurs de la table : " + snap.table.players.filter(function (p) { return p.sid !== m.sid; }).map(function (p) { var x = last.res[p.sid]; return p.nom + " +" + (x ? x.pts : 0); }).join(" · ")));
         body.appendChild(h("button", { class: "ok", onclick: function () { ack = last.round + 1; saveFlags(); key = ""; render(); } }, "Continuer"));
@@ -313,14 +313,14 @@
       } }, pin ? "Entrer" : "Enregistrer et entrer"), msg), h("p", { class: "meta" }, "Le PIN est stocké dans ce navigateur : il évite qu'un étudiant ouvre la tour sur le poste projeté, ce n'est pas une authentification réseau."));
   }
   function setup() {
-    var saved = LSget(GK), jeuxOk = Object.keys(D.jeux), sel = {}, min = h("input", { type: "number", value: "30", min: 5, max: 90, style: "max-width:90px" });
-    var boxes = jeuxOk.map(function (k) { var cb = h("input", { type: "checkbox", style: "width:auto" }); cb.checked = k === "5.1"; sel[k] = cb; return h("label", { style: "display:block;margin:4px 0" }, cb, " " + k + " · " + D.jeux[k].titre); });
+    var saved = LSget(GK), jeuxOk = Object.keys(D.jeux), sel = {}, min = h("input", { type: "number", value: "480", min: 30, max: 900, style: "max-width:90px" });
+    var boxes = h("select", {}, jeuxOk.map(function (k) { return h("option", { value: k }, k + " · " + D.jeux[k].titre); }));
     mount(h("h1", {}, "Tour de contrôle"),
       saved ? h("div", { class: "card" }, h("h2", {}, "Partie en cours"), h("p", {}, "Code " + saved.code + " · " + Object.keys(saved.players).length + " joueur(s) · séance " + (saved.status === "lobby" ? "pas lancée" : saved.status === "play" ? "en cours" : "terminée")), h("button", { class: "ok", onclick: function () { run(saved, false); } }, "Reprendre cette partie")) : null,
-      h("div", { class: "card" }, h("h2", {}, "Nouvelle partie"), h("p", {}, "Jeu(x) joué(s) pendant la séance :"), boxes, h("p", {}, "Durée de la séance (minutes) : ", min),
+      h("div", { class: "card" }, h("h2", {}, "Nouvelle partie"), h("p", {}, "JEU de départ (vous passerez au suivant avec « JEU suivant ») :"), boxes, h("p", {}, "Durée maximale de la partie (minutes) : ", min),
         h("p", { class: "meta" }, "Code de partie : " + CODE + ". Ouvrez la tour avant que les étudiants ne se connectent."),
-        h("button", { class: "ok", onclick: function () { var js = jeuxOk.filter(function (k) { return sel[k].checked; }); if (!js.length) js = ["5.1"]; run(C.newGame({ code: CODE, jeux: js, min: Math.max(5, +min.value || 30) }), false); } }, "Ouvrir la partie"),
-        h("button", { class: "sec", onclick: function () { var g = C.newGame({ code: CODE, jeux: ["5.1"], min: 8 }); run(g, true); } }, "Simuler une partie (5 tables)")),
+        h("button", { class: "ok", onclick: function () { run(C.newGame({ code: CODE, jeux: [boxes.value || "1"], min: Math.max(30, +min.value || 480) }), false); } }, "Ouvrir la partie"),
+        h("button", { class: "sec", onclick: function () { var g = C.newGame({ code: CODE, jeux: ["1"], min: 480 }); run(g, true); } }, "Simuler une partie (5 tables)")),
       h("p", {}, h("a", { href: "#/test" }, "Mode test : parcourir tous les jeux et toutes les cartes sans répondre"), "  ·  ", h("a", { href: "#/plateau" }, "← Plateau")));
   }
 
@@ -396,7 +396,7 @@
       var rank = S.tables.slice().sort(function (a, b) { return b.sum - a.sum || b.pts - a.pts; }).map(function (x) { return x.id; });
       headEl.innerHTML = "";
       var stTxt = { ok: "● réseau prêt", local: "◐ mode local (même navigateur)", busy: "○ code déjà utilisé : fermez l'autre tour", err: "○ réseau indisponible", off: "○ PeerJS absent" }[status] || "…";
-      headEl.appendChild(h("div", { class: "jx-title" }, h("b", {}, "5 · La route de l'état de l'art"), h("span", {}, " · jeu " + G.jeux.join(" + ") + " · " + (D.jeux[G.jeux[0]] ? D.jeux[G.jeux[0]].titre : "")), h("small", {}, "  rejoindre : belmdeveloppement.github.io/communication-pro/#/j  ·  code "), h("b", { class: "jx-code" }, G.code)));
+      headEl.appendChild(h("div", { class: "jx-title" }, h("b", {}, "5 · La route de l'état de l'art"), h("span", {}, " · JEU " + G.jeux.join(" + ") + " · " + (D.jeux[G.jeux[0]] ? D.jeux[G.jeux[0]].titre : "")), h("small", {}, "  rejoindre : belmdeveloppement.github.io/communication-pro/#/j  ·  code "), h("b", { class: "jx-code" }, G.code)));
       headEl.appendChild(h("div", { class: "jx-clock" }, G.status === "lobby" ? "Séance non lancée" : G.status === "ended" ? "Séance terminée" : mmss(left), h("small", {}, "  " + Object.keys(G.players).length + " joueurs · " + S.tables.length + " tables · " + stTxt)));
       var ctr = h("div", { class: "jx-ctl" });
       if (G.status === "lobby") ctr.appendChild(h("button", { class: "ok", onclick: function () { C.start(G, now()); dirty = true; refresh(); } }, "Lancer la séance"));
@@ -404,10 +404,9 @@
       ctr.appendChild(h("button", { class: "sec", onclick: function () { setView(view === "proj" ? "prof" : "proj"); } }, view === "proj" ? "Vue enseignant" : "Vue projetée"));
       if (view === "proj") ctr.appendChild(h("button", { class: "sec", onclick: function () { try { document.documentElement.requestFullscreen(); } catch (e) {} } }, "Plein écran"));
       var jk = Object.keys(D.jeux), ji = jk.indexOf(G.jeux[0]), cn = C.counts(G, G.jeux[0]);
-      ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { C.nextJeu(G, -1); dirty = true; refresh(); } }, "◀ Jeu précédent"));
-      ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Passer au jeu " + jk[ji + 1] + " ? Les positions et les points sont conservés ; la question ouverte se termine normalement.")) { C.nextJeu(G, 1); dirty = true; refresh(); } } }, "Jeu suivant ▶" + (ji < jk.length - 1 ? " (" + jk[ji + 1] + ")" : "")));
+      ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { C.nextJeu(G, -1); dirty = true; refresh(); } }, "◀ JEU précédent"));
+      ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Passer au JEU " + jk[ji + 1] + " ? Les positions et les points sont conservés ; les JEUX en cours se terminent normalement.")) { C.nextJeu(G, 1); dirty = true; refresh(); } } }, "JEU suivant ▶" + (ji < jk.length - 1 ? " (" + jk[ji + 1] + ")" : "")));
       if (cn.extra) ctr.appendChild(h("button", { class: G.extra ? "ok" : "sec", onclick: function () { C.setExtra(G, !G.extra); dirty = true; refresh(); } }, G.extra ? "Cartes supplémentaires : activées (" + (cn.base + cn.extra) + ")" : "Débloquer les cartes supplémentaires (+" + cn.extra + ")"));
-      ctr.appendChild(h("button", { class: G.n2 ? "ok" : "sec", onclick: function () { if (!G.n2 && !confirm("Ouvrir le niveau 2 (cases 32 à 62, jeux 5.9 à 5.16) pour tous les joueurs arrivés à la case 31 ?")) return; C.setN2(G, !G.n2); dirty = true; refresh(); } }, G.n2 ? "Niveau 2 : ouvert" : "Ouvrir le niveau 2"));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { exportCsv(S); } }, "Export CSV"));
       ctr.appendChild(h("a", { class: "btn sec", href: "#/test", target: "_blank", style: "text-decoration:none;display:inline-block" }, "Mode test"));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { if (confirm("Terminer et effacer cette partie ?")) { try { localStorage.removeItem(GK); } catch (e) {} dead = true; location.hash = "#/tour"; setTimeout(function () { location.reload(); }, 50); } } }, "Nouvelle partie"));
@@ -479,9 +478,9 @@
       var it = list[ix], c = it.c, j = D.jeux[it.jeu], n = list.filter(function (x) { return x.jeu === it.jeu; }), pos = n.indexOf(it) + 1;
       box.innerHTML = "";
       var cb = h("input", { type: "checkbox", style: "width:auto" }); cb.checked = sync; cb.addEventListener("change", function () { sync = cb.checked; if (sync) pushJeu(); showInfo(); });
-      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être. Les 16 jeux sont parcourus."));
+      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être. Les 40 JEUX sont parcourus."));
       box.appendChild(h("label", { style: "display:block;margin:6px 0" }, cb, " Synchroniser la partie : changer de jeu ici change le jeu des joueurs"), info); showInfo();
-      box.appendChild(h("h1", {}, "Jeu " + it.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "meta" }, "Zone " + j.zone + " · carte " + pos + " / " + n.length + (c.extra ? " · carte supplémentaire" : "") + " · type " + c.t + " · " + (ix + 1) + " / " + list.length + " au total"));
+      box.appendChild(h("h1", {}, "JEU " + it.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "meta" }, "Zone " + j.zone + " · carte " + pos + " / " + n.length + (c.extra ? " · carte supplémentaire" : "") + " · type " + c.t + " · " + (ix + 1) + " / " + list.length + " au total"));
       var card = h("div", { class: "card" }); box.appendChild(card);
       card.appendChild(h("p", { class: "big" }, c.q));
       if (c.t === "choix") c.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (i === c.ok ? "good" : "") }, (i === c.ok ? "✓ " : "") + o)); });
@@ -511,7 +510,7 @@
       D.outils.forEach(function (o) {
         var a = o.aide, sel = st[o.id] || "";
         function mark(v) { st[o.id] = v; save(); if (ctl) try { ctl.postMessage({ t: "tool", tool: o.id, off: v === "ko" }); } catch (e) {} draw(); }
-        rows.appendChild(h("div", { class: "card", style: "border-left:6px solid " + (sel === "ok" ? "#2E9E6B" : sel === "ko" ? "#C0392B" : "#bbb") }, h("b", {}, "Jeu " + o.jeu + " · " + o.nom), h("p", { class: "meta" }, o.tache),
+        rows.appendChild(h("div", { class: "card", style: "border-left:6px solid " + (sel === "ok" ? "#2E9E6B" : sel === "ko" ? "#C0392B" : "#bbb") }, h("b", {}, "JEU " + o.jeu + " · " + o.nom), h("p", { class: "meta" }, o.tache),
           h("p", {}, h("a", { href: o.url, target: "_blank", rel: "noopener", class: "btn" }, "Ouvrir " + o.nom + " ↗"), " ", a.boutons.slice(1).map(function (b) { return h("a", { href: b[1], target: "_blank", rel: "noopener", class: "btn sec", style: "margin-left:4px" }, b[0] + " ↗"); })),
           h("p", {}, h("button", { class: sel === "ok" ? "ok" : "sec", onclick: function () { mark("ok"); } }, "✓ Accessible"), h("button", { class: sel === "ko" ? "r" : "sec", onclick: function () { mark("ko"); } }, "✗ Bloqué"), h("small", { class: "meta" }, sel === "ko" ? " Cet outil sera proposé à la désactivation dans la tour." : ""))));
       });

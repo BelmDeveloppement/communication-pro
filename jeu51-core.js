@@ -10,16 +10,17 @@
   function setData(d) { D = d; }
   var COLORS = ["#3B6FD8", "#2E9E6B", "#D6479B", "#E4572E", "#E9A400"];
   var COLNAMES = ["bleu", "vert", "rose", "rouge", "orange"];
-  var MAXP = 5, MAXT = 5, OFFLINE_MS = 25000, CARD_MAX_MS = 6 * 60000, STUCK_MS = 3 * 60000, PEND_MS = 150000, DUEL_WAIT_MS = 45000, DUEL_PLAY_MS = 90000;
+  var MAXP = 5, MAXT = 5, OFFLINE_MS = 25000, CARD_MAX_MS = 90 * 60000, STUCK_MS = 20 * 60000, PEND_MS = 150000, DUEL_WAIT_MS = 45000, DUEL_PLAY_MS = 90000;
 
   function newGame(cfg) {
     cfg = cfg || {};
-    return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: false, help: {}, broken: {}, off: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["5.1"], min: cfg.min || 30, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [] };
+    return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: true, help: {}, broken: {}, off: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["1"], min: cfg.min || 480, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [] };
   }
   function tid(n) { var k = parseInt(String(n).replace(/\D/g, ""), 10); return k >= 1 && k <= MAXT ? "T" + k : null; }
   function tableOf(G, t) { return G.tables[t] || (G.tables[t] = { id: t, players: [], round: 0, seen: {}, cur: null, last: null }); }
   function online(p, now) { return p.sim || (now - p.last) < OFFLINE_MS; }
-  function lim(G) { return G.n2 ? D.caps.max : D.caps.gate; }
+  /* Rythme : on ne dépasse pas de D.caps.slack cases le JEU en cours (le plateau avance au rythme du cours). */
+  function lim(G) { var jc = D.caps.jeuCase, last = Object.keys(D.jeux).length, k = G.jeux[0]; if (!jc || !jc[k]) return D.caps.max; if (parseInt(k, 10) >= last) return D.caps.max; return Math.min(D.caps.max, jc[k] + (D.caps.slack || 8)); }
   function say(G, p, txt, now) {
     p.notes = p.notes || []; p.notes.unshift({ txt: txt, at: now }); p.notes = p.notes.slice(0, 5);
     G.log.unshift({ t: p.table, n: p.nom, txt: txt, at: now }); G.log = G.log.slice(0, 40);
@@ -64,7 +65,7 @@
   function toolOff(G, id) { return !!G.off[id]; }
   function canDraw(G, sid, now) {
     var p = G.players[sid]; if (!p || p.done) return false; var T = G.tables[p.table];
-    if (!running(G, now) || T.cur) return false;
+    if (!running(G, now) || T.cur || (T.played && T.played[G.jeux[0]])) return false;
     var tr = tireur(G, T, now); if (!tr) return false;
     if (!readyTable(G, T, now)) return false;
     return tr.sid === sid ? !p.pend : (!online(tr, now) || !!tr.pend) && !p.pend;
@@ -116,7 +117,7 @@
     if (!pl.length) { var ps = D.pieges.cartes; return { jeu: "P", id: PE.shuffle(ps.map(function (c) { return c.id; }), seed)[0] }; }
     return { jeu: jeu, id: PE.shuffle(pl.map(function (c) { return c.id; }), seed)[0] };
   }
-  function toolFor(jeu) { return D.outils.filter(function (o) { return o.jeu === jeu; })[0] || D.outils[0]; }
+  function toolFor(jeu) { var n = parseInt(jeu, 10), best = null; D.outils.forEach(function (o) { if (parseInt(o.jeu, 10) <= n) best = o; }); return best || D.outils[0]; }
   function move(G, p, delta) { var from = p.pos; p.pos = PE.advance(p.pos, delta, lim(G)); if (p.pos >= D.caps.max) p.done = true; return p.pos - from; }
 
   function closeRound(G, t, now) {
@@ -152,7 +153,7 @@
       res[s] = { pts: r.pts, mv: mv, bet: { on: !!(a && a.bet), d: bet }, detail: r.detail, from: from, to: np, final: fin, ev: eff, answered: !!a, ms: ms };
       p.res.push({ n: rd, jeu: cur.jeu, id: cur.id, pts: r.pts, ms: ms, answered: !!a, detail: det });
     });
-    (T.seen[cur.jeu] = T.seen[cur.jeu] || []).push(cur.id);
+    (T.seen[cur.jeu] = T.seen[cur.jeu] || []).push(cur.id); (T.played = T.played || {})[cur.jeu] = true;
     T.last = { round: rd, jeu: cur.jeu, id: cur.id, res: res, at: now }; T.cur = null; T.round++;
     return true;
   }
@@ -303,7 +304,7 @@
     var p = G.players[sid]; if (!p) return null; var T = G.tables[p.table], tr = tireur(G, T, now);
     return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, n2: !!G.n2, gate: D.caps.gate, max: D.caps.max,
       me: { sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
-      canDraw: canDraw(G, sid, now), tireur: tr ? tr.nom : null,
+      canDraw: canDraw(G, sid, now), played: !!(T.played && T.played[G.jeux[0]]), lim: lim(G), tireur: tr ? tr.nom : null,
       table: { id: T.id, round: T.round,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),
         cur: T.cur ? { jeu: T.cur.jeu, id: T.cur.id, at: T.cur.at, answered: Object.keys(T.cur.ans), mine: !!T.cur.ans[sid] } : null,
