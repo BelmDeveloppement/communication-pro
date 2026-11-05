@@ -1,8 +1,8 @@
 /* © 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur.
-   Logique « tables et joueurs » du plateau « 5 · La route de l'état de l'art » (16 jeux, 62 cases, niveaux 1 et 2).
+   Logique « tables et joueurs » du plateau « La route de l'état de l'art » (45 JEU, 63 cases, un pion par table, points, jauges de maîtrise).
    Pur, sans DOM, testable sous Node. Le navigateur de l'enseignant fait autorité : les joueurs envoient leurs actions, il note et renvoie l'état.
-   Règles : 0 point = recul d'une case ; 1 à 3 points = avance d'autant ; pari (+1 / −1) ; cases Aléa, Outil, Piège, Duel, Relecture ;
-   case 31 = fin du niveau 1 (barrière tant que l'enseignant n'a pas ouvert le niveau 2) ; case 62 = Examen (arrivée). */
+   Règles : 1 case = 1 JEU, on passe par toutes les cases ; le pion de la table avance d'une case quand toute la table a validé ; il ne dépasse pas le JEU ouvert par l'enseignant.
+   Points : 0 à 3 par JEU, pari ±1, effets en points, bonus « table solidaire » ; jauges de maîtrise par objectif (10 jetons) ; niveau Débutant / Confirmé / Expert (seuils cachés). */
 (function (root) {
   "use strict";
   var PE = root.PEngine || (typeof require !== "undefined" ? require("./plateau-engine.js") : null);
@@ -14,19 +14,31 @@
 
   function newGame(cfg) {
     cfg = cfg || {};
-    return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: true, help: {}, broken: {}, off: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["1"], min: cfg.min || 480, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [] };
+    return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: true, help: {}, broken: {}, off: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["1"], min: cfg.min || 480, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [], arbit: [] };
   }
   function tid(n) { var k = parseInt(String(n).replace(/\D/g, ""), 10); return k >= 1 && k <= MAXT ? "T" + k : null; }
-  function tableOf(G, t) { return G.tables[t] || (G.tables[t] = { id: t, players: [], round: 0, seen: {}, cur: null, last: null }); }
+  function tableOf(G, t) { return G.tables[t] || (G.tables[t] = { id: t, players: [], round: 0, seen: {}, cur: null, last: null, pos: G.status === "play" ? 1 : 0, bonus: 0, zs: {}, done: false }); }
   function online(p, now) { return p.sim || (now - p.last) < OFFLINE_MS; }
-  /* Rythme : on ne dépasse pas de D.caps.slack cases le JEU en cours (le plateau avance au rythme du cours). */
-  function lim(G) { var jc = D.caps.jeuCase, last = Object.keys(D.jeux).length, k = G.jeux[0]; if (!jc || !jc[k]) return D.caps.max; if (parseInt(k, 10) >= last) return D.caps.max; return Math.min(D.caps.max, jc[k] + (D.caps.slack || 8)); }
+  /* Frontière : la table joue le JEU de la case où se trouve son pion, à condition que l'enseignant l'ait ouvert (numéro de JEU <= JEU ouvert). */
+  function lim(G) { return D.caps.max; }
+  function caseOf(T) { return D.cases[T.pos] || null; }
+  function jeuHere(T) { var c = caseOf(T); return c && c.type === "jeu" ? c.jeu : null; }
+  function playable(G, T) { var j = jeuHere(T); return !!j && !T.done && parseInt(j, 10) <= parseInt(G.jeux[0], 10); }
+  function zoneOf(jeu) { return D.jeux[jeu].zone; }
+  /* Jauge de la table pour un objectif : 10 jetons = maîtrise complète (points obtenus / points possibles sur tout l'objectif). */
+  function gaugeLvl(T, z, np) { var sum = (T.zs[z] || 0), den = 3 * D.nz[z] * Math.max(1, np); return Math.max(0, Math.min(10, Math.round(10 * sum / den))); }
+  function levelOf(pct) { return pct < 0.45 ? "Débutant" : pct < 0.75 ? "Confirmé" : "Expert"; }
+  function mastery(zp, zn, z, np) { var den = 3 * D.nz[z] * (np || 1), pct = Math.max(0, (zp[z] || 0) / den); return { z: z, pct: pct, n: zn[z] || 0, lvl: (zn[z] || 0) ? levelOf(pct) : null }; }
+  function masteryAll(p) { return Object.keys(D.zones).map(function (z) { return mastery(p.zp, p.zn, z, 1); }); }
+  function masteryTable(G, T) { var ps = T.players.map(function (s) { return G.players[s]; }), np = Math.max(1, ps.length); return Object.keys(D.zones).map(function (z) { var zp = {}, zn = {}; zp[z] = T.zs[z] || 0; zn[z] = ps.reduce(function (a, p) { return Math.max(a, p.zn[z] || 0); }, 0); return mastery(zp, zn, z, np); }); }
+  function tableScore(G, T) { return T.players.reduce(function (a, s) { return a + G.players[s].score; }, 0) + (T.bonus || 0); }
   function say(G, p, txt, now) {
     p.notes = p.notes || []; p.notes.unshift({ txt: txt, at: now }); p.notes = p.notes.slice(0, 5);
     G.log.unshift({ t: p.table, n: p.nom, txt: txt, at: now }); G.log = G.log.slice(0, 40);
   }
 
   function join(G, o, now) {
+    settle(G);
     var t = tid(o.table); if (!t) return { ok: false, err: "Table inconnue : choisissez une table de 1 à " + MAXT + "." };
     var nom = String(o.nom || "").trim().slice(0, 18); if (!nom) return { ok: false, err: "Saisissez votre prénom." };
     var T = tableOf(G, t), p = G.players[o.sid];
@@ -35,10 +47,11 @@
     if (same) { same.last = now; return { ok: true, player: same, rebound: true }; }
     if (T.players.length >= MAXP) return { ok: false, err: "La table " + t + " est complète (" + MAXP + " joueurs)." };
     var used = T.players.map(function (s) { return G.players[s].ci; }), ci = 0; while (used.indexOf(ci) >= 0) ci++;
-    p = { sid: o.sid, nom: nom, table: t, ci: ci, col: COLORS[ci], pos: 0, score: 0, done: false, last: now, joined: now, res: [], sim: !!o.sim, tools: {}, bets: 0, betsWon: 0, duelW: 0, duelL: 0, revN: 0, revOk: 0, trapN: 0, trapOk: 0, pend: null, notes: [], read: { common: false, jeux: {} } };
+    p = { sid: o.sid, nom: nom, table: t, ci: ci, col: COLORS[ci], pos: T.pos, score: 0, zp: {}, zn: {}, done: T.done, last: now, joined: now, res: [], sim: !!o.sim, tools: {}, bets: 0, betsWon: 0, duelW: 0, duelL: 0, revN: 0, revOk: 0, trapN: 0, trapOk: 0, pend: null, notes: [], read: { common: false, jeux: {} } };
     G.players[p.sid] = p; T.players.push(p.sid); return { ok: true, player: p };
   }
-  function start(G, now) { if (G.status === "play") return; G.status = "play"; G.start = now; G.end = now + G.min * 60000; }
+  function settle(G) { Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.pos === 0 && G.status === "play") { T.pos = 1; T.players.forEach(function (s) { G.players[s].pos = 1; }); } }); }
+  function start(G, now) { if (G.status === "play") return; G.status = "play"; G.start = now; G.end = now + G.min * 60000; settle(G); }
   function stop(G, now) { G.end = now; if (G.status === "play") G.status = "ended"; }
   function running(G, now) { return G.status === "play" && now < G.end; }
   function tireur(G, T, now) {
@@ -46,14 +59,15 @@
     return ps[T.round % ps.length];
   }
   /* Lecture obligatoire : document commun (une fois) + fiche du jeu courant (quand on y arrive) */
-  function hasRead(G, p) { if (p.sim) return true; return !!(p.read && p.read.common) && !!(p.read.jeux && p.read.jeux[G.jeux[0]]); }
-  function readState(G, p) { if (p.sim) return "ok"; if (!p.read || !p.read.common) return "common"; if (!p.read.jeux[G.jeux[0]]) return "fiche"; return "ok"; }
+  function hereJ(G, p) { return jeuHere(G.tables[p.table]); }
+  function hasRead(G, p) { if (p.sim) return true; var j = hereJ(G, p); return !!(p.read && p.read.common) && (!j || !!(p.read.jeux && p.read.jeux[j])); }
+  function readState(G, p) { if (p.sim) return "ok"; if (!p.read || !p.read.common) return "common"; var j = hereJ(G, p); if (j && !p.read.jeux[j]) return "fiche"; return "ok"; }
   function readyTable(G, T, now) {
     return T.players.every(function (s) { var p = G.players[s]; return p.done || !online(p, now) || hasRead(G, p); });
   }
   function actRead(G, sid, doc, now) {
     var p = G.players[sid]; if (!p) return false; p.read = p.read || { common: false, jeux: {} };
-    if (doc === "common") p.read.common = true; else if (doc === "jeu") p.read.jeux[G.jeux[0]] = true; else return false;
+    if (doc === "common") p.read.common = true; else if (doc === "jeu") { var hj = hereJ(G, p); if (hj) p.read.jeux[hj] = true; } else return false;
     p.last = now; return true;
   }
   function resetRead(G, jeu) { Object.keys(G.players).forEach(function (s) { var p = G.players[s]; if (p.read && p.read.jeux) delete p.read.jeux[jeu]; }); }
@@ -65,7 +79,7 @@
   function toolOff(G, id) { return !!G.off[id]; }
   function canDraw(G, sid, now) {
     var p = G.players[sid]; if (!p || p.done) return false; var T = G.tables[p.table];
-    if (!running(G, now) || T.cur || (T.played && T.played[G.jeux[0]])) return false;
+    if (!running(G, now) || T.cur || !playable(G, T)) return false;
     var tr = tireur(G, T, now); if (!tr) return false;
     if (!readyTable(G, T, now)) return false;
     return tr.sid === sid ? !p.pend : (!online(tr, now) || !!tr.pend) && !p.pend;
@@ -79,7 +93,7 @@
   function cardOf(jeu, id) { var src = jeu === "P" ? D.pieges : D.jeux[jeu]; return src.cartes.filter(function (c) { return c.id === id; })[0]; }
   function draw(G, sid, now) {
     if (!canDraw(G, sid, now)) return false;
-    var T = G.tables[G.players[sid].table], jeu = G.jeux[0], j = pool(G, jeu);
+    var T = G.tables[G.players[sid].table], jeu = jeuHere(T), j = pool(G, jeu);
     var r = PE.pickCard(j, T.seen[jeu] || [], G.code + T.id + T.round);
     if (r.reset) T.seen[jeu] = [];
     T.cur = { jeu: jeu, id: r.card.id, at: now, ans: {}, by: sid };
@@ -118,43 +132,58 @@
     return { jeu: jeu, id: PE.shuffle(pl.map(function (c) { return c.id; }), seed)[0] };
   }
   function toolFor(jeu) { var n = parseInt(jeu, 10), best = null; D.outils.forEach(function (o) { if (parseInt(o.jeu, 10) <= n) best = o; }); return best || D.outils[0]; }
-  function move(G, p, delta) { var from = p.pos; p.pos = PE.advance(p.pos, delta, lim(G)); if (p.pos >= D.caps.max) p.done = true; return p.pos - from; }
+  function pt(G, p, delta) { p.score += delta; return delta; }
 
+  /* Fin d'un tour de table : points de chacun, bonus, jauge, puis le pion avance d'une case en traversant les cases à effet. */
+  function applyCase(G, T, p, cs, cur, card, a, r, rd, now) {
+    var eff = null;
+    if (cs.type === "aleas") {
+      var ev = D.events[PE.shuffle(D.events.map(function (e, i) { return i; }), G.code + p.sid + rd + cs.n)[0]];
+      pt(G, p, ev.move); eff = { k: "aleas", titre: ev.titre, txt: ev.txt, move: ev.move }; say(G, p, "Aléa « " + ev.titre + " » (" + (ev.move > 0 ? "+" : "") + ev.move + " point)", now);
+    } else if (cs.type === "outil" || cs.type === "piege" || cs.type === "duel" || cs.type === "pairs") {
+      if (p.pend) return { k: "busy", of: cs.type };
+      if (cs.type === "outil") {
+        var to = toolFor(cur.jeu);
+        if (G.off[to.id]) { pt(G, p, 1); eff = { k: "outil", tool: to.id, off: true }; say(G, p, "Outil « " + to.nom + " » désactivé : +1 point sans tâche", now); }
+        else { p.pend = { k: "outil", at: now, tool: to.id }; eff = { k: "outil", tool: to.id }; }
+      } else if (cs.type === "piege") {
+        var pc = D.pieges.cartes; p.pend = { k: "piege", at: now, card: { jeu: "P", id: PE.shuffle(pc.map(function (c) { return c.id; }), G.code + p.sid + rd + "p")[0] } }; eff = { k: "piege" };
+      } else if (cs.type === "duel") {
+        p.pend = { k: "duel", at: now, st: "wait", opp: null, card: null, ans: null }; eff = { k: "duel" }; matchDuels(G, p, cur.jeu, now);
+      } else {
+        var rv = T.players.map(function (x) { return G.players[x]; }).filter(function (q) { return q.sid !== p.sid && !q.done && !q.pend && online(q, now); });
+        if (rv.length) { var q = rv[(rd + p.ci) % rv.length]; q.pend = { k: "rel", at: now, au: p.nom, aus: p.sid, jeu: cur.jeu, id: cur.id, ans: ansText(card, a ? a.ans : null), pts: r.pts }; eff = { k: "pairs", par: q.nom }; }
+        else eff = { k: "pairs", par: null };
+      }
+    } else if (cs.type === "gate") eff = { k: "gate" };
+    return eff;
+  }
   function closeRound(G, t, now) {
     var T = G.tables[t]; if (!T || !T.cur) return false;
-    var cur = T.cur, card = cardOf(cur.jeu, cur.id), res = {}, rd = T.round;
-    T.players.forEach(function (s) {
-      var p = G.players[s]; if (p.done) return;
-      var a = cur.ans[s], r = PE.score(card, a ? a.ans : null), mv = PE.move(r.pts), bet = a && a.bet ? PE.betDelta(r.pts) : 0;
-      var from = p.pos, np = PE.advance(from, mv + bet, lim(G)), fin = np, eff = null, cs = D.cases[np];
+    var cur = T.cur, card = cardOf(cur.jeu, cur.id), res = {}, rd = T.round, z = zoneOf(cur.jeu), act = T.players.map(function (s) { return G.players[s]; }).filter(function (p) { return !p.done; });
+    var from = T.pos, to = from + 1, path = [], low = false;
+    var live = act.filter(function (p) { return !!cur.ans[p.sid] || online(p, now); });
+    act.forEach(function (p) {
+      var a = cur.ans[p.sid], r = PE.score(card, a ? a.ans : null), bet = a && a.bet ? PE.betDelta(r.pts) : 0;
       if (a && a.bet) { p.bets++; if (bet > 0) p.betsWon++; }
-      if (np !== from && cs) {
-        if ((cs.type === "outil" || cs.type === "piege" || cs.type === "duel") && p.pend) { eff = { k: "busy", of: cs.type }; }
-        else if (cs.type === "aleas") {
-          var ev = D.events[PE.shuffle(D.events.map(function (e, i) { return i; }), G.code + p.sid + rd)[0]];
-          fin = PE.advance(np, ev.move, lim(G)); eff = { k: "aleas", titre: ev.titre, txt: ev.txt, move: ev.move }; say(G, p, "Aléa « " + ev.titre + " » (" + (ev.move > 0 ? "+" : "") + ev.move + ")", now);
-        } else if (cs.type === "outil") {
-          var to = toolFor(cur.jeu);
-          if (G.off[to.id]) { fin = PE.advance(np, 1, lim(G)); eff = { k: "outil", tool: to.id, off: true }; say(G, p, "Outil « " + to.nom + " » désactivé : +1 case sans tâche", now); }
-          else { p.pend = { k: "outil", at: now, tool: to.id }; eff = { k: "outil", tool: to.id }; }
-        } else if (cs.type === "piege") {
-          var pc = D.pieges.cartes; p.pend = { k: "piege", at: now, card: { jeu: "P", id: PE.shuffle(pc.map(function (c) { return c.id; }), G.code + p.sid + rd + "p")[0] } }; eff = { k: "piege" };
-        } else if (cs.type === "duel") {
-          p.pend = { k: "duel", at: now, st: "wait", opp: null, card: null, ans: null }; eff = { k: "duel" }; matchDuels(G, p, cur.jeu, now);
-        } else if (cs.type === "pairs") {
-          var rv = T.players.map(function (x) { return G.players[x]; }).filter(function (q) { return q.sid !== p.sid && !q.done && !q.pend && online(q, now); });
-          if (rv.length) { var q = rv[(rd + p.ci) % rv.length]; q.pend = { k: "rel", at: now, au: p.nom, aus: p.sid, jeu: cur.jeu, id: cur.id, ans: ansText(card, a ? a.ans : null), pts: r.pts }; eff = { k: "pairs", par: q.nom }; }
-          else eff = { k: "pairs", par: null };
-        } else if (cs.type === "gate") eff = { k: "gate", open: !!G.n2 };
-      }
-      p.pos = fin; p.score += r.pts; if (fin >= D.caps.max) p.done = true;
-      var ms = a ? a.at - cur.at : null;
-      var det = r.detail.map(function (d, i) { return { ok: !!d.ok, lab: d.lab, c: critOf(card, i, d) }; });
-      res[s] = { pts: r.pts, mv: mv, bet: { on: !!(a && a.bet), d: bet }, detail: r.detail, from: from, to: np, final: fin, ev: eff, answered: !!a, ms: ms };
+      p.score += r.pts + bet; p.zp[z] = (p.zp[z] || 0) + r.pts; p.zn[z] = (p.zn[z] || 0) + 1; T.zs[z] = (T.zs[z] || 0) + r.pts; if (r.pts < 2) low = true;
+      var ms = a ? a.at - cur.at : null, det = r.detail.map(function (d, i) { return { ok: !!d.ok, lab: d.lab, c: critOf(card, i, d) }; });
+      res[p.sid] = { pts: r.pts, gain: r.pts + bet, mv: 1, bet: { on: !!(a && a.bet), d: bet }, detail: r.detail, from: from, to: to, final: to, ev: null, evs: [], answered: !!a, ms: ms };
       p.res.push({ n: rd, jeu: cur.jeu, id: cur.id, pts: r.pts, ms: ms, answered: !!a, detail: det });
     });
+    var solid = act.length > 0 && act.every(function (p) { return res[p.sid].pts >= 2; }); if (solid) T.bonus = (T.bonus || 0) + 1;
+    /* le pion traverse les cases une par une jusqu'au prochain JEU (ou l'arrivée) */
+    for (;;) {
+      var cs = D.cases[to]; if (!cs) { to--; break; }
+      path.push({ n: cs.n, type: cs.type });
+      if (cs.type === "jeu" || cs.type === "exam") break;
+      act.forEach(function (p) { var e = applyCase(G, T, p, cs, cur, card, cur.ans[p.sid], PE.score(card, cur.ans[p.sid] ? cur.ans[p.sid].ans : null), rd, now); if (e) { res[p.sid].evs.push(e); res[p.sid].ev = res[p.sid].ev || e; } });
+      to++;
+    }
+    T.pos = to; act.forEach(function (p) { p.pos = to; res[p.sid].to = to; res[p.sid].final = to; res[p.sid].mv = to - from; });
+    if (D.cases[to] && D.cases[to].type === "exam") { T.done = true; T.players.forEach(function (s) { G.players[s].done = true; G.players[s].pos = to; }); }
     (T.seen[cur.jeu] = T.seen[cur.jeu] || []).push(cur.id); (T.played = T.played || {})[cur.jeu] = true;
-    T.last = { round: rd, jeu: cur.jeu, id: cur.id, res: res, at: now }; T.cur = null; T.round++;
+    T.last = { round: rd, jeu: cur.jeu, id: cur.id, res: res, at: now, zone: z, gauge: gaugeLvl(T, z, T.players.length), bonus: solid, from: from, to: to, path: path, tscore: tableScore(G, T) }; T.cur = null; T.round++;
     return true;
   }
 
@@ -172,7 +201,7 @@
     var q = p.pend.opp ? G.players[p.pend.opp] : null, card = cardOf(p.pend.card.jeu, p.pend.card.id), sp = pendAns(p), sq = q && q.pend && q.pend.k === "duel" ? pendAns(q) : null;
     var pp = sp ? PE.score(card, sp.ans).pts : -1, pq = sq ? PE.score(card, sq.ans).pts : -1;
     if (p.pend.st === "solo") {
-      if (pp >= 2) { move(G, p, 1); say(G, p, "Duel contre la tour gagné : +1 case", now); p.duelW++; } else say(G, p, "Duel contre la tour : pas de gain", now);
+      if (pp >= 2) { pt(G, p, 1); say(G, p, "Duel contre la tour gagné : +1 point", now); p.duelW++; } else say(G, p, "Duel contre la tour : pas de gain", now);
       p.pend = null; return;
     }
     var win = null;
@@ -180,8 +209,8 @@
     if (win && (win === p ? pp : pq) <= 0) win = null;
     if (!win) { say(G, p, "Duel : égalité, rien ne bouge", now); if (q) say(G, q, "Duel : égalité, rien ne bouge", now); }
     else {
-      var lo = win === p ? q : p; move(G, win, 1); move(G, lo, -1); win.duelW++; lo.duelL++;
-      say(G, win, "Duel gagné contre " + lo.nom + " (" + lo.table + ") : +1 case", now); say(G, lo, "Duel perdu contre " + win.nom + " (" + win.table + ") : −1 case", now);
+      var lo = win === p ? q : p; pt(G, win, 1); pt(G, lo, -1); win.duelW++; lo.duelL++;
+      say(G, win, "Duel gagné contre " + lo.nom + " (" + lo.table + ") : +1 point", now); say(G, lo, "Duel perdu contre " + win.nom + " (" + win.table + ") : −1 point", now);
     }
     p.pend = null; if (q && q.pend && q.pend.k === "duel") q.pend = null;
   }
@@ -190,7 +219,7 @@
   function actOutil(G, sid, ok, now) {
     var p = G.players[sid]; if (!p || !p.pend || p.pend.k !== "outil") return false;
     var to = D.outils.filter(function (o) { return o.id === p.pend.tool; })[0];
-    if (ok) { p.tools[to.id] = now; var d = move(G, p, 1); say(G, p, "Outil « " + to.nom + " » utilisé : +1 case, jeton posé sur l'atelier", now); }
+    if (ok) { p.tools[to.id] = now; pt(G, p, 1); say(G, p, "Outil « " + to.nom + " » utilisé : +1 point", now); }
     else say(G, p, "Outil « " + to.nom + " » : tour passé", now);
     p.pend = null; return true;
   }
@@ -202,7 +231,7 @@
   function actPiege(G, sid, ans, now) {
     var p = G.players[sid]; if (!p || !p.pend || p.pend.k !== "piege") return false;
     var c = cardOf("P", p.pend.card.id), r = PE.score(c, ans); p.trapN++;
-    if (r.pts >= 2) { p.trapOk++; say(G, p, "Piège évité", now); } else { move(G, p, -1); say(G, p, "Piège : −1 case", now); }
+    if (r.pts >= 2) { p.trapOk++; say(G, p, "Piège évité", now); } else { pt(G, p, -1); say(G, p, "Piège : −1 point", now); }
     p.pend = null; return { pts: r.pts };
   }
   function actDuel(G, sid, ans, now) {
@@ -214,11 +243,21 @@
   }
   function actRel(G, sid, verdict, now) {
     var p = G.players[sid]; if (!p || !p.pend || p.pend.k !== "rel") return false;
-    var pend = p.pend, errFound = verdict === "err" && pend.pts < 3, right = (verdict === "err") === (pend.pts < 3); p.revN++;
-    if (right) { p.score += 1; p.revOk++; }
-    if (errFound) { move(G, p, 1); say(G, p, "Relecture : erreur de " + pend.au + " trouvée, +1 case", now); }
-    else say(G, p, right ? "Relecture de " + pend.au + " : bien lu (+1 point)" : "Relecture de " + pend.au + " : verdict inexact", now);
-    p.pend = null; return { right: right, pts: pend.pts };
+    var pend = p.pend, err = verdict === "err"; p.revN++; p.revOk++; pt(G, p, 1);
+    if (err) { G.arbit.unshift({ au: pend.au, aus: pend.aus, rev: p.nom, revs: sid, jeu: pend.jeu, pts: pend.pts, at: now, done: false }); G.arbit = G.arbit.slice(0, 30); say(G, p, "Relecture de " + pend.au + " : une coche te semble fausse, l'enseignant arbitre (+1 point)", now); }
+    else say(G, p, "Relecture de " + pend.au + " : coches validées (+1 point)", now);
+    p.pend = null; return { right: !err, pts: pend.pts };
+  }
+  /* Arbitrage de l'enseignant : une coche fausse retire 1 point à l'auteur ; sinon rien. */
+  function arbitrate(G, i, ok, now) {
+    var x = G.arbit[i]; if (!x || x.done) return false; x.done = true; x.ok = !!ok; var au = G.players[x.aus];
+    if (ok && au) { pt(G, au, -1); say(G, au, "Relecture : une coche fausse a été confirmée (−1 point)", now); } return true;
+  }
+  /* Correction d'un score de JEU par l'enseignant (met à jour points, jauge et classement). */
+  function fixJeu(G, sid, jeu, newPts, now) {
+    var p = G.players[sid]; if (!p) return false; var r = p.res.filter(function (x) { return x.jeu === String(jeu); })[0]; if (!r) return false;
+    newPts = Math.max(0, Math.min(3, newPts | 0)); var d = newPts - r.pts, z = zoneOf(r.jeu); if (!d) return true;
+    r.pts = newPts; r.fixed = true; p.score += d; p.zp[z] = (p.zp[z] || 0) + d; G.tables[p.table].zs[z] = (G.tables[p.table].zs[z] || 0) + d; say(G, p, "Score du JEU " + jeu + " corrigé par l'enseignant : " + newPts + "/3", now); return true;
   }
   function act(G, sid, m, now) {
     if (m.t === "draw") return draw(G, sid, now);
@@ -233,6 +272,7 @@
     return false;
   }
   function tick(G, now) {
+    settle(G);
     if (G.status === "play" && now >= G.end) G.status = "ended";
     Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.cur && now - T.cur.at > CARD_MAX_MS) closeRound(G, t, now); });
     Object.keys(G.players).forEach(function (s) {
@@ -280,13 +320,16 @@
       if (p.pend && now - p.pend.at > 90000 && p.pend.k !== "duel") S.alerts.push({ k: "pend", t: p.table, txt: p.nom + " (" + p.table + ") n'a pas encore réglé l'effet de sa case (" + p.pend.k + ")." });
       Object.keys(p.tools || {}).forEach(function (id) { if (S.tools[id]) S.tools[id].push({ nom: p.nom, col: p.col }); });
       S.bets += p.bets; S.betsWon += p.betsWon; S.duels += p.duelW + p.duelL; S.revs += p.revN; S.revOk += p.revOk; S.traps += p.trapN; S.trapOk += p.trapOk;
-      S.players.push({ sid: s, nom: p.nom, table: p.table, col: p.col, pos: p.pos, score: p.score, n: n, ok: ok, rate: n ? p.score / (3 * n) : 0, ms: ms.length ? ms.reduce(function (a, b) { return a + b; }, 0) / ms.length : null, online: on, st: pastille(G, p, now), rd: readState(G, p), done: p.done, tools: Object.keys(p.tools || {}).length, bets: p.bets, betsWon: p.betsWon, duelW: p.duelW, duelL: p.duelL, revOk: p.revOk, revN: p.revN });
+      S.players.push({ sid: s, nom: p.nom, table: p.table, col: p.col, pos: p.pos, score: p.score, n: n, ok: ok, rate: n ? rs.reduce(function (t, r) { return t + r.pts; }, 0) / (3 * n) : 0, ms: ms.length ? ms.reduce(function (a, b) { return a + b; }, 0) / ms.length : null, online: on, st: pastille(G, p, now), zp: p.zp, zn: p.zn, rd: readState(G, p), done: p.done, tools: Object.keys(p.tools || {}).length, bets: p.bets, betsWon: p.betsWon, duelW: p.duelW, duelL: p.duelL, revOk: p.revOk, revN: p.revN });
       rs.forEach(function (r) {
         S.dist[r.pts]++; S.expected++; if (r.answered) S.answered++; if (r.ms != null) S.resp.push(r.ms);
         var k = r.jeu + "·" + r.id, c = S.cards[k] = S.cards[k] || { jeu: r.jeu, id: r.id, n: 0, pts: 0, ms: 0, nms: 0 }; c.n++; c.pts += r.pts; if (r.ms != null) { c.ms += r.ms; c.nms++; }
         r.detail.forEach(function (d) { var ck = d.c || crit(d.lab), x = S.crit[ck] = S.crit[ck] || { n: 0, ok: 0 }; x.n++; if (d.ok) x.ok++; else S.err[ck + " — " + String(d.lab).slice(0, 60)] = (S.err[ck + " — " + String(d.lab).slice(0, 60)] || 0) + 1; });
       });
     });
+      S.tables.forEach(function (x) { var T = G.tables[x.id]; x.pos = T.pos; x.tscore = tableScore(G, T); x.bonus = T.bonus || 0; x.gauges = Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }); x.mast = masteryTable(G, T); x.done = !!T.done; });
+    S.players.forEach(function (x) { x.mast = masteryAll(G.players[x.sid]); });
+    S.arbit = G.arbit;
     return S;
   }
   /* Instantané envoyé à un joueur */
@@ -302,15 +345,15 @@
   function nudge(G, sid, now) { G.nudge[sid] = now; }
   function snapshot(G, sid, now) {
     var p = G.players[sid]; if (!p) return null; var T = G.tables[p.table], tr = tireur(G, T, now);
-    return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, n2: !!G.n2, gate: D.caps.gate, max: D.caps.max,
+    return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, gate: D.caps.gate, max: D.caps.max, tpos: T.pos, here: jeuHere(T), tdone: !!T.done, tscore: tableScore(G, T), gauges: Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }), mast: G.status === "ended" || T.done ? masteryAll(p) : null,
       me: { sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
-      canDraw: canDraw(G, sid, now), played: !!(T.played && T.played[G.jeux[0]]), lim: lim(G), tireur: tr ? tr.nom : null,
+      canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
       table: { id: T.id, round: T.round,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),
         cur: T.cur ? { jeu: T.cur.jeu, id: T.cur.id, at: T.cur.at, answered: Object.keys(T.cur.ans), mine: !!T.cur.ans[sid] } : null,
-        last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res } : null } };
+        last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res, zone: T.last.zone, gauge: T.last.gauge, bonus: T.last.bonus, from: T.last.from, to: T.last.to, path: T.last.path } : null } };
   }
   var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
-    act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, lim: lim };
+    act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);

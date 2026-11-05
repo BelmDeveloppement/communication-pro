@@ -36,30 +36,29 @@
   }
 
   function legend() {
-    var rows = [["jeu", "Case JEU (numéro = JEU du cours)", "Jalon du cours : l'enseignant ouvre le JEU, toute la classe le joue."], ["aleas", "Aléa", "Un événement de la vie professionnelle : +2, +1 ou −1 case."], ["outil", "Outil", "Un vrai outil à essayer 2 minutes ; réussi, il vous donne +1 case et un jeton posé sur l'atelier."], ["piege", "Piège", "Une question individuelle : une erreur coûte une case."], ["duel", "Duel", "Un adversaire d'une autre table, même question : le gagnant avance, le perdant recule d'une case."], ["pairs", "Relecture", "Un voisin lit votre réponse à voix haute et dit s'il y voit une erreur."]];
+    var rows = [["jeu", "Case JEU (numéro = JEU du cours)", "Jalon du cours : l'enseignant ouvre le JEU, toute la classe le joue."], ["aleas", "Aléa", "Un événement de la vie professionnelle : +2, +1 ou −1 point."], ["outil", "Outil", "Un vrai outil à essayer 2 minutes ; réussi, il vous donne +1 point."], ["piege", "Piège", "Une question individuelle : une erreur coûte 1 point."], ["duel", "Duel", "Un adversaire d'une autre table, même question : le gagnant gagne 1 point, le perdant en perd 1."], ["pairs", "Relecture", "Un camarade de table relit vos critères cochés et donne son verdict (+1 point pour lui)."]];
     return h("table", {}, h("tr", {}, ["Symbole", "Case", "Effet"].map(function (t) { return h("th", {}, t); })), rows.map(function (r) { var c = r[0] === "jeu" ? { type: "jeu", jeu: "1", zone: "O3" } : { type: r[0] }; return h("tr", {}, h("td", {}, h("span", { class: "team", style: "background:" + zcol(c) }, glyph(c))), h("td", {}, r[1]), h("td", {}, r[2])); }));
   }
 
   function entry() {
-    mount(h("h1", {}, "5 · La route de l'état de l'art"),
-      h("p", { class: "meta" }, "Un plateau de 63 cases pour 40 JEUX, dans l'ordre du cours. L'enseignant ouvre un JEU à la fois ; chaque joueur coche ses critères sur son téléphone ou son ordinateur."),
+    mount(h("h1", {}, "La route de l'état de l'art"),
+      h("p", { class: "meta" }, "Un plateau de 63 cases pour 45 JEU, dans l'ordre du cours. L'enseignant ouvre un JEU à la fois ; chaque joueur coche ses critères sur son téléphone ou son ordinateur."),
       h("div", { class: "grid" }, h("a", { class: "tile", href: "#/j" }, h("b", {}, "Je suis un joueur"), h("div", { class: "meta" }, "Rejoindre la partie : prénom, numéro de table, code ROUTE")),
         h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, Object.keys(D.jeux).length + " JEUX, numérotés de 1 à " + Object.keys(D.jeux).length)),
         h("a", { class: "tile r", href: "#/tour" }, h("b", {}, "Tour de contrôle"), h("div", { class: "meta" }, "Enseignant : PIN, partie, simulation, mode test"))),
       h("div", { class: "card" }, h("h2", {}, "Le plateau"), boardSvg([])),
-      h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_5_80x60.pdf" }, "Plateau unique 80 × 60 cm (le même pour les 5 tables)"), " · ", h("a", { href: "Plateau_5_A3.pdf" }, "A3 (essai)"), " · ", h("a", { href: "Plateau_5_pions.pdf" }, "Pions et jetons à découper (A4)"))));
+      h("div", { class: "card" }, h("h2", {}, "Plateau physique à imprimer"), h("p", {}, h("a", { href: "Plateau_spirale_80x60.pdf" }, "Plateau unique 80 × 60 cm (le même pour les 5 tables)"))));
   }
   function rules() {
     mount(h("h1", {}, "Règles du plateau"),
       h("div", { class: "card" }, h("ol", {},
-        h("li", {}, "Un joueur = un étudiant, sur son téléphone ou son ordinateur. Une table réunit jusqu'à 5 joueurs autour du même plateau (tables 1 à 5) ; chaque joueur a son pion, de la couleur affichée sur son écran."),
-        h("li", {}, "L'enseignant ouvre un JEU à la fois. Un joueur de la table touche « Commencer » ; la fiche du JEU s'affiche. Vous réalisez le JEU, puis chacun coche les critères que sa production remplit : 0 à 3 points. Une table ne joue qu'une fois chaque JEU."),
-        h("li", {}, "1 à 3 points : votre pion avance d'autant de cases. 0 point : il recule d'une case (jamais avant le départ)."),
-        h("li", {}, "Le pari : avant de valider, vous pouvez cocher « Je mise ». 3 points : +1 case de plus. 0 ou 1 point : −1 case de plus. 2 points : rien."),
-        h("li", {}, "Selon la case où vous vous arrêtez, un effet se déclenche (légende ci-dessous). Les effets se règlent sur votre écran, quelques secondes."),
-        h("li", {}, "Atelier d'outils : 16 outils, un jeton à votre couleur par outil essayé sur une case Outil."),
-        h("li", {}, "Vous ne pouvez pas dépasser de plus de huit cases le JEU en cours. La case 31 marque la mi-parcours. L'arrivée est la case 62."),
-        h("li", {}, "Le score d'une table est la somme des cases atteintes par ses joueurs ; départage : les points."))),
+        h("li", {}, "Une table réunit jusqu'à 5 joueurs (tables 1 à 5) autour du même plateau et d'un seul pion. Chaque joueur répond sur son téléphone ou son ordinateur."),
+        h("li", {}, "1 case = 1 JEU. Vous passez par toutes les cases : le pion est sur un JEU, la table le joue, puis le pion avance d'une case. L'enseignant ouvre les JEU au fil du cours : le pion ne dépasse pas le JEU ouvert."),
+        h("li", {}, "Pour chaque JEU, chaque joueur coche les critères que sa production remplit : 0 à 3 points. Le pion avance quand toute la table a validé."),
+        h("li", {}, "Le pari : avant de valider, vous pouvez cocher « Je mise ». 3 points : +1 point de plus. 0 ou 1 point : −1 point. 2 points : rien."),
+        h("li", {}, "Les cases à effet (légende ci-dessous) se règlent sur votre écran, quelques secondes, et donnent ou retirent des points."),
+        h("li", {}, "Cinq jauges de maîtrise, une par objectif : après chaque JEU, l'écran indique le nombre de jetons à poser (sur 10). En fin de séance : un niveau Débutant, Confirmé ou Expert par objectif."),
+        h("li", {}, "Score de la table = somme des points de ses joueurs + bonus « table solidaire » (+1 quand tous ont au moins 2 points sur un JEU). La case 31 marque la mi-parcours, l'arrivée est la case 62."))),
       h("div", { class: "card" }, h("h2", {}, "Légende des cases"), legend()),
       h("div", { class: "card" }, h("h2", {}, "Les cinq zones du syllabus"), Object.keys(D.zones).map(function (z) { return h("p", {}, h("span", { class: "team", style: "background:" + D.zones[z].col }, z), D.zones[z].syl); })),
       h("div", {}, Object.keys(D.jeux).map(function (k) { var j = D.jeux[k], o = D.outils.filter(function (x) { return x.jeu === k; })[0]; return h("div", { class: "card" }, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", { class: "meta" }, "Bloc " + D.zones[j.zone].nom + " · " + j.mode), h("p", {}, j.regle), o ? h("p", { class: "meta" }, "Outil du jeu : ", h("a", { href: o.url, target: "_blank", rel: "noopener" }, o.nom), " — " + o.tache) : null); })),

@@ -1,4 +1,4 @@
-/* © 2026 SAS BELM DEVELOPPEMENT. Tests du contenu et du moteur : 40 JEUX à critères, banque de questions rapides, équilibrage, ordre des items, cases. */
+/* © 2026 SAS BELM DEVELOPPEMENT. Tests du contenu et du moteur : 45 JEU à critères, banque de questions rapides, équilibrage, ordre des items, cases. */
 var P = require("./plateau-engine.js"), fs = require("fs"), vm = require("vm");
 var ctx = { window: {} }; vm.runInNewContext(fs.readFileSync("plateau-data.js", "utf8"), ctx); var D = ctx.window.PLATEAU_DATA, bad = 0, n = 0;
 function ok(c, m) { n++; if (!c) { bad++; console.log("ÉCHEC", m); } }
@@ -6,7 +6,7 @@ function eq(a, b, m) { ok(JSON.stringify(a) === JSON.stringify(b), m + " " + JSO
 function best(c) { return c.t === "choix" ? c.ok : c.t === "multi" ? c.oks : c.t === "assoc" ? c.items.map(function (i) { return i.ok; }) : c.t === "trous" ? c.slots.map(function (s) { return s.ok; }) : c.grille.map(function () { return true; }); }
 function empty(c) { return c.t === "choix" ? -1 : c.t === "multi" ? [] : c.t === "assoc" ? c.items.map(function () { return -1; }) : c.t === "trous" ? c.slots.map(function () { return -1; }) : []; }
 // 39 JEUX : une carte à trois critères
-var ks = Object.keys(D.jeux); eq(ks.length, 40, "40 JEUX");
+var ks = Object.keys(D.jeux); eq(ks.length, 45, "45 JEU");
 ks.forEach(function (k, i) { var j = D.jeux[k], c = j.cartes[0]; ok(k === String(i + 1), "ordre " + k);
   ok(j.titre && j.court && j.court.length <= 16 && j.mode && D.zones[j.zone], k + " champs"); ok(j.cartes.length === 1 && c.t === "oral" && c.grille.length === 3, k + " carte à 3 critères");
   eq(P.score(c, best(c)).pts, 3, k + " 3 critères = 3 pts"); eq(P.score(c, [true, false, true]).pts, 2, k + " 2 pts"); eq(P.score(c, []).pts, 0, k + " rien = 0");
@@ -28,9 +28,9 @@ eq(P.move(0), -1, "0 pt = recul"); eq(P.move(2), 2, "2 pts"); eq(P.advance(0, -1
 eq([0, 1, 2, 3].map(P.betDelta), [-1, -1, 0, 1], "pari");
 // plateau
 eq(D.cases.length, 63, "63 cases"); eq(D.cases[0].type, "depart", "départ"); eq(D.cases[31].type, "gate", "mi-parcours"); eq(D.cases[62].type, "exam", "arrivée");
-var types = {}; D.cases.forEach(function (c) { types[c.type] = (types[c.type] || 0) + 1; }); eq(types.jeu, 40, "40 cases JEU"); eq(types.outil, 7, "7 cases Outil"); eq(types.aleas, 4, "4 aléas"); eq(types.piege, 4, "4 pièges"); eq(types.duel, 3, "3 duels"); eq(types.pairs, 2, "2 relectures");
-var jc = D.caps.jeuCase; eq(Object.keys(jc).length, 40, "case de chaque JEU"); ok(ks.every(function (k, i) { return i === 0 || jc[k] > jc[ks[i - 1]]; }), "cases JEU croissantes");
-eq(D.outils.length, 16, "16 outils"); D.outils.forEach(function (o) { ok(D.jeux[o.jeu], "outil sur un JEU existant " + o.id); ok(o.aide && o.aide.rappel, "aide " + o.id); });
+var types = {}; D.cases.forEach(function (c) { types[c.type] = (types[c.type] || 0) + 1; }); eq(types.jeu, 45, "45 cases JEU"); eq(types.outil, 5, "5 cases Outil"); eq(types.aleas, 3, "3 aléas"); eq(types.piege, 3, "3 pièges"); eq(types.duel, 2, "2 duels"); eq(types.pairs, 2, "2 relectures");
+var jc = D.caps.jeuCase; eq(Object.keys(jc).length, 45, "case de chaque JEU"); ok(ks.every(function (k, i) { return i === 0 || jc[k] > jc[ks[i - 1]]; }), "cases JEU croissantes");
+eq(D.outils.length, 17, "17 outils"); D.outils.forEach(function (o) { ok(D.jeux[o.jeu], "outil sur un JEU existant " + o.id); ok(o.aide && o.aide.rappel, "aide " + o.id); });
 // assoc : jamais l'ordre de la correction (1000 tirages)
 var ca = B.cartes.filter(function (c) { return c.t === "assoc"; }), fixed = 0, same = 0, firstPos = {};
 for (var s = 0; s < 1000; s++) { var c = ca[s % ca.length], o = P.displayOrder(c, "seed" + s); var id = o.every(function (v, i) { return c.items[v].ok === i; }) || o.every(function (v, i) { return i === 0 || c.items[v].ok >= c.items[o[i - 1]].ok; }); if (id) same++; var f = 0; o.forEach(function (v, i) { if (c.items[v].ok === i) f++; }); if (f > 1) fixed++; firstPos[o[0]] = 1; }

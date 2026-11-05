@@ -112,16 +112,16 @@
     tmr = setInterval(hello, 4000);
     A.timers.push(setInterval(clockTick, 500));
 
-    function pawns() { return snap.table.players.map(function (p) { return { pos: p.pos, col: p.col, label: p.nom }; }); }
+    function pawns() { return [{ pos: snap.tpos, col: "#1F2A5C", label: "Table " + snap.table.id.slice(1) }]; }
     function render() {
       var m = snap.me, ci = m.ci;
       head.innerHTML = ""; head.appendChild(h("div", { class: "card" }, h("span", { class: "jx-dot", style: "background:" + m.col }), h("b", {}, " " + m.nom), "  ·  " + C.COLNAMES[ci] + "  ·  table " + m.table.slice(1),
-        h("div", { class: "big" }, "Case " + m.pos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "") + "  ·  " + Object.keys(m.tools || {}).length + "/16 outils"), h("div", {}, h("span", { class: "meta" }, "Temps de la séance : "), clockEl), info));
+        h("div", { class: "big" }, "Pion de la table sur la case " + snap.tpos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "")), h("div", {}, h("span", { class: "meta" }, "Temps de la séance : "), clockEl), info));
       board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns()));
       var T = snap.table, k, pe = snap.me.pend, last = T.last && T.last.res[m.sid] && T.last.round >= ack ? T.last : null;
       var needRead = snap.rd !== "ok" && snap.status !== "ended" && !m.done && !(T.cur && T.cur.mine);
       if (last) k = "res:" + last.round + ":" + (rolled >= last.round ? 1 : 0);
-      else if (needRead) k = "read:" + snap.rd + ":" + snap.jeux[0] + ":" + snap.nudge;
+      else if (needRead) k = "read:" + snap.rd + ":" + snap.here + ":" + snap.nudge;
       else if (T.cur && T.cur.mine === false) k = "card:" + T.round + ":" + T.cur.id;
       else if (pe) k = "pend:" + pe.k + ":" + (pe.st || "") + ":" + (pe.mine ? 1 : 0) + ":" + (pe.opp ? pe.opp.nom + pe.opp.done : "") + ":" + (pe.card ? pe.card.id : "") + ":" + (pe.id || "") + ":" + T.round + ":" + (pe.tool ? pe.tool.off : "");
       else if (T.cur) k = "wait:" + T.round + ":" + T.cur.answered.length + ":" + T.players.length;
@@ -148,7 +148,7 @@
         h("div", { class: "card", style: "background:#FFF6DD" }, h("h3", {}, "Exemple résolu"), h("p", {}, h("b", {}, "Situation : "), f.ex[0]), h("p", {}, h("b", {}, "Réponse : "), f.ex[1]), h("p", {}, h("b", {}, "Pourquoi : "), f.ex[2])), toolBlock(to));
     }
     function drawRead() {
-      var common = snap.rd === "common", wait = common ? 10 : 8, left = wait, k = snap.jeux[0];
+      var common = snap.rd === "common", wait = common ? 10 : 8, left = wait, k = snap.here;
       var btn = h("button", { class: "ok", disabled: "disabled" }, "J'ai lu (" + left + " s)");
       var tm = setInterval(function () { left--; if (left <= 0) { clearInterval(tm); btn.removeAttribute("disabled"); btn.textContent = "J'ai lu"; } else btn.textContent = "J'ai lu (" + left + " s)"; }, 1000); A.timers.push(tm);
       btn.onclick = function () { clearInterval(tm); send({ t: "read", doc: common ? "common" : "jeu" }); btn.disabled = true; btn.textContent = "Merci, en attente de la table…"; };
@@ -177,14 +177,15 @@
     function helpBtn(to) { return h("button", { class: "sec", onclick: function () { helpModal(to, 0); } }, "Aide outil · " + to.nom); }
     function drawIdle(T) {
       if (snap.status === "lobby") return body.appendChild(h("div", { class: "card" }, h("h2", {}, "En attente du lancement"), h("p", {}, "L'enseignant lance la séance. Joueurs déjà à la table :"), chips(T)));
-      if (snap.me.done) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Arrivée à l'Examen !"), h("p", {}, "Vous avez terminé la route : " + snap.me.score + " points.")));
-      if (snap.status === "ended") return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Séance terminée"), h("p", {}, "Case " + snap.me.pos + ", " + snap.me.score + " points. Classement de la table :"), h("ol", {}, T.players.slice().sort(function (a, b) { return b.pos - a.pos || b.score - a.score; }).map(function (p) { return h("li", {}, p.nom + " : case " + p.pos + ", " + p.score + " pt"); }))));
-      var j = D.jeux[snap.jeux[0]], nt = snap.me.notes && snap.me.notes[0] && snap.now - snap.me.notes[0].at < 120000 ? snap.me.notes[0].txt : null;
+      if (snap.me.done) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Arrivée à l'Examen !"), h("p", {}, "Vous avez terminé la route : " + snap.me.score + " points. Score de la table : " + snap.tscore + "."), h("ul", {}, (snap.mast || []).map(function (x) { return h("li", {}, D.zones[x.z].syl.split(" · ")[0] + " " + D.zones[x.z].nom + " : " + (x.lvl || "pas encore travaillé")); }))));
+      if (snap.status === "ended") return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Séance terminée"), h("p", {}, "Case " + snap.tpos + ", " + snap.me.score + " points. Score de la table : " + snap.tscore + ". Niveaux de maîtrise (vous) :"), h("ul", {}, (snap.mast || []).map(function (x) { return h("li", {}, D.zones[x.z].syl.split(" · ")[0] + " " + D.zones[x.z].nom + " : " + (x.lvl || "pas encore travaillé")); }))));
+      var hj = snap.here, j = hj ? D.jeux[hj] : null, nt = snap.me.notes && snap.me.notes[0] && snap.now - snap.me.notes[0].at < 120000 ? snap.me.notes[0].txt : null;
       if (nt) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Dernier événement : "), nt));
-      if (snap.lim < snap.max && snap.me.pos >= snap.lim) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Vous avez de l'avance sur le cours."), h("p", {}, "Votre pion attend le prochain JEU. Vous pouvez continuer à jouer pour gagner des points.")));
-      body.appendChild(h("div", { class: "card" }, h("h2", {}, "JEU " + snap.jeux.join(" · ") + (snap.jeux.length === 1 ? " · " + j.titre : "")), snap.jeux.length === 1 ? h("p", {}, j.regle) : null, snap.jeux.length === 1 ? h("p", {}, helpBtn(C.toolFor(snap.jeux[0]))) : null,
-        snap.canDraw ? h("div", {}, h("p", { class: "big" }, "C'est à vous de tirer la carte pour la table."), h("button", { class: "ok", onclick: function () { send({ t: "draw" }); } }, "Tirer la carte"))
-          : h("p", { class: "big" }, "Au tour de " + (snap.tireur || "…") + " de tirer la carte."), chips(T)));
+      if (!j) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Rien à jouer pour l'instant"), h("p", {}, "Votre pion est sur la case " + snap.tpos + ".")));
+      if (snap.wait) return body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), h("p", { class: "big" }, "L'enseignant n'a pas encore ouvert ce JEU."), h("p", {}, "Votre table a de l'avance sur le cours : préparez-vous en relisant le support, le pion n'ira pas plus loin avant l'ouverture.")));
+      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), h("p", {}, j.regle), h("p", {}, helpBtn(C.toolFor(hj))),
+        snap.canDraw ? h("div", {}, h("p", { class: "big" }, "C'est à vous de lancer le JEU pour la table."), h("button", { class: "ok", onclick: function () { send({ t: "draw" }); } }, "Commencer le JEU"))
+          : h("p", { class: "big" }, "Au tour de " + (snap.tireur || "…") + " de lancer le JEU."), chips(T)));
     }
     /* ----- formulaire commun à tous les types de cartes ----- */
     function cardForm(c, seed, box) {
@@ -233,24 +234,25 @@
         send({ t: "ans", ans: f.get(), bet: bet.checked }); key = "wait:"; body.innerHTML = ""; body.appendChild(h("div", { class: "card" }, h("h2", {}, "Réponse envoyée"), h("p", {}, "En attente des autres joueurs de la table…")));
       } }, "Valider ma réponse"), msg); body.appendChild(box);
     }
-    function moveText(r, m) {
-      var t = [], pawn = C.COLNAMES[m.ci];
-      if (r.pts === 0) t.push(r.from === 0 ? "0 point : votre pion reste au départ." : "0 point : reculez d'une case.");
-      else if (r.to === r.from) t.push(r.pts + " point(s) : le pion ne bouge pas (vous avez de l'avance sur le cours : le pion attend le prochain JEU).");
-      else t.push(r.pts + " point" + (r.pts > 1 ? "s" : "") + " : avancez de " + r.pts + " case" + (r.pts > 1 ? "s" : "") + ".");
-      if (r.bet && r.bet.on) t.push(r.bet.d > 0 ? "Pari gagné : encore +1 case." : r.bet.d < 0 ? "Pari perdu : encore −1 case." : "Pari neutre (2 points).");
-      return "Pion " + pawn + " : " + t.join(" ");
+    function moveText(r, m, last) {
+      var t = [], n = r.to - r.from, zc = D.zones[last.zone];
+      t.push(r.pts + " point" + (r.pts > 1 ? "s" : "") + " sur 3 pour ce JEU.");
+      if (r.bet && r.bet.on) t.push(r.bet.d > 0 ? "Pari gagné : +1 point." : r.bet.d < 0 ? "Pari perdu : −1 point." : "Pari neutre (2 points).");
+      if (last.bonus) t.push("Table solidaire : +1 point pour la table.");
+      t.push("Quand toute la table a fini : avancez le pion de " + n + " case" + (n > 1 ? "s" : "") + ", jusqu'à la case " + r.to + ".");
+      t.push("Jauge " + last.zone + " (" + zc.nom + ") : " + last.gauge + " jeton" + (last.gauge > 1 ? "s" : "") + " sur 10. Complétez ou retirez des jetons de couleur " + zc.nom.toLowerCase() + " (celle de l'objectif) pour arriver à ce niveau.");
+      return t.join(" ");
     }
     function drawResult(last) {
       var r = last.res[snap.me.sid], c = C.cardOf(last.jeu, last.id), m = snap.me;
       function details() {
         body.innerHTML = "";
-        body.appendChild(h("div", { class: "card" }, h("h2", {}, r.pts + " point" + (r.pts > 1 ? "s" : "") + " sur 3"), r.answered ? null : h("p", { class: "warn" }, "Pas de réponse envoyée à temps."),
+        body.appendChild(h("div", { class: "card" }, h("h2", {}, r.pts + " point" + (r.pts > 1 ? "s" : "") + " sur 3 · JEU " + last.jeu), r.answered ? null : h("p", { class: "warn" }, "Pas de réponse envoyée à temps."),
           c.t === "choix" ? null : h("ul", {}, r.detail.map(function (d) { return h("li", { style: "color:" + (d.ok ? "#1b6b45" : "#a33") }, (d.ok ? "✓ " : "✗ ") + d.lab); })),
           h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)));
-        body.appendChild(h("div", { class: "warn big" }, moveText(r, m) + " → case " + r.to + "."));
-        if (r.ev && r.ev.k === "aleas") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Aléa : " + r.ev.titre), h("p", {}, r.ev.txt), h("p", { class: "big" }, "Puis " + (r.ev.move > 0 ? "avancez" : "reculez") + " de " + Math.abs(r.ev.move) + " → case " + r.final + ".")));
-        if (r.ev && r.ev.k === "gate") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : mi-parcours"), h("p", {}, "Bravo, vous êtes à mi-chemin du plateau. Continuez.")));
+        body.appendChild(h("div", { class: "warn big" }, moveText(r, m, last)));
+        if (r.ev && r.ev.k === "aleas") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Aléa : " + r.ev.titre), h("p", {}, r.ev.txt), h("p", { class: "big" }, (r.ev.move > 0 ? "Vous gagnez " : r.ev.move < 0 ? "Vous perdez " : "Aucun point en jeu") + (r.ev.move ? Math.abs(r.ev.move) + " point" + (Math.abs(r.ev.move) > 1 ? "s" : "") + "." : "."))));
+        if (r.ev && r.ev.k === "gate") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : mi-parcours"), h("p", {}, "Bravo, vous êtes à mi-chemin du plateau. Pas d'effet : continuez.")));
         if (r.ev && ["outil", "piege", "duel", "pairs"].indexOf(r.ev.k) >= 0) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Case à effet : " + D.types[r.ev.k]), h("p", {}, r.ev.k === "pairs" && !r.ev.par ? "Personne n'est disponible pour relire votre réponse : l'effet est annulé." : "L'effet se règle à l'écran suivant.")));
         body.appendChild(h("p", { class: "meta" }, "Autres joueurs de la table : " + snap.table.players.filter(function (p) { return p.sid !== m.sid; }).map(function (p) { var x = last.res[p.sid]; return p.nom + " +" + (x ? x.pts : 0); }).join(" · ")));
         body.appendChild(h("button", { class: "ok", onclick: function () { ack = last.round + 1; saveFlags(); key = ""; render(); } }, "Continuer"));
@@ -269,26 +271,26 @@
         box.appendChild(h("h2", {}, "Case Outil : " + pe.tool.nom)); box.appendChild(h("p", { class: "big" }, pe.tool.tache));
         var to = D.outils.filter(function (o) { return o.id === pe.tool.id; })[0];
         box.appendChild(h("p", {}, h("a", { href: pe.tool.url, target: "_blank", rel: "noopener", class: "btn" }, "Ouvrir " + pe.tool.nom + " ↗"), " ", helpBtn(to)));
-        box.appendChild(h("p", { class: "meta" }, "Si l'outil est inaccessible, passez votre tour sans pénalité. Essayez l'outil quelques minutes. Si vous avez réussi la tâche : +1 case et un jeton de votre couleur à poser sur l'atelier du plateau."));
-        box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "outil", ok: true }); feedback("Outil validé", ["+1 case. Posez un jeton de votre couleur sur la case « " + pe.tool.nom + " » de l'atelier du plateau."]); } }, "J'ai réussi la tâche"));
+        box.appendChild(h("p", { class: "meta" }, "Si l'outil est inaccessible, passez votre tour sans pénalité. Essayez l'outil quelques minutes. Si vous avez réussi la tâche : +1 point."));
+        box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "outil", ok: true }); feedback("Outil validé", ["+1 point."]); } }, "J'ai réussi la tâche"));
         box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "outil", ok: false }); feedback("Tour passé", ["L'outil sera pour une prochaine fois."]); } }, "Passer mon tour"));
         box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "broke" }); feedback("Merci", ["Votre tour est passé sans pénalité. L'enseignant est prévenu que l'outil « " + pe.tool.nom + " » ne marche pas."]); } }, "Cet outil ne marche pas"));
       } else if (pe.k === "piege") {
         var c = C.cardOf("P", pe.card.id); box.appendChild(h("h2", {}, "Case Piège")); box.appendChild(h("p", { class: "big" }, c.q)); var f = cardForm(c, me.sid + "P" + c.id, box), msg = h("p", { class: "warn", style: "display:none" }, "Répondez avant de valider.");
-        box.appendChild(h("button", { class: "ok", onclick: function () { if (!f.ok()) { msg.style.display = "block"; return; } var a = f.get(), pts = PE.score(c, a).pts; send({ t: "pans", ans: a }); feedback(pts >= 2 ? "Piège évité" : "Piège : −1 case", [pts >= 2 ? "Vous restez sur votre case." : "Reculez d'une case.", h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)], pts >= 2 ? "#2E9E6B" : "#C0392B"); } }, "Valider"), msg);
+        box.appendChild(h("button", { class: "ok", onclick: function () { if (!f.ok()) { msg.style.display = "block"; return; } var a = f.get(), pts = PE.score(c, a).pts; send({ t: "pans", ans: a }); feedback(pts >= 2 ? "Piège évité" : "Piège : −1 point", [pts >= 2 ? "Aucun point perdu." : "Vous perdez 1 point.", h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)], pts >= 2 ? "#2E9E6B" : "#C0392B"); } }, "Valider"), msg);
       } else if (pe.k === "duel") {
         box.appendChild(h("h2", {}, "Case Duel"));
-        if (pe.st === "wait") { box.appendChild(h("p", { class: "big" }, "En attente d'un adversaire d'une autre table…")); box.appendChild(h("p", { class: "meta" }, "Sans adversaire au bout de 45 secondes, vous affrontez la tour : réussissez la question (2 points ou plus) pour gagner +1 case.")); }
+        if (pe.st === "wait") { box.appendChild(h("p", { class: "big" }, "En attente d'un adversaire d'une autre table…")); box.appendChild(h("p", { class: "meta" }, "Sans adversaire au bout de 45 secondes, vous affrontez la tour : réussissez la question (2 points ou plus) pour gagner +1 point.")); }
         else {
-          var dc = C.cardOf(pe.card.jeu, pe.card.id); box.appendChild(h("p", { class: "meta" }, pe.st === "solo" ? "Duel contre la tour : 2 points ou plus = +1 case." : "Adversaire : " + pe.opp.nom + " (table " + pe.opp.table.slice(1) + "). Le meilleur score gagne +1 case, l'autre recule d'une case ; à égalité, le plus rapide l'emporte.")); box.appendChild(h("p", { class: "big" }, dc.q));
+          var dc = C.cardOf(pe.card.jeu, pe.card.id); box.appendChild(h("p", { class: "meta" }, pe.st === "solo" ? "Duel contre la tour : 2 points ou plus = +1 point." : "Adversaire : " + pe.opp.nom + " (table " + pe.opp.table.slice(1) + "). Le meilleur score gagne +1 point, l'autre perd 1 point ; à égalité, le plus rapide l'emporte.")); box.appendChild(h("p", { class: "big" }, dc.q));
           if (pe.mine) box.appendChild(h("p", { class: "warn" }, "Réponse envoyée" + (pe.st === "solo" ? "." : ", en attente de " + pe.opp.nom + "…")));
           else { var f2 = cardForm(dc, me.sid + "D" + dc.id, box), mg = h("p", { class: "warn", style: "display:none" }, "Répondez avant de valider."); box.appendChild(h("button", { class: "ok", onclick: function () { if (!f2.ok()) { mg.style.display = "block"; return; } send({ t: "dans", ans: f2.get() }); } }, "Valider")); box.appendChild(mg); }
         }
       } else if (pe.k === "rel") {
         var rc = C.cardOf(pe.jeu, pe.id); box.appendChild(h("h2", {}, "Case Relecture : lisez la réponse de " + pe.au)); box.appendChild(h("p", { class: "meta" }, "Question : " + rc.q)); box.appendChild(h("p", { class: "big" }, "Réponse de " + pe.au + " : " + pe.ans));
-        box.appendChild(h("p", {}, "Cette réponse est-elle entièrement correcte ? Bon verdict : +1 point ; vous trouvez une vraie erreur : +1 case en plus."));
-        box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "rev", verdict: "err" }); feedback("Verdict envoyé", ["Vous avez signalé une erreur. Le résultat s'affiche dans le journal de la partie."]); } }, "Je vois une erreur"));
-        box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "rev", verdict: "ok" }); feedback("Verdict envoyé", ["Vous avez jugé la réponse correcte. Le résultat s'affiche dans le journal de la partie."]); } }, "Rien à redire"));
+        box.appendChild(h("p", {}, "Cette réponse est-elle entièrement correcte ? Vous gagnez 1 point pour la relecture ; si une coche vous semble fausse, l'enseignant arbitre."));
+        box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "rev", verdict: "err" }); feedback("Verdict envoyé", ["Vous avez signalé une coche douteuse : l'enseignant arbitre. +1 point pour la relecture."]); } }, "Une coche me semble fausse"));
+        box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "rev", verdict: "ok" }); feedback("Verdict envoyé", ["Coches validées. +1 point pour la relecture."]); } }, "Rien à redire"));
       }
       body.appendChild(box);
     }
@@ -388,15 +390,15 @@
     mount(wrap);
     function setView(v) { view = v; document.body.classList.toggle("jx-full", v === "proj"); wrap.className = "jx " + (v === "proj" ? "jx-p" : "jx-t"); refresh(); }
     function exportCsv(S) {
-      var l = ["Table;Prénom;Case;Points;Cartes;Réussite;Temps moyen (s)"]; S.players.forEach(function (p) { l.push([p.table, p.nom, p.pos, p.score, p.n, Math.round(p.rate * 100) + "%", p.ms == null ? "" : Math.round(p.ms / 1000)].join(";")); });
+      var l = ["Table;Prénom;Case de la table;Points;JEU joués;Réussite;Temps moyen (s);" + Object.keys(D.zones).map(function (z) { return "Maîtrise " + z; }).join(";")]; S.players.forEach(function (p) { l.push([p.table, p.nom, p.pos, p.score, p.n, Math.round(p.rate * 100) + "%", p.ms == null ? "" : Math.round(p.ms / 1000)].concat(p.mast.map(function (m) { return m.lvl ? m.lvl + " " + Math.round(m.pct * 100) + "%" : ""; })).join(";")); });
       var a = h("a", { href: "data:text/csv;charset=utf-8," + encodeURIComponent("﻿" + l.join("\n")), download: "route-" + G.code + ".csv" }); document.body.appendChild(a); a.click(); a.remove();
     }
     function refresh() {
       if (dead) return; var t = now(), S = C.stats(G, t), left = G.status === "play" ? G.end - t : 0;
-      var rank = S.tables.slice().sort(function (a, b) { return b.sum - a.sum || b.pts - a.pts; }).map(function (x) { return x.id; });
+      var rank = S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x) { return x.id; });
       headEl.innerHTML = "";
       var stTxt = { ok: "● réseau prêt", local: "◐ mode local (même navigateur)", busy: "○ code déjà utilisé : fermez l'autre tour", err: "○ réseau indisponible", off: "○ PeerJS absent" }[status] || "…";
-      headEl.appendChild(h("div", { class: "jx-title" }, h("b", {}, "5 · La route de l'état de l'art"), h("span", {}, " · JEU " + G.jeux.join(" + ") + " · " + (D.jeux[G.jeux[0]] ? D.jeux[G.jeux[0]].titre : "")), h("small", {}, "  rejoindre : belmdeveloppement.github.io/communication-pro/#/j  ·  code "), h("b", { class: "jx-code" }, G.code)));
+      headEl.appendChild(h("div", { class: "jx-title" }, h("b", {}, "La route de l'état de l'art"), h("span", {}, " · JEU ouvert : " + G.jeux.join(" + ") + " · " + (D.jeux[G.jeux[0]] ? D.jeux[G.jeux[0]].titre : "")), h("small", {}, "  rejoindre : belmdeveloppement.github.io/communication-pro/#/j  ·  code "), h("b", { class: "jx-code" }, G.code)));
       headEl.appendChild(h("div", { class: "jx-clock" }, G.status === "lobby" ? "Séance non lancée" : G.status === "ended" ? "Séance terminée" : mmss(left), h("small", {}, "  " + Object.keys(G.players).length + " joueurs · " + S.tables.length + " tables · " + stTxt)));
       var ctr = h("div", { class: "jx-ctl" });
       if (G.status === "lobby") ctr.appendChild(h("button", { class: "ok", onclick: function () { C.start(G, now()); dirty = true; refresh(); } }, "Lancer la séance"));
@@ -404,8 +406,8 @@
       ctr.appendChild(h("button", { class: "sec", onclick: function () { setView(view === "proj" ? "prof" : "proj"); } }, view === "proj" ? "Vue enseignant" : "Vue projetée"));
       if (view === "proj") ctr.appendChild(h("button", { class: "sec", onclick: function () { try { document.documentElement.requestFullscreen(); } catch (e) {} } }, "Plein écran"));
       var jk = Object.keys(D.jeux), ji = jk.indexOf(G.jeux[0]), cn = C.counts(G, G.jeux[0]);
-      ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { C.nextJeu(G, -1); dirty = true; refresh(); } }, "◀ JEU précédent"));
-      ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Passer au JEU " + jk[ji + 1] + " ? Les positions et les points sont conservés ; les JEUX en cours se terminent normalement.")) { C.nextJeu(G, 1); dirty = true; refresh(); } } }, "JEU suivant ▶" + (ji < jk.length - 1 ? " (" + jk[ji + 1] + ")" : "")));
+      ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { C.nextJeu(G, -1); dirty = true; refresh(); } }, "◀ Refermer un JEU"));
+      ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Ouvrir le JEU " + jk[ji + 1] + " ? Les tables dont le pion est sur ce JEU (ou avant) pourront le jouer. Points et positions conservés.")) { C.nextJeu(G, 1); dirty = true; refresh(); } } }, "Ouvrir le JEU " + (ji < jk.length - 1 ? jk[ji + 1] : "") + " ▶"));
       if (cn.extra) ctr.appendChild(h("button", { class: G.extra ? "ok" : "sec", onclick: function () { C.setExtra(G, !G.extra); dirty = true; refresh(); } }, G.extra ? "Cartes supplémentaires : activées (" + (cn.base + cn.extra) + ")" : "Débloquer les cartes supplémentaires (+" + cn.extra + ")"));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { exportCsv(S); } }, "Export CSV"));
       ctr.appendChild(h("a", { class: "btn sec", href: "#/test", target: "_blank", style: "text-decoration:none;display:inline-block" }, "Mode test"));
@@ -417,11 +419,11 @@
       else { var em = racesEl.querySelector(".jx-empty"); if (em) em.remove(); }
       ids.forEach(function (id) {
         var T = G.tables[id], x = S.tables.filter(function (y) { return y.id === id; })[0], R = rows[id];
-        if (!R) { R = rows[id] = { pawns: {} }; R.el = h("div", { class: "jx-row" }); R.lab = h("div", { class: "jx-tlab" }); R.track = h("div", { class: "jx-track" }, h("i", { class: "a1" }), h("i", { class: "a2" }), h("i", { class: "a3" }), h("i", { class: "a4" }), h("i", { class: "a5" }), h("i", { class: "a6" }), h("s", { class: "gate", title: "Case 31 : fin du niveau 1" }), h("em", {}, "Examen")); R.sum = h("div", { class: "jx-sum" }); R.chips = h("div", { class: "jx-chips" });
+        if (!R) { R = rows[id] = { pawns: {} }; R.el = h("div", { class: "jx-row" }); R.lab = h("div", { class: "jx-tlab" }); R.track = h("div", { class: "jx-track" }, h("i", { class: "a1" }), h("i", { class: "a2" }), h("i", { class: "a3" }), h("i", { class: "a4" }), h("i", { class: "a5" }), h("i", { class: "a6" }), h("s", { class: "gate", title: "Case 31 : mi-parcours" }), h("em", {}, "Examen")); R.sum = h("div", { class: "jx-sum" }); R.chips = h("div", { class: "jx-chips" });
           R.el.appendChild(R.lab); R.el.appendChild(h("div", { class: "jx-mid" }, R.track, R.chips)); R.el.appendChild(R.sum); racesEl.appendChild(R.el); }
         R.lab.innerHTML = ""; R.lab.appendChild(h("b", {}, id)); R.lab.appendChild(h("small", {}, "#" + (rank.indexOf(id) + 1)));
         R.el.className = "jx-row" + (x.stuck ? " stuck" : "");
-        R.sum.innerHTML = ""; R.sum.appendChild(h("b", {}, "Σ " + x.sum)); R.sum.appendChild(h("small", {}, x.pts + " pt"));
+        R.sum.innerHTML = ""; R.sum.appendChild(h("b", {}, x.tscore + " pt")); R.sum.appendChild(h("small", {}, "case " + x.pos + (x.bonus ? " · +" + x.bonus + " solidaire" : "")));
         var byPos = {};
         T.players.forEach(function (s) { var p = G.players[s], el = R.pawns[s]; if (!el) { el = R.pawns[s] = h("div", { class: "jx-pawn", title: p.nom }, h("span", {}, p.nom.slice(0, 1).toUpperCase())); el.style.background = p.col; R.track.appendChild(el); }
           (byPos[p.pos] = byPos[p.pos] || []).push(el); el.style.left = "calc(" + (p.pos / 62) + " * (100% - 32px) + 2px)"; });
@@ -434,7 +436,14 @@
       /* panneau latéral */
       sideEl.innerHTML = "";
       sideEl.appendChild(h("div", { class: "jx-qr" }, h("img", { src: "qr-j.svg", alt: "QR de connexion" }), h("div", {}, h("b", {}, "Connexion perdue ? Scannez à nouveau"), h("small", {}, "même prénom, même table · code " + G.code))));
-      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Atelier d\'outils (" + D.outils.filter(function (o) { return S.tools[o.id].length; }).length + "/16)"), h("div", { class: "jx-ateliers" }, D.outils.map(function (o) { return h("div", { class: "jx-at" + (S.tools[o.id].length ? " on" : ""), title: o.nom }, h("span", {}, o.nom), h("div", {}, S.tools[o.id].map(function (x) { return h("i", { style: "background:" + x.col, title: x.nom }); }))); })), h("p", { class: "meta" }, "Paris : " + S.betsWon + "/" + S.bets + " gagnés · duels : " + Math.round(S.duels / 2) + " · relectures justes : " + S.revOk + "/" + S.revs + " · pièges évités : " + S.trapOk + "/" + S.traps)));
+      var LV = { "Débutant": "#E4572E", "Confirmé": "#E9A400", "Expert": "#2E9E6B" };
+      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement des tables"), h("table", {}, S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("b", {}, x.id)), h("td", {}, x.tscore + " pt"), h("td", {}, "case " + x.pos), h("td", {}, x.gauges.map(function (g) { return h("span", { class: "meta", style: "color:" + D.zones[g.z].col + ";font-weight:700;margin-right:5px", title: D.zones[g.z].nom }, g.z + " " + g.lvl); }))); })),
+        h("p", { class: "meta" }, "Jauges sur 10 par objectif · paris : " + S.betsWon + "/" + S.bets + " gagnés · duels : " + Math.round(S.duels / 2) + " · pièges évités : " + S.trapOk + "/" + S.traps)));
+      if (view === "prof") {
+        sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement individuel (enseignant)"), h("table", {}, S.players.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 12).map(function (p, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom + " (" + p.table + ")"), h("td", {}, p.score + " pt")); }))));
+        var op = (G.arbit || []).map(function (x, i) { return [x, i]; }).filter(function (y) { return !y[0].done; });
+        sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Relectures à arbitrer (" + op.length + ")"), op.length ? op.slice(0, 5).map(function (y) { var x = y[0]; return h("p", { class: "meta" }, x.rev + " conteste une coche de " + x.au + " (JEU " + x.jeu + ", " + x.pts + "/3) ", h("button", { class: "r jx-mini", onclick: function () { C.arbitrate(G, y[1], true, now()); dirty = true; refresh(); } }, "Coche fausse : −1 pt"), h("button", { class: "sec jx-mini", onclick: function () { C.arbitrate(G, y[1], false, now()); dirty = true; refresh(); } }, "Coche correcte")); }) : h("p", { class: "meta" }, "Aucune.")));
+      }
       var nrd = S.players.filter(function (p) { return p.rd !== "ok" && p.online && !p.done; }).length;
       if (G.status !== "lobby") sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Lecture des règles"), h("p", {}, nrd ? nrd + " joueur(s) n'ont pas fini de lire (pastille 📖 sur chaque table)." : "Tous les joueurs connectés ont lu."),
         nrd ? h("button", { class: "sec jx-mini", onclick: function () { S.players.forEach(function (p) { if (p.rd !== "ok") C.nudge(G, p.sid, now()); }); dirty = true; refresh(); } }, "Relancer") : null));
@@ -447,9 +456,22 @@
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Alertes"), S.alerts.length ? S.alerts.slice(0, 6).map(function (a) { return h("p", { class: "jx-al" }, "⚠ " + a.txt, a.k === "tool" ? h("button", { class: "r jx-mini", onclick: function () { C.setTool(G, a.tool, true); dirty = true; refresh(); } }, "Désactiver cet outil") : null); }) : h("p", { class: "meta" }, "Rien à signaler.")));
       /* onglets enseignant */
       tabsEl.innerHTML = detEl.innerHTML = ""; if (view !== "prof") return;
-      [["ens", "Joueurs"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); } }, a[1])); });
-      if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Table", "Joueur", "Case", "Points", "Cartes", "Réussite", "Temps moyen", "Outils", "Paris", "Duels", "État"].map(function (c) { return h("th", {}, c); })),
-        S.players.sort(function (a, b) { return a.table < b.table ? -1 : a.table > b.table ? 1 : b.pos - a.pos; }).map(function (p) { return h("tr", {}, h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.pos)), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.tools + "/16"), h("td", {}, p.betsWon + "/" + p.bets), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1])); })));
+      [["ens", "Joueurs"], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); } }, a[1])); });
+      if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEU joués", "Réussite", "Temps moyen", "Paris", "Duels", "État"].map(function (c) { return h("th", {}, c); })),
+        S.players.slice().sort(function (a, b) { return b.score - a.score; }).map(function (p, i) { return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.betsWon + "/" + p.bets), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1])); })));
+      if (tab === "mast") {
+        var zs = Object.keys(D.zones), cell = function (m) { return h("td", { style: "font-weight:700;color:" + (m.lvl ? LV[m.lvl] : "#8A93A8") }, m.lvl ? m.lvl + " (" + Math.round(m.pct * 100) + " %)" : "—"); };
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Niveaux de maîtrise par objectif (indice de progression, seuils non communiqués aux étudiants)"), h("table", {}, h("tr", {}, [h("th", {}, "Table / joueur")].concat(zs.map(function (z) { return h("th", { style: "color:" + D.zones[z].col }, z + " " + D.zones[z].nom + " (" + D.nz[z] + " JEU)"); }))),
+          S.tables.map(function (x) { return h("tr", { style: "background:#EEF2FB" }, [h("td", {}, h("b", {}, "Table " + x.id.slice(1)))].concat(x.mast.map(cell))); }).concat(S.players.slice().sort(function (a, b) { return a.table < b.table ? -1 : a.table > b.table ? 1 : 0; }).map(function (p) { return h("tr", {}, [h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom + " (" + p.table + ")")].concat(p.mast.map(cell))); })))));
+      }
+      if (tab === "pts") {
+        var ps = S.players.slice().sort(function (a, b) { return a.table < b.table ? -1 : a.table > b.table ? 1 : a.nom < b.nom ? -1 : 1; }); if (!ps.length) return detEl.appendChild(h("p", { class: "meta" }, "Aucun joueur."));
+        if (!G.sel || !G.players[G.sel]) G.sel = ps[0].sid;
+        var sel = h("select", { onchange: function () { G.sel = sel.value; refresh(); } }, ps.map(function (p) { var o = h("option", { value: p.sid }, p.nom + " (" + p.table + ")"); if (p.sid === G.sel) o.selected = true; return o; })), pl = G.players[G.sel];
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Points par JEU et correction"), sel, h("table", {}, h("tr", {}, ["JEU", "Objectif", "Points /3", "Corriger"].map(function (c) { return h("th", {}, c); })),
+          pl.res.map(function (r) { return h("tr", {}, h("td", {}, r.jeu + " · " + D.jeux[r.jeu].court), h("td", {}, D.jeux[r.jeu].zone), h("td", {}, r.pts + (r.fixed ? " (corrigé)" : "")), h("td", {}, [0, 1, 2, 3].map(function (v) { return h("button", { class: v === r.pts ? "" : "sec jx-mini", onclick: function () { C.fixJeu(G, G.sel, r.jeu, v, now()); dirty = true; refresh(); } }, String(v)); }))); })),
+          h("p", { class: "meta" }, "Un changement met à jour le score, le classement, la jauge et le niveau de maîtrise.")));
+      }
       if (tab === "crit") {
         var cards = Object.keys(S.cards).map(function (k) { return S.cards[k]; }).sort(function (a, b) { return a.pts / a.n - b.pts / b.n; });
         detEl.appendChild(h("table", {}, h("tr", {}, ["Carte", "Énoncé, critères et modèle", "Réponses", "Moyenne /3", "Temps moyen"].map(function (c) { return h("th", {}, c); })), cards.map(function (c) { var card = C.cardOf(c.jeu, c.id); return h("tr", {}, h("td", {}, c.jeu + "·" + c.id), h("td", {}, h("div", {}, card.q), card.checks ? h("ul", { class: "meta" }, card.checks.map(function (k) { return h("li", {}, k.lab); })) : null, card.modele ? h("div", { class: "meta" }, h("b", {}, "Modèle : "), card.modele) : null), h("td", {}, String(c.n)), h("td", {}, (c.pts / c.n).toFixed(2)), h("td", {}, c.nms ? Math.round(c.ms / c.nms / 1000) + " s" : "—")); })));
