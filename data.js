@@ -49,7 +49,7 @@ window.DATA = {
     ],
     "widths": [
      2.4,
-     7.0
+     7
     ],
     "rows": [
      [
@@ -129,7 +129,7 @@ window.DATA = {
     ],
     "widths": [
      0.6,
-     3.0,
+     3,
      5.2
     ],
     "rows": [
@@ -1269,7 +1269,7 @@ window.DATA = {
     ],
     "widths": [
      0.8,
-     8.0
+     8
     ],
     "rows": [
      [
@@ -1822,7 +1822,7 @@ window.DATA = {
     ],
     "widths": [
      2.6,
-     5.0,
+     5,
      1.2
     ],
     "rows": [
@@ -1995,7 +1995,7 @@ window.DATA = {
      "Feedback SBI (exemple)"
     ],
     "widths": [
-     3.0,
+     3,
      5.8
     ],
     "rows": [
@@ -2227,7 +2227,7 @@ window.DATA = {
      "Exemple (TransLor, fictif)"
     ],
     "widths": [
-     2.0,
+     2,
      6.8
     ],
     "rows": [
@@ -2295,7 +2295,7 @@ window.DATA = {
      "Réponse attendue"
     ],
     "widths": [
-     1.0,
+     1,
      7.8
     ],
     "rows": [
@@ -4776,7 +4776,7 @@ window.DATA = {
     ],
     "widths": [
      1.8,
-     7.0
+     7
     ],
     "rows": [
      [
@@ -4940,7 +4940,7 @@ window.DATA = {
      "Réponse"
     ],
     "widths": [
-     3.0,
+     3,
      5.8
     ],
     "rows": [
@@ -5271,7 +5271,7 @@ window.DATA = {
      "Exemple"
     ],
     "widths": [
-     2.0,
+     2,
      6.8
     ],
     "rows": [
@@ -5631,6 +5631,205 @@ window.DATA = {
      "Ne pas archiver une page clé pour votre argument."
     ],
     "retenir": "Une page sans date de consultation ne se vérifie pas : datez, et archivez ce qui compte."
+   }
+  },
+  "EXJ14": {
+   "id": "EXJ14",
+   "titre": "Types de sources : primaire, secondaire, tertiaire, littérature grise",
+   "mode": "Binôme, ordinateur",
+   "duree": 15,
+   "chap": "Carnet · chapitre 4",
+   "situation": [
+    "Huit documents sur l'authentification (cas fictif). Pour chacun, choisissez le type de source : primaire, secondaire, tertiaire ou littérature grise. Un document peut relever de deux types : l'application l'indique quand plusieurs réponses sont possibles.",
+    "1. RGPD, texte consolidé, site du Journal officiel de l'Union européenne.",
+    "2. Article de presse « Les passkeys vont-elles tuer le mot de passe ? » (cite un rapport d'agence).",
+    "3. Page d'encyclopédie en ligne « Authentification multifacteur ».",
+    "4. Article de revue à comité de lecture : étude utilisateurs sur les passkeys, 120 participants, méthode et résultats détaillés.",
+    "5. Revue de littérature de 2024 « Passkeys : état des connaissances » (compare 31 études).",
+    "6. Livre blanc d'un éditeur de solution d'authentification : « 99 % d'attaques bloquées ».",
+    "7. Manuel universitaire de cryptographie, chapitre 3 « Authentification ».",
+    "8. Fichier ouvert (CSV) des incidents de sécurité déclarés en 2024, publié par une agence nationale."
+   ],
+   "taches": [
+    "Document 1 (RGPD) : quel type de source ?",
+    "Document 2 (article de presse) : quel type de source ?",
+    "Document 3 (encyclopédie) : quel type de source ?",
+    "Document 4 (article de revue, 120 participants) : quel type de source ?",
+    "Document 5 (revue de littérature) : quel type de source ?",
+    "Document 6 (livre blanc d'éditeur) : quel type de source ?",
+    "Document 7 (manuel universitaire) : quel type de source ?",
+    "Document 8 (fichier CSV d'une agence) : quel(s) type(s) de source ? (plusieurs réponses possibles)",
+    "Quelle source pour citer l'obligation de notifier une violation de données ?",
+    "Quelle source pour comprendre vite un sujet nouveau ?",
+    "Quelle source pour donner un taux d'adoption des passkeys ?",
+    "Quelle source pour comparer des solutions du marché ?",
+    "Quel(s) type(s) de source convient à VOTRE question de décision ? (plusieurs réponses possibles)"
+   ],
+   "types": [
+    [
+     "Secondaire",
+     "Primaire",
+     "Tertiaire",
+     "Littérature grise"
+    ],
+    [
+     "Tertiaire",
+     "Littérature grise",
+     "Secondaire",
+     "Primaire"
+    ],
+    [
+     "Tertiaire",
+     "Primaire",
+     "Secondaire",
+     "Littérature grise"
+    ],
+    [
+     "Secondaire",
+     "Tertiaire",
+     "Littérature grise",
+     "Primaire"
+    ],
+    [
+     "Primaire",
+     "Secondaire",
+     "Littérature grise",
+     "Tertiaire"
+    ],
+    [
+     "Primaire",
+     "Tertiaire",
+     "Littérature grise",
+     "Secondaire"
+    ],
+    [
+     "Secondaire",
+     "Primaire",
+     "Littérature grise",
+     "Tertiaire"
+    ],
+    {
+     "multi": [
+      "Secondaire",
+      "Primaire",
+      "Tertiaire",
+      "Littérature grise"
+     ]
+    },
+    [
+     "Un article de presse",
+     "Une page d'encyclopédie",
+     "Le texte du RGPD",
+     "Un livre blanc d'éditeur"
+    ],
+    [
+     "Le fichier brut (CSV) d'une agence nationale",
+     "Une encyclopédie ou un manuel, puis une revue de littérature",
+     "Un article de revue avec méthode et résultats détaillés",
+     "Le livre blanc d'un éditeur de solutions"
+    ],
+    [
+     "Un article de presse qui cite un rapport",
+     "La page d'encyclopédie sur les passkeys",
+     "Un livre blanc d'éditeur de solutions",
+     "Une étude primaire ou les données d'une agence, méthode lue"
+    ],
+    [
+     "Un comparatif (littérature grise), en relevant qui le finance",
+     "Un manuel universitaire",
+     "Une revue de littérature",
+     "Le texte du RGPD"
+    ],
+    {
+     "multi": [
+      "Primaire",
+      "Secondaire",
+      "Tertiaire",
+      "Littérature grise"
+     ]
+    }
+   ],
+   "livrable": "Vos choix pour les huit documents, les quatre besoins et votre question → à ranger dans le dossier PowerPoint, diapositive « section 5 ».",
+   "corr": {
+    "methode": [
+     "Classer selon la fonction du document, jamais selon son aspect (PDF, site officiel).",
+     "Se demander : produit-il ses propres résultats, ou relaie-t-il un autre document ?",
+     "Un document peut être de deux types (ex. données d'agence : primaire et littérature grise)."
+    ],
+    "cols": [
+     "N°",
+     "Type",
+     "Indice qui justifie",
+     "Usage dans l'état de l'art"
+    ],
+    "widths": [
+     0.7,
+     1.6,
+     4.2,
+     3.4
+    ],
+    "rows": [
+     [
+      "1",
+      "Primaire",
+      "Texte juridique d'origine, publié par l'autorité qui l'a produit.",
+      "À citer pour une obligation légale."
+     ],
+     [
+      "2",
+      "Secondaire",
+      "Il relaie un rapport : l'article renvoie à un autre document pour ses chiffres.",
+      "Remonter au rapport cité avant de reprendre un chiffre."
+     ],
+     [
+      "3",
+      "Tertiaire",
+      "Synthèse sans résultats propres, auteurs multiples, mise à jour continue.",
+      "Bon point de départ ; ne pas le citer comme preuve."
+     ],
+     [
+      "4",
+      "Primaire",
+      "Il présente sa méthode et ses résultats (120 participants).",
+      "Source solide pour un résultat, à lire avec les limites."
+     ],
+     [
+      "5",
+      "Secondaire",
+      "Il compare 31 études sans produire de résultat nouveau.",
+      "Utile pour situer le débat et trouver les primaires."
+     ],
+     [
+      "6",
+      "Littérature grise (et intéressée)",
+      "Publié par un éditeur sans relecture externe ; chiffre sans méthode.",
+      "À citer comme position de l'éditeur, jamais comme fait."
+     ],
+     [
+      "7",
+      "Tertiaire",
+      "Manuel : synthèse pédagogique des connaissances établies.",
+      "Définitions et notions de base."
+     ],
+     [
+      "8",
+      "Primaire ET littérature grise",
+      "Données brutes de l'agence ; hors édition commerciale ou académique.",
+      "Source de chiffres, à croiser avec la méthode de collecte."
+     ],
+     [
+      "9-12",
+      "Besoins",
+      "(a) primaire : le texte du RGPD ; (b) tertiaire puis secondaire ; (c) primaire (étude) ou données d'agence, après lecture de la méthode ; (d) grise : relever qui finance chaque comparatif.",
+      "Choisir la source selon le besoin."
+     ]
+    ],
+    "erreurs": [
+     "Classer un document selon son aspect (PDF, site web) plutôt que selon sa fonction.",
+     "Croire qu'un site officiel ne contient que des primaires.",
+     "Citer un tertiaire (encyclopédie) comme preuve."
+    ],
+    "retenir": "Avant de citer, classer : de quel type de source parle-t-on ?"
    }
   }
  },
@@ -6532,6 +6731,7 @@ window.DATA = {
   "M2",
   "EX10",
   "V4",
+  "EXJ14",
   "EX11b",
   "EX12",
   "EX13",
@@ -6992,6 +7192,7 @@ window.DATA = {
   "EX11": "EX27",
   "EX28": "EX28",
   "EX2": "EX29",
-  "EX3": "EX30"
+  "EX3": "EX30",
+  "EXJ14": "JEU 14"
  }
 };

@@ -134,6 +134,25 @@
       if (k.indexOf("wait:") === 0) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Réponse envoyée"), h("p", {}, "En attente des autres joueurs de la table…"), chips(T)));
       drawIdle(T);
     }
+    /* ----- bandeau fixe d'aide : informations essentielles de chaque JEU, jamais les résultats ----- */
+    function aideModal(k) {
+      var ov = h("div", { style: "position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;overflow:auto;padding:12px" }), box = h("div", { class: "card", style: "max-width:600px;margin:0 auto" });
+      var sel = h("select", { "aria-label": "Choisir un JEU" }, [h("option", { value: "common" }, "Règles du plateau")].concat(Object.keys(D.jeux).sort(function (a, b) { return a - b; }).map(function (n) { return h("option", { value: n }, "JEU " + n + " · " + D.jeux[n].titre.slice(0, 40)); })));
+      var content = h("div", {});
+      function show(v) { content.innerHTML = ""; if (v === "common") content.appendChild(h("div", {}, h("h2", {}, D.lecture.commun.titre), docEl(D.lecture.commun))); else content.appendChild(ficheEl(v)); }
+      sel.value = k || "common"; sel.onchange = function () { show(sel.value); show2 = sel.value; };
+      var show2 = sel.value; show(show2);
+      box.appendChild(h("p", { class: "meta" }, "Aide : rappel des règles et de la méthode. Elle ne donne jamais les résultats."));
+      box.appendChild(sel); box.appendChild(content); box.appendChild(h("button", { class: "sec", onclick: function () { ov.remove(); } }, "Fermer")); ov.appendChild(box); document.body.appendChild(ov);
+    }
+    function aideBar() {
+      var cur = function () { return snap && snap.here ? String(snap.here) : null; };
+      return h("div", { style: "position:sticky;top:0;z-index:40;background:#1F2A5C;color:#fff;padding:6px 10px;border-radius:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px" },
+        h("b", {}, "Aide"),
+        h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal("common"); } }, "Règles"),
+        h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal(cur()); } }, "JEU en cours"),
+        h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal(cur() || "common"); } }, "Tous les JEU"));
+    }
     function chips(T) { return h("div", {}, T.players.map(function (p) { return pastille(p.st, p.nom, p.col); })); }
     /* ----- lecture obligatoire ----- */
     function docEl(doc) { return h("div", {}, doc.sections.map(function (sc) { return h("div", {}, h("h3", {}, sc[0]), h("ul", {}, sc[1].map(function (l) { return h("li", {}, l); }))); })); }
@@ -294,7 +313,7 @@
       }
       body.appendChild(box);
     }
-    mount(h("h1", {}, "5 · La route de l'état de l'art"), head, board, body,
+    mount(aideBar(), h("h1", {}, "5 · La route de l'état de l'art"), head, board, body,
       h("p", {}, h("a", { href: "#/plateau/regles" }, "Règles"), "  ·  ", h("a", { href: "#", onclick: function (e) { e.preventDefault(); if (confirm("Quitter la partie ? Vous pourrez la rejoindre avec le même prénom.")) { try { localStorage.removeItem(MK); } catch (x) {} stopAll(); location.hash = "#/j"; } } }, "Quitter la partie")));
     body.appendChild(h("p", { class: "meta" }, "Connexion…"));
   }

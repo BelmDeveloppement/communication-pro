@@ -133,6 +133,12 @@
     function setAnswer(i, txt) { if (fields[i]) { fields[i].value = txt; flush(); } }
     function makeField(i) {
       var ty = e.types && e.types[i], opts = ty === "vf" ? ["VRAI", "FAUX"] : ty === "on" ? ["OUI", "NON"] : Array.isArray(ty) ? ty : null, f;
+      if (ty && ty.multi) {
+        f = { value: state.a[i] || "" }; var sel = (f.value ? f.value.split(" ; ") : []), mb = [];
+        var mpaint = function () { mb.forEach(function (b) { b.className = "choice" + (sel.indexOf(b.getAttribute("data-v")) >= 0 ? " on" : ""); }); };
+        ty.multi.forEach(function (o) { var b = h("button", { class: "choice", "data-v": o, type: "button", onclick: function () { var k = sel.indexOf(o); if (k >= 0) sel.splice(k, 1); else sel.push(o); f.value = ty.multi.filter(function (x) { return sel.indexOf(x) >= 0; }).join(" ; "); mpaint(); flush(); } }, o); mb.push(b); });
+        mpaint(); f.el = h("div", {}, h("p", { class: "meta" }, "Plusieurs réponses possibles : cochez toutes celles qui conviennent."), h("div", { class: "choices" }, mb)); return f;
+      }
       if (opts) {
         f = { value: state.a[i] || "" }; var bs = [];
         var paint = function () { bs.forEach(function (b) { b.className = "choice" + (b.getAttribute("data-v") === f.value ? " on" : ""); }); };
@@ -166,7 +172,9 @@
     var bar = h("div", {}); function drawBar() { bar.innerHTML = ""; bar.appendChild(sessionBar()); refreshLock(); }
     Sess.onchange = drawBar; drawBar(); Sess.connect();
     var roleBox = h("div", {});
-    var parts = [bar, h("p", { class: "meta" }, h("span", { class: "badge" }, id.replace("EX", "EX ").replace("F", "F ")), e.mode + " · " + e.duree + " min · " + e.chap), h("h1", {}, e.titre),
+    var mineK = LSget("sujet"), mineS = mineK && D.sujets.filter(function (x) { return x[0] === mineK; })[0];
+    var rappel = mineS ? h("div", { class: "card", style: "background:#EEF3FF" }, h("b", {}, "Votre sujet : " + mineS[0]), h("p", { class: "meta" }, mineS[1] + " (choisi à la page Sujets ; rien à ressaisir).")) : null;
+    var parts = [bar, rappel, h("p", { class: "meta" }, h("span", { class: "badge" }, id.replace("EX", "EX ").replace("F", "F ")), e.mode + " · " + e.duree + " min · " + e.chap), h("h1", {}, e.titre),
       h("div", { class: "card" }, h("h2", {}, "Mise en situation"), lines(e.situation), e.tableau ? h("table", {}, h("tr", {}, e.tableau.header.map(function (x) { return h("th", {}, x); })), e.tableau.rows.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); })) : null),
       h("div", { class: "card" }, h("h2", {}, "À faire"), h("ol", {}, e.taches.map(function (t) { return h("li", {}, t); }))),
       e.livrable ? h("p", { class: "warn" }, "Livrable : " + e.livrable) : null,
@@ -452,6 +460,7 @@
     mount(h("h1", {}, "Sujets de l'état de l'art"), sessionBar(),
       h("p", { class: "meta" }, "Chaque étudiant choisit un seul sujet, et un sujet ne peut être pris que par un seul étudiant : le premier qui appuie est servi. Ensuite, formulez votre question de décision (EX1)."),
       Sess.claimMsg ? h("p", { class: "warn" }, Sess.claimMsg) : null,
+      h("div", { class: "card", style: "background:#FFF6DD" }, h("b", {}, "Exemple du cours (non choisissable) : Journalisation centralisée"), h("p", {}, "Faut-il centraliser les journaux de sécurité de TransLor, selon le coût, la fiabilité des alertes, le délai de mise en œuvre et la conformité ? L'enseignant déroule cet exemple à chaque étape du dossier.")),
       h("div", {}, D.sujets.map(function (s, i) {
         var c = cl[s[0]], prisAutre = c && !(info && c.sid === info.sid), isMine = mine === s[0];
         var b = h("button", { class: isMine ? "ok" : "sec", onclick: function () { Sess.claim(s[0]); } }, isMine ? "Votre sujet ✓" : prisAutre ? "Pris par " + c.nom : "Choisir");
@@ -521,6 +530,44 @@
     upd(); return box;
   }
 
+  /* ---------- Calculateur : écart réel ou bruit (JEU 30) et matrice pondérée (JEU 31) ---------- */
+  function lgam(x) { var c = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5], y = x, t = x + 5.5, ser = 1.000000000190015; t -= (x + 0.5) * Math.log(t); for (var j = 0; j < 6; j++) ser += c[j] / ++y; return -t + Math.log(2.5066282746310005 * ser / x); }
+  function betacf(a, b, x) { var qab = a + b, qap = a + 1, qam = a - 1, c = 1, d = 1 - qab * x / qap, m, h2; if (Math.abs(d) < 1e-30) d = 1e-30; d = 1 / d; h2 = d; for (m = 1; m <= 200; m++) { var m2 = 2 * m, aa = m * (b - m) * x / ((qam + m2) * (a + m2)); d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30; c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30; d = 1 / d; h2 *= d * c; aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2)); d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30; c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30; d = 1 / d; var del = d * c; h2 *= del; if (Math.abs(del - 1) < 3e-12) break; } return h2; }
+  function ibeta(x, a, b) { if (x <= 0) return 0; if (x >= 1) return 1; var bt = Math.exp(lgam(a + b) - lgam(a) - lgam(b) + a * Math.log(x) + b * Math.log(1 - x)); return x < (a + 1) / (a + b + 2) ? bt * betacf(a, b, x) / a : 1 - bt * betacf(b, a, 1 - x) / b; }
+  function welch(x, y) { var mx = mean(x), my = mean(y), vx = Math.pow(sd(x), 2), vy = Math.pow(sd(y), 2), nx = x.length, ny = y.length, se2 = vx / nx + vy / ny, t = (mx - my) / Math.sqrt(se2), df = se2 * se2 / (Math.pow(vx / nx, 2) / (nx - 1) + Math.pow(vy / ny, 2) / (ny - 1)); return { t: t, df: df, p: ibeta(df / (df + t * t), df / 2, 0.5) }; }
+  function mean(a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; }
+  function sd(a) { var m = mean(a); return Math.sqrt(a.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / (a.length - 1)); }
+  function nums(t) { return (t.match(/-?\d+(?:[.,]\d+)?/g) || []).map(function (v) { return parseFloat(v.replace(",", ".")); }); }
+  function f2(v, d) { return isFinite(v) ? v.toFixed(d == null ? 2 : d).replace(".", ",") : "—"; }
+  function calculPage() {
+    var ta = h("textarea", { rows: 6, placeholder: "Une ligne par outil, par exemple :\nA : 41 38 45 40 36\nB : 37 44 35 43 39" }), out = h("div", {});
+    var ex = h("button", { class: "sec", onclick: function () { ta.value = "A : 41 38 45 40 36\nB : 37 44 35 43 39\nC : 52 50 53 51 54\nD : 41 43 40 42 44"; go(); } }, "Remplir avec l'exemple du JEU 30");
+    function go() {
+      var G = ta.value.split("\n").map(function (l, i) { var k = l.indexOf(":"), nm = k > 0 ? l.slice(0, k).trim() : "Ligne " + (i + 1); return { nm: nm, v: nums(k > 0 ? l.slice(k + 1) : l) }; }).filter(function (g) { return g.v.length >= 2; });
+      out.innerHTML = ""; if (G.length < 1) return;
+      out.appendChild(h("table", {}, h("tr", {}, ["Outil", "Mesures", "Moyenne", "Écart-type"].map(function (x) { return h("th", {}, x); })), G.map(function (g) { return h("tr", {}, h("td", {}, g.nm), h("td", {}, String(g.v.length)), h("td", {}, f2(mean(g.v), 1)), h("td", {}, f2(sd(g.v), 1))); })));
+      if (G.length >= 2) {
+        var rows = []; for (var i = 0; i < G.length; i++) for (var j = i + 1; j < G.length; j++) { var a = G[i], b = G[j], d = Math.abs(mean(a.v) - mean(b.v)), s = Math.max(sd(a.v), sd(b.v)), r = d / s, w = welch(a.v, b.v), v = r < 1 ? "bruit : aucune différence établie" : r <= 2 ? "refaire des mesures" : "écart probablement réel"; rows.push(h("tr", {}, h("td", {}, a.nm + " – " + b.nm), h("td", {}, f2(d, 1)), h("td", {}, f2(r, 1)), h("td", {}, w.p < 0.0001 ? "< 0,0001" : f2(w.p, 3)), h("td", {}, v))); }
+        out.appendChild(h("h3", {}, "Comparaisons deux à deux")); out.appendChild(h("table", {}, h("tr", {}, ["Paire", "Écart des moyennes", "Rapport écart ÷ écart-type", "p (test t de Welch)", "Lecture de la règle"].map(function (x) { return h("th", {}, x); })), rows));
+        out.appendChild(h("p", { class: "meta" }, "Rapport : écart des moyennes divisé par le plus grand des deux écarts-types. Règle : moins de 1 = bruit ; entre 1 et 2 = refaire ; plus de 2 = probablement réel. Le p du test t confirme la règle ; il ne la remplace pas. Avec peu de mesures, la conclusion reste fragile : écrivez le nombre de mesures."));
+      }
+    }
+    ta.addEventListener("input", go);
+    var ma = h("textarea", { rows: 5, placeholder: "Une ligne par solution : nom : notes de 1 à 5\nDisque local : 5 2 2 5\nCloud seul : 3 4 4 4" }), mw = h("input", { type: "text", placeholder: "Poids en %, dans l'ordre des colonnes : 30 30 25 15" }), mw2 = h("input", { type: "text", placeholder: "Autres poids (sensibilité) : 50 20 20 10" }), mo = h("div", {});
+    function gm() {
+      var S = ma.value.split("\n").map(function (l) { var k = l.indexOf(":"); return k > 0 ? { nm: l.slice(0, k).trim(), v: nums(l.slice(k + 1)) } : null; }).filter(function (x) { return x && x.v.length; }), W1 = nums(mw.value), W2 = nums(mw2.value); mo.innerHTML = "";
+      if (!S.length || !W1.length) return; var tot = function (v, w) { return v.reduce(function (s, x, i) { return s + x * (w[i] || 0) / 100; }, 0); };
+      var warn = Math.abs(W1.reduce(function (s, x) { return s + x; }, 0) - 100) > 0.01 ? h("p", { class: "warn" }, "Les poids ne totalisent pas 100 %.") : null; if (warn) mo.appendChild(warn);
+      mo.appendChild(h("table", {}, h("tr", {}, ["Solution", "Total (poids de départ)"].concat(W2.length ? ["Total (autres poids)"] : []).map(function (x) { return h("th", {}, x); })), S.map(function (x) { return h("tr", {}, [h("td", {}, x.nm), h("td", {}, f2(tot(x.v, W1)))].concat(W2.length ? [h("td", {}, f2(tot(x.v, W2)))] : [])); })));
+      if (W2.length) { var best = function (w) { return S.slice().sort(function (a, b) { return tot(b.v, w) - tot(a.v, w); })[0].nm; }; mo.appendChild(h("p", {}, best(W1) === best(W2) ? "Le classement de tête ne change pas quand les poids changent : " + best(W1) + "." : "Le classement de tête change : " + best(W1) + " avec les poids de départ, " + best(W2) + " avec les autres poids. Dites-le dans votre conclusion.")); }
+    }
+    [ma, mw, mw2].forEach(function (e) { e.addEventListener("input", gm); });
+    var exm = h("button", { class: "sec", onclick: function () { ma.value = "Disque local : 5 2 2 5\nCloud seul : 3 4 4 4\nHybride : 4 5 5 3"; mw.value = "30 30 25 15"; mw2.value = "50 20 20 10"; gm(); } }, "Remplir avec le cadre du JEU 31 (notes d'exemple à remplacer par celles de l'énoncé)");
+    mount(h("h1", {}, "Calculateur du cours"), h("p", { class: "meta" }, "Aide au calcul pour les JEUX 30 et 31. Rien n'est envoyé : tout se calcule dans votre navigateur. Refaites toujours un calcul à la main ou au tableur pour contrôler."),
+      h("div", { class: "card" }, h("h2", {}, "JEU 30 · Écart réel ou bruit ?"), ta, ex, out),
+      h("div", { class: "card" }, h("h2", {}, "JEU 31 · Matrice pondérée"), ma, mw, mw2, exm, mo),
+      h("p", {}, h("a", { href: "#/dossier" }, "← Dossier et modèles")));
+  }
   function dossierPage() {
     var SEC = [["0", "Mon offre cible", "EX0"], ["1", "Question de décision", "EX1"], ["2", "Besoin du commanditaire", "EX4"], ["3", "Stratégie de recherche", "EX7, EX8"], ["4", "Sources institutionnelles", "EX9"], ["5", "Sources enregistrées et évaluées", "EX10, EX11b, EX12"], ["6", "Origine d'un chiffre", "EX13"],
       ["7", "Fiche de lecture", "EX14"], ["8", "Références vérifiées (IA)", "EX15"], ["9", "Argument de Toulmin", "EX16, EX19"], ["10", "Chiffre de fournisseur et objections", "EX18, EX20"], ["11", "Matrice pondérée", "EX21, EX22"], ["12", "Plan et résumé d'ouverture", "EX23"],
@@ -529,6 +576,7 @@
       h("div", { class: "card" }, h("p", {}, "Un seul fichier PowerPoint (une diapositive par section, précédée d'un exemple fictif à supprimer), rempli au fil des exercices sur le sujet choisi par votre équipe. Chaque exercice indique « → Dossier, section X »."),
         h("a", { class: "btn", href: "modele-dossier-etat-de-l-art.pptx", download: "modele-dossier-etat-de-l-art.pptx" }, "Télécharger le modèle (PowerPoint)"),
         h("p", { class: "meta" }, "Ouvrir avec PowerPoint ou LibreOffice Impress, ou importer dans Google Slides. Aucune donnée confidentielle ni personnelle.")),
+      h("div", { class: "card" }, h("h2", {}, "Modèles de calcul (JEUX 30 et 31)"), h("p", {}, "Calculateur en ligne, ou modèles Excel à compléter."), h("a", { class: "btn", href: "#/calcul" }, "Ouvrir le calculateur"), " ", h("a", { class: "btn sec", href: "modele-jeu30-ecart-ou-bruit.xlsx", download: "modele-jeu30-ecart-ou-bruit.xlsx" }, "Modèle Excel JEU 30"), " ", h("a", { class: "btn sec", href: "modele-jeu31-matrice-ponderee.xlsx", download: "modele-jeu31-matrice-ponderee.xlsx" }, "Modèle Excel JEU 31")),
       h("div", { class: "card" }, h("h2", {}, "Les 22 sections (0 à 21)"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
         SEC.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); }))),
       h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur."));
@@ -575,7 +623,7 @@
       h("div", { class: "card" }, h("h2", {}, "2 · Au début du cours"), li("Page animateur : saisir un code (ex. COM1), cliquer sur « Ouvrir la session ». Garder cette page ouverte jusqu'à la fin.", "Projeter le QR de la session : chaque étudiant le scanne une fois et saisit son prénom. En l'absence de QR, afficher le code et l'adresse du site.", "Contrôler le compteur « n en ligne » : les absents de la liste n'ont pas rejoint la session.")),
       h("div", { class: "card" }, h("h2", {}, "3 · À chaque exercice"), li("Projeter la page du support ; les étudiants scannent son QR et répondent sur leur téléphone.", "Onglet « Réponses d'un exercice » : un tableau, une ligne par étudiant, une colonne par consigne. Cocher « Grand texte » pour le projeter.", "Après la restitution, cliquer sur « Ouvrir la correction aux étudiants », puis projeter la page de correction du support.", "Exercice 1 : l'onglet « Sujets choisis » montre qui a pris quel sujet (premier arrivé, premier servi).")),
       h("div", { class: "card" }, h("h2", {}, "4 · En fin de journée"), li("Cliquer sur « Exporter en CSV » : les réponses sont gardées dans le navigateur de cet ordinateur seulement, l'export est la sauvegarde.", "Ne pas utiliser « Effacer les réponses » avant d'avoir exporté.")),
-      h("div", { class: "card" }, h("h2", {}, "Le plateau « La route de l'état de l'art »"), li("Tour de contrôle (#/tour) : PIN, « Ouvrir la partie », « Lancer la séance ». Les 40 JEUX, dans l'ordre du cours, s'ouvrent un à un avec le bouton « JEU suivant » : toute la classe joue le même JEU, noté de 0 à 3 sur trois critères cochés par chaque joueur.", "Joueurs : QR du plateau ou lien #/j, code ROUTE, prénom et table 1 à 5. Un QR de reconnexion reste affiché en permanence sur la tour (« Connexion perdue ? Scannez à nouveau, même prénom, même table »).", "Plateau physique 80 × 60 cm : route de 63 cases à gauche, bandeau de droite avec l'atelier d'outils (16 emplacements, jetons de couleur), la case « Je mise » et la légende. Version imprimée par table (PDF « Plateau 80 × 60 »).", "Règles : 1 à 3 points = on avance d'autant ; 0 point = on recule d'une case ; pari facultatif (+1 / −1) ; cases Aléa, Outil, Piège, Duel et Relecture réglées à l'écran du joueur.", "Case 31 : simple marque de mi-parcours. Le rythme est limité : on ne dépasse pas de plus de 8 cases le JEU en cours.", "Duels : appariés entre tables ; sans adversaire au bout de 45 secondes, le joueur affronte la tour. Relecture : un joueur de la même table relit la réponse et donne son verdict.", "Mode test (#/test) : parcourt les 40 JEUX et toutes les cartes avec les réponses attendues, sans rien envoyer aux joueurs sauf le jeu choisi. « Simuler une partie » lance 5 tables fictives avec effets de cases.", "Les corrigés détaillés de toutes les cartes sont dans la fiche enseignant (PDF, non publié).",)),
+      h("div", { class: "card" }, h("h2", {}, "Le plateau « La route de l'état de l'art »"), li("Tour de contrôle (#/tour) : PIN, « Ouvrir la partie », « Lancer la séance ». Les 45 JEUX, dans l'ordre du cours, s'ouvrent un à un : toute la classe joue le même JEU. Chaque JEU a 3 critères, cochés par chaque joueur : un critère validé = 1 point (0 à 3 points).", "Joueurs : QR du plateau ou lien #/j, code ROUTE, prénom et table 1 à 5. Un bandeau d'aide fixe en haut de l'écran donne les règles et la fiche de chaque JEU (jamais les résultats). Un QR de reconnexion reste affiché sur la tour.", "Plateau physique 80 × 60 cm : route de 63 cases, une couleur par objectif (P1, O3, O2, O1, P2), cinq jauges de maîtrise. Version imprimée par table (PDF « Plateau 80 × 60 »).", "Règles : un seul pion par table. Il va jusqu'au JEU suivant en traversant les cases à effet (Aléa, Outil, Piège, Duel, Relecture), dont l'effet s'applique à chaque joueur sur son écran. Pari facultatif : 3 critères validés = +1 point, 0 ou 1 = −1 point.", "Case 31 : simple marque de mi-parcours. Le rythme est limité par l'enseignant : le pion ne dépasse pas le JEU ouvert.", "Duels : appariés entre tables ; sans adversaire au bout de 45 secondes, le joueur affronte la tour (2 critères validés ou plus : +1 point). Relecture : un joueur de la même table relit la réponse et donne son verdict.", "Mode test (#/test) : parcourt les JEUX et toutes les cartes avec les réponses attendues, sans rien envoyer aux joueurs sauf le jeu choisi. « Simuler une partie » lance 5 tables fictives avec effets de cases.", "Les corrigés détaillés de toutes les cartes sont dans la fiche enseignant (PDF, non publié).",)),
       h("div", { class: "card" }, h("h2", {}, "6 · Si cela ne marche pas"), li("« Aucune salle avec ce code » : la session n'est pas ouverte ; ouvrir la page animateur et cliquer sur « Ouvrir la session ».", "« Ce code est déjà utilisé » : une autre page animateur est ouverte ; fermer l'autre onglet ou changer de code.", "Les réponses n'arrivent pas : changer de réseau (partage de connexion). Les étudiants gardent leur saisie sur leur téléphone et la renvoient en rechargeant la page.", "Pas d'écran de projection du QR : écrire le code au tableau.", "Les étudiants sans smartphone : binômes, ou réponses sur papier.")),
       h("p", {}, h("a", { href: "#/prof" }, "→ Ouvrir la page animateur"), "  ·  ", h("a", { href: "#/" }, "← Accueil")));
   }
@@ -597,6 +645,7 @@
     if (a === "outils") return outilsPage();
     if (a === "sujets") return sujetsPage();
     if (a === "dossier") return dossierPage();
+    if (a === "calcul") return calculPage();
     notFound();
   }
   window.addEventListener("hashchange", route); route();
