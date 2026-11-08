@@ -547,9 +547,9 @@
       out.innerHTML = ""; if (G.length < 1) return;
       out.appendChild(h("table", {}, h("tr", {}, ["Outil", "Mesures", "Moyenne", "Écart-type"].map(function (x) { return h("th", {}, x); })), G.map(function (g) { return h("tr", {}, h("td", {}, g.nm), h("td", {}, String(g.v.length)), h("td", {}, f2(mean(g.v), 1)), h("td", {}, f2(sd(g.v), 1))); })));
       if (G.length >= 2) {
-        var rows = []; for (var i = 0; i < G.length; i++) for (var j = i + 1; j < G.length; j++) { var a = G[i], b = G[j], d = Math.abs(mean(a.v) - mean(b.v)), s = Math.max(sd(a.v), sd(b.v)), r = d / s, w = welch(a.v, b.v), v = r < 1 ? "bruit : aucune différence établie" : r <= 2 ? "refaire des mesures" : "écart probablement réel"; rows.push(h("tr", {}, h("td", {}, a.nm + " – " + b.nm), h("td", {}, f2(d, 1)), h("td", {}, f2(r, 1)), h("td", {}, w.p < 0.0001 ? "< 0,0001" : f2(w.p, 3)), h("td", {}, v))); }
-        out.appendChild(h("h3", {}, "Comparaisons deux à deux")); out.appendChild(h("table", {}, h("tr", {}, ["Paire", "Écart des moyennes", "Rapport écart ÷ écart-type", "p (test t de Welch)", "Lecture de la règle"].map(function (x) { return h("th", {}, x); })), rows));
-        out.appendChild(h("p", { class: "meta" }, "Rapport : écart des moyennes divisé par le plus grand des deux écarts-types. Règle : moins de 1 = bruit ; entre 1 et 2 = refaire ; plus de 2 = probablement réel. Le p du test t confirme la règle ; il ne la remplace pas. Avec peu de mesures, la conclusion reste fragile : écrivez le nombre de mesures."));
+        var rows = []; for (var i = 0; i < G.length; i++) for (var j = i + 1; j < G.length; j++) { var a = G[i], b = G[j], d = Math.abs(mean(a.v) - mean(b.v)), w = welch(a.v, b.v), v = w.p < 0.05 ? "écart improbable par hasard (à confirmer avec plus de mesures)" : "rien n'est établi : écart compatible avec le hasard"; rows.push(h("tr", {}, h("td", {}, a.nm + " – " + b.nm), h("td", {}, f2(d, 1)), h("td", {}, f2(Math.abs(w.t), 2)), h("td", {}, w.p < 0.0001 ? "< 0,0001" : f2(w.p, 3)), h("td", {}, v))); }
+        out.appendChild(h("h3", {}, "Comparaisons deux à deux")); out.appendChild(h("table", {}, h("tr", {}, ["Paire", "Écart des moyennes", "t (Welch)", "p", "Lecture"].map(function (x) { return h("th", {}, x); })), rows));
+        out.appendChild(h("p", { class: "meta" }, "t = écart des moyennes ÷ √(s₁²/n₁ + s₂²/n₂), test de Welch. p < 0,05 : écart improbable par hasard (convention usuelle, pas une loi). p élevé : on ne peut rien conclure. Avec peu de mesures, la conclusion reste fragile : écrivez le nombre de mesures."));
       }
     }
     ta.addEventListener("input", go);
@@ -577,8 +577,44 @@
         h("a", { class: "btn", href: "modele-dossier-etat-de-l-art.pptx", download: "modele-dossier-etat-de-l-art.pptx" }, "Télécharger le modèle (PowerPoint)"),
         h("p", { class: "meta" }, "Ouvrir avec PowerPoint ou LibreOffice Impress, ou importer dans Google Slides. Aucune donnée confidentielle ni personnelle.")),
       h("div", { class: "card" }, h("h2", {}, "Modèles de calcul (JEUX 30 et 31)"), h("p", {}, "Calculateur en ligne, ou modèles Excel à compléter."), h("a", { class: "btn", href: "#/calcul" }, "Ouvrir le calculateur"), " ", h("a", { class: "btn sec", href: "modele-jeu30-ecart-ou-bruit.xlsx", download: "modele-jeu30-ecart-ou-bruit.xlsx" }, "Modèle Excel JEU 30"), " ", h("a", { class: "btn sec", href: "modele-jeu31-matrice-ponderee.xlsx", download: "modele-jeu31-matrice-ponderee.xlsx" }, "Modèle Excel JEU 31")),
+      h("div", { class: "card" }, h("h2", {}, "Enregistreur de pitch (JEU 41)"), h("p", {}, "Filmer votre pitch avec la caméra de cet appareil, avec votre accord ; la vidéo reste chez vous."), h("a", { class: "btn", href: "#/camera" }, "Ouvrir l'enregistreur")),
       h("div", { class: "card" }, h("h2", {}, "Les 22 sections (0 à 21)"), h("table", {}, h("tr", {}, ["Section", "Titre", "Exercices"].map(function (x) { return h("th", {}, x); })),
         SEC.map(function (r) { return h("tr", {}, r.map(function (x) { return h("td", {}, x); })); }))),
+      h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur."));
+  }
+  function cameraPage() {
+    var vid = h("video", { playsinline: "", autoplay: "", style: "width:100%;max-width:560px;background:#000;border-radius:8px" }); vid.muted = true;
+    var info = h("p", { class: "meta" }, ""), timer = h("p", { style: "font-size:1.4em;font-weight:700" }, "00:00"), dl = h("div", {});
+    var chunks = [], rec = null, stream = null, tick = null, t0 = 0, n = 0;
+    var bOn = h("button", {}, "1 · Activer la caméra"), bRec = h("button", { class: "sec" }, "2 · Enregistrer"), bStop = h("button", { class: "sec" }, "3 · Arrêter"), bOff = h("button", { class: "sec" }, "Éteindre la caméra");
+    bRec.disabled = true; bStop.disabled = true; bOff.disabled = true;
+    function say(t) { info.textContent = t; }
+    function mm(ms) { var s = Math.floor(ms / 1000); return ("0" + Math.floor(s / 60)).slice(-2) + ":" + ("0" + (s % 60)).slice(-2); }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { bOn.disabled = true; say("Ce navigateur ne permet pas d'enregistrer ici. Utilisez l'application caméra de votre téléphone, puis revenez au JEU."); }
+    bOn.addEventListener("click", function () {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: true }).then(function (st) {
+        stream = st; vid.srcObject = st; bOn.disabled = true; bRec.disabled = false; bOff.disabled = false; say("Caméra active. Vous seul voyez l'image : rien n'est envoyé.");
+      }).catch(function () { say("Accès refusé ou caméra introuvable. Autorisez la caméra et le micro dans votre navigateur, ou utilisez votre téléphone."); });
+    });
+    bRec.addEventListener("click", function () {
+      if (!stream) return; chunks = []; try { rec = new MediaRecorder(stream); } catch (e) { say("Enregistrement impossible sur ce navigateur."); return; }
+      rec.ondataavailable = function (ev) { if (ev.data && ev.data.size) chunks.push(ev.data); };
+      rec.onstop = function () {
+        var type = rec.mimeType || "video/webm", blob = new Blob(chunks, { type: type }), url = URL.createObjectURL(blob), ext = type.indexOf("mp4") >= 0 ? "mp4" : "webm"; n++;
+        var pv = h("video", { controls: "", playsinline: "", src: url, style: "width:100%;max-width:560px;border-radius:8px" });
+        dl.appendChild(h("div", { class: "card" }, h("h3", {}, "Version " + n + " · " + mm(Date.now() - t0)), pv, h("a", { class: "btn", href: url, download: "pitch-version-" + n + "." + ext }, "Enregistrer la vidéo sur mon appareil")));
+        say("Enregistrée sur cet appareil seulement. Relevez maintenant le débit, les « euh » et le temps avant le message clé.");
+      };
+      rec.start(); t0 = Date.now(); tick = setInterval(function () { timer.textContent = mm(Date.now() - t0); }, 500); bRec.disabled = true; bStop.disabled = false; say("Enregistrement en cours…");
+    });
+    bStop.addEventListener("click", function () { if (rec && rec.state !== "inactive") rec.stop(); clearInterval(tick); bRec.disabled = false; bStop.disabled = true; });
+    bOff.addEventListener("click", function () { if (rec && rec.state !== "inactive") rec.stop(); clearInterval(tick); if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; vid.srcObject = null; bOn.disabled = false; bRec.disabled = true; bStop.disabled = true; bOff.disabled = true; say("Caméra éteinte."); });
+    window.addEventListener("hashchange", function () { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); }, { once: true });
+    mount(h("h1", {}, "Enregistreur de pitch (JEU 41)"),
+      h("div", { class: "card" }, h("p", {}, "Avec votre accord, la caméra et le micro de cet appareil filment votre pitch de 2 minutes. La vidéo reste sur votre appareil : elle n'est ni envoyée ni collectée. Vous la téléchargez si vous voulez la garder ; sinon elle disparaît à la fermeture de la page."),
+        h("p", { class: "meta" }, "Consigne : message clé dans les 20 premières secondes, un chiffre, une demande. Filmez la version 1, notez trois défauts datés et mesurez débit, « euh » et temps avant le message clé, puis filmez la version 2."),
+        vid, timer, h("p", {}, bOn, " ", bRec, " ", bStop, " ", bOff), info),
+      dl,
       h("p", { class: "meta" }, "© 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur."));
   }
   function outilsPage() {
@@ -646,6 +682,7 @@
     if (a === "sujets") return sujetsPage();
     if (a === "dossier") return dossierPage();
     if (a === "calcul") return calculPage();
+    if (a === "camera") return cameraPage();
     notFound();
   }
   window.addEventListener("hashchange", route); route();

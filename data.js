@@ -2026,12 +2026,12 @@ window.DATA = {
   },
   "EX26": {
    "id": "EX26",
-   "titre": "Préparer le pitch de 5 minutes",
+   "titre": "Préparer le pitch de 10 minutes",
    "mode": "Équipes",
    "duree": 20,
    "chap": "Carnet · chapitre 8",
    "situation": [
-    "Vous défendez votre état de l'art en 5 minutes devant un jury composé de la directrice (non technique) et de ses collaborateurs. Puis 4 minutes de questions."
+    "Vous défendez votre état de l'art en 10 minutes devant un jury composé de la directrice (non technique) et de ses collaborateurs. Puis 4 minutes de questions."
    ],
    "taches": [
     "Écrivez le message clé en une phrase.",
@@ -2095,7 +2095,7 @@ window.DATA = {
      ]
     ],
     "erreurs": [
-     "Tout dire : 5 minutes = un message.",
+     "Tout dire : 10 minutes = un message.",
      "Lire ses notes.",
      "Oublier l'appel à décision."
     ]
@@ -2115,10 +2115,10 @@ window.DATA = {
    "duree": 65,
    "chap": "Carnet · chapitre 8",
    "situation": [
-    "Chaque équipe présente 5 minutes, puis répond aux questions du jury 4 minutes. Les autres équipes observent et notent avec la grille (sur 20)."
+    "Chaque équipe présente 10 minutes, puis répond aux questions du jury 4 minutes. Les autres équipes observent et notent avec la grille (sur 20)."
    ],
    "taches": [
-    "Présentez votre état de l'art (5 minutes chronométrées).",
+    "Présentez votre état de l'art (10 minutes chronométrées).",
     "Répondez aux questions : reformuler, puis fait, concession ou réserve.",
     "Observateurs : notez avec la grille et écrivez un feedback SBI."
    ],
@@ -2793,7 +2793,8 @@ window.DATA = {
     "Ce que j'ai appris de plus utile.",
     "Ce que je fais différemment dès lundi.",
     "Ce qui manquait ou était de trop dans ce cours.",
-    "Une note de 1 à 5 : utilité en entreprise."
+    "Utilité en entreprise MAINTENANT (stage ou premier poste, dans les 6 mois) : note de 1 à 5, avec un exemple.",
+    "Utilité dans QUELQUES ANNÉES (5 ans) : note de 1 à 5. Qu'est-ce qui restera utile même si les outils changent ?"
    ],
    "livrable": ""
   },
@@ -5089,13 +5090,13 @@ window.DATA = {
    "chap": "Carnet · chapitre 7",
    "situation": [
     "TransLor teste 4 outils de sauvegarde (5 mesures chacun, en minutes, valeurs fictives). A est-il plus rapide que B ? C plus rapide que D ?",
-    "Comparez l'écart entre outils au bruit. Écart-type pas à pas : page précédente ; tableur : =MOYENNE(plage), =ECARTYPE(plage).",
-    "Règle : rapport < 1 bruit ; > 2 probablement réel."
+    "Calculez moyennes et écarts-types, puis le test t : =TTEST(plage1;plage2;2;3). Méthode : pages précédentes.",
+    "Lecture : p < 0,05 : écart improbable par hasard ; p élevé : rien n'est établi (5 mesures : fragile)."
    ],
    "taches": [
     "A et B : écart entre les moyennes, en minutes.",
     "A : écart-type, arrondi à 0,1.",
-    "A–B : l'écart des moyennes est-il plus petit ou plus grand que l'écart-type ?",
+    "A–B : calculez p avec =TTEST. p est-il plus petit ou plus grand que 0,05 ?",
     "A–B : que concluez-vous ?",
     "C et D : écart entre les moyennes, en minutes.",
     "C–D : que concluez-vous ?",
@@ -5127,7 +5128,7 @@ window.DATA = {
    "corr": {
     "methode": [
      "Calculer la moyenne et la dispersion de chaque outil.",
-     "Comparer l'écart des moyennes à la dispersion.",
+     "Calculer le test t (=TTEST) et lire p.",
      "Conclure avec prudence : cinq mesures, c'est peu."
     ],
     "cols": [
@@ -5149,32 +5150,32 @@ window.DATA = {
      [
       "1-4",
       "A et B",
-      "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9. L'écart (0,4) est bien plus petit que l'écart-type (3,4) : bruit. Conclusion : aucune différence établie."
+      "Moyennes 40,0 et 39,6 : écart 0,4 ; écarts-types 3,4 et 3,9 ; t ≈ 0,17 ; p ≈ 0,87. L'écart est très petit devant le bruit : rien n'est établi. Conclusion : aucune différence établie."
      ],
      [
       "5-6",
       "C et D",
-      "Moyennes 52,0 et 42,0 : écart 10 ; écarts-types 1,6 et 1,6 : l'écart vaut plus de 6 écarts-types : probablement réel. Conclusion : D est plus rapide d'environ 10 minutes sur ces cinq mesures."
+      "Moyennes 52,0 et 42,0 : écart 10 ; écarts-types 1,6 et 1,6 ; t = 10 ; p ≈ 0,000008. L'écart ne s'explique presque pas par le hasard : probablement réel. Conclusion : D est plus rapide d'environ 10 minutes sur ces cinq mesures."
      ],
      [
       "—",
-      "Test statistique (facultatif)",
-      "Un test de Student (fonction de tableur, ou avis d'un statisticien) donne environ 0,87 pour A–B et 0,00001 pour C–D (calcul fait à la construction du cours). Plus ce nombre est petit, moins l'écart s'explique par le hasard."
+      "Le test t (obligatoire dans cette version)",
+      "Test t de Welch : =TTEST(plage1;plage2;2;3). Résultats : A–B p ≈ 0,87 ; C–D p ≈ 0,000008. Plus p est petit, moins l'écart s'explique par le hasard. Seuil usuel : 0,05 (convention, pas une loi)."
      ],
      [
       "—",
       "t-test et ANOVA",
-      "À connaître de nom : le t-test compare deux groupes, l'ANOVA plus de deux. Pour les utiliser correctement, demandez conseil à un statisticien."
+      "Le t-test compare deux groupes ; l'ANOVA en compare plus de deux. Avec peu de mesures, demandez conseil à un statisticien."
      ],
      [
       "7",
       "Phrases possibles",
-      "A–B : « l'écart observé (0,4 min) est inférieur à la dispersion des mesures ; aucune différence n'est établie. » C–D : « D est plus rapide d'environ 10 min sur ces cinq mesures ; à confirmer avec plus de mesures. »"
+      "A–B : « l'écart observé (0,4 min) est très petit devant la dispersion des mesures (p ≈ 0,87) ; aucune différence n'est établie. » C–D : « D est plus rapide d'environ 10 min sur ces cinq mesures ; à confirmer avec plus de mesures. »"
      ],
      [
       "8",
       "IA · B meilleur que A ?",
-      "Une IA répond souvent « oui, B est légèrement meilleur » en comparant 39,6 à 40,0, sans parler de la dispersion. Refaites le calcul : l'écart est du bruit."
+      "Une IA répond souvent « oui, B est légèrement meilleur » en comparant 39,6 à 40,0, sans parler de la dispersion. Refaites le calcul avec =TTEST : p ≈ 0,87, l'écart est du bruit."
      ]
     ],
     "erreurs": [
@@ -5182,7 +5183,7 @@ window.DATA = {
      "Oublier de dire le nombre de mesures.",
      "Croire qu'un test remplace la réflexion sur la façon de mesurer."
     ],
-    "retenir": "Avant de classer deux solutions, comparer l'écart à la dispersion et dire le nombre de mesures."
+    "retenir": "Avant de classer deux solutions, calculer le test t, lire p et dire le nombre de mesures."
    },
    "tableau": {
     "header": [
