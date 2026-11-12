@@ -53,7 +53,7 @@
     mount(h("h1", {}, "Règles du plateau"),
       h("div", { class: "card" }, h("ol", {},
         h("li", {}, "Une table réunit jusqu'à 5 joueurs (tables 1 à 5) autour du même plateau et d'un seul pion. Chaque joueur répond sur son téléphone ou son ordinateur."),
-        h("li", {}, "1 case = 1 JEU. Vous passez par toutes les cases : le pion est sur un JEU, la table le joue, puis le pion avance d'une case. L'enseignant ouvre les JEU au fil du cours : le pion ne dépasse pas le JEU ouvert."),
+        h("li", {}, "1 case = 1 JEU. Toute la classe joue le même JEU : celui que l'enseignant a ouvert. Quand il ouvre un JEU, placez le pion de votre table sur sa case (l'écran donne le numéro). Une table au milieu d'un JEU le termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité."),
         h("li", {}, "Pour chaque JEU, chaque joueur coche les critères que sa production remplit : 0 à 3 points. Le pion avance quand toute la table a validé."),
         h("li", {}, "Le pari : avant de valider, vous pouvez cocher « Je mise ». 3 points : +1 point de plus. 0 ou 1 point : −1 point. 2 points : rien."),
         h("li", {}, "Les cases à effet (légende ci-dessous) se règlent sur votre écran, quelques secondes, et donnent ou retirent des points."),

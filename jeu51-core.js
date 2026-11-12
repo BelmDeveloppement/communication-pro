@@ -1,7 +1,7 @@
 /* © 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur.
    Logique « tables et joueurs » du plateau « La route de l'état de l'art » (45 JEU, 63 cases, un pion par table, points, jauges de maîtrise).
    Pur, sans DOM, testable sous Node. Le navigateur de l'enseignant fait autorité : les joueurs envoient leurs actions, il note et renvoie l'état.
-   Règles : 1 case = 1 JEU, on passe par toutes les cases ; le pion de la table avance d'une case quand toute la table a validé ; il ne dépasse pas le JEU ouvert par l'enseignant.
+   Règles : 1 case = 1 JEU, toute la classe joue le JEU ouvert par l'enseignant : à l'ouverture, toutes les tables y placent leur pion (une table au milieu d'une carte la termine d'abord ; un JEU non joué est sauté, neutre). Après un JEU, le pion avance jusqu'au JEU suivant et y attend.
    Points : 0 à 3 par JEU, pari ±1, effets en points, bonus « table solidaire » ; jauges de maîtrise par objectif (10 jetons) ; niveau Débutant / Confirmé / Expert (seuils cachés). */
 (function (root) {
   "use strict";
@@ -17,7 +17,7 @@
     return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: true, help: {}, broken: {}, off: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["1"], min: cfg.min || 480, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [], arbit: [] };
   }
   function tid(n) { var k = parseInt(String(n).replace(/\D/g, ""), 10); return k >= 1 && k <= MAXT ? "T" + k : null; }
-  function tableOf(G, t) { return G.tables[t] || (G.tables[t] = { id: t, players: [], round: 0, seen: {}, cur: null, last: null, pos: G.status === "play" ? 1 : 0, bonus: 0, zs: {}, done: false }); }
+  function tableOf(G, t) { return G.tables[t] || (G.tables[t] = { id: t, players: [], round: 0, seen: {}, cur: null, last: null, pos: G.status === "play" ? startPos(G) : 0, bonus: 0, zs: {}, skip: {}, done: false }); }
   function online(p, now) { return p.sim || (now - p.last) < OFFLINE_MS; }
   /* Frontière : la table joue le JEU de la case où se trouve son pion, à condition que l'enseignant l'ait ouvert (numéro de JEU <= JEU ouvert). */
   function lim(G) { return D.caps.max; }
@@ -26,11 +26,15 @@
   function playable(G, T) { var j = jeuHere(T); return !!j && !T.done && parseInt(j, 10) <= parseInt(G.jeux[0], 10); }
   function zoneOf(jeu) { return D.jeux[jeu].zone; }
   /* Jauge de la table pour un objectif : 10 jetons = maîtrise complète (points obtenus / points possibles sur tout l'objectif). */
-  function gaugeLvl(T, z, np) { var sum = (T.zs[z] || 0), den = 3 * D.nz[z] * Math.max(1, np); return Math.max(0, Math.min(10, Math.round(10 * sum / den))); }
+  function caseIx(k) { for (var i = 0; i < D.cases.length; i++) if (D.cases[i].type === "jeu" && String(D.cases[i].jeu) === String(k)) return i; return -1; }
+  function startPos(G) { var i = caseIx(G.jeux[0]); return i > 0 ? i : 1; }
+  /* JEU sautés (l'enseignant est passé à un autre JEU avant que la table ne les joue) : neutres, retirés du total possible. */
+  function skN(sk, z) { var n = 0; Object.keys(sk || {}).forEach(function (j) { if (D.jeux[j] && D.jeux[j].zone === z) n++; }); return n; }
+  function gaugeLvl(T, z, np) { var sum = (T.zs[z] || 0), den = 3 * Math.max(1, D.nz[z] - skN(T.skip, z)) * Math.max(1, np); return Math.max(0, Math.min(10, Math.round(10 * sum / den))); }
   function levelOf(pct) { return pct < 0.45 ? "Débutant" : pct < 0.75 ? "Confirmé" : "Expert"; }
-  function mastery(zp, zn, z, np) { var den = 3 * D.nz[z] * (np || 1), pct = Math.max(0, (zp[z] || 0) / den); return { z: z, pct: pct, n: zn[z] || 0, lvl: (zn[z] || 0) ? levelOf(pct) : null }; }
-  function masteryAll(p) { return Object.keys(D.zones).map(function (z) { return mastery(p.zp, p.zn, z, 1); }); }
-  function masteryTable(G, T) { var ps = T.players.map(function (s) { return G.players[s]; }), np = Math.max(1, ps.length); return Object.keys(D.zones).map(function (z) { var zp = {}, zn = {}; zp[z] = T.zs[z] || 0; zn[z] = ps.reduce(function (a, p) { return Math.max(a, p.zn[z] || 0); }, 0); return mastery(zp, zn, z, np); }); }
+  function mastery(zp, zn, z, np, sk) { var den = 3 * Math.max(1, D.nz[z] - skN(sk, z)) * (np || 1), pct = Math.max(0, (zp[z] || 0) / den); return { z: z, pct: pct, n: zn[z] || 0, lvl: (zn[z] || 0) ? levelOf(pct) : null }; }
+  function masteryAll(p) { return Object.keys(D.zones).map(function (z) { return mastery(p.zp, p.zn, z, 1, p.skip); }); }
+  function masteryTable(G, T) { var ps = T.players.map(function (s) { return G.players[s]; }), np = Math.max(1, ps.length); return Object.keys(D.zones).map(function (z) { var zp = {}, zn = {}; zp[z] = T.zs[z] || 0; zn[z] = ps.reduce(function (a, p) { return Math.max(a, p.zn[z] || 0); }, 0); return mastery(zp, zn, z, np, T.skip); }); }
   function tableScore(G, T) { return T.players.reduce(function (a, s) { return a + G.players[s].score; }, 0) + (T.bonus || 0); }
   function say(G, p, txt, now) {
     p.notes = p.notes || []; p.notes.unshift({ txt: txt, at: now }); p.notes = p.notes.slice(0, 5);
@@ -47,10 +51,10 @@
     if (same) { same.last = now; return { ok: true, player: same, rebound: true }; }
     if (T.players.length >= MAXP) return { ok: false, err: "La table " + t + " est complète (" + MAXP + " joueurs)." };
     var used = T.players.map(function (s) { return G.players[s].ci; }), ci = 0; while (used.indexOf(ci) >= 0) ci++;
-    p = { sid: o.sid, nom: nom, table: t, ci: ci, col: COLORS[ci], pos: T.pos, score: 0, zp: {}, zn: {}, done: T.done, last: now, joined: now, res: [], sim: !!o.sim, tools: {}, bets: 0, betsWon: 0, duelW: 0, duelL: 0, revN: 0, revOk: 0, trapN: 0, trapOk: 0, pend: null, notes: [], read: { common: false, jeux: {} } };
+    p = { sid: o.sid, nom: nom, table: t, ci: ci, col: COLORS[ci], pos: T.pos, score: 0, zp: {}, zn: {}, done: T.done, last: now, joined: now, res: [], sim: !!o.sim, tools: {}, bets: 0, betsWon: 0, duelW: 0, duelL: 0, revN: 0, revOk: 0, trapN: 0, trapOk: 0, pend: null, notes: [], skip: JSON.parse(JSON.stringify(T.skip || {})), read: { common: false, jeux: {} } };
     G.players[p.sid] = p; T.players.push(p.sid); return { ok: true, player: p };
   }
-  function settle(G) { Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.pos === 0 && G.status === "play") { T.pos = 1; T.players.forEach(function (s) { G.players[s].pos = 1; }); } }); }
+  function settle(G) { Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.pos === 0 && G.status === "play") { if (!moveTable(G, T, G.jeux[0], 0)) { T.pos = 1; T.players.forEach(function (s) { G.players[s].pos = 1; }); } delete T.jumped; } }); }
   function start(G, now) { if (G.status === "play") return; G.status = "play"; G.start = now; G.end = now + G.min * 60000; settle(G); }
   function stop(G, now) { G.end = now; if (G.status === "play") G.status = "ended"; }
   function running(G, now) { return G.status === "play" && now < G.end; }
@@ -88,8 +92,29 @@
   function counts(G, jeu) { var cs = D.jeux[jeu].cartes; return { base: cs.filter(function (c) { return !c.extra; }).length, extra: cs.filter(function (c) { return c.extra; }).length }; }
   function setExtra(G, on) { G.extra = !!on; }
   function setN2(G, on) { G.n2 = !!on; }
-  function setJeu(G, k) { if (D.jeux[k]) { G.jeux = [k]; resetRead(G, k); } return G.jeux[0]; }
-  function nextJeu(G, dir) { var ks = Object.keys(D.jeux), i = ks.indexOf(G.jeux[0]), n = Math.max(0, Math.min(ks.length - 1, (i < 0 ? 0 : i) + (dir || 1))); G.jeux = [ks[n]]; resetRead(G, ks[n]); return ks[n]; }
+  /* Place le pion d'une table sur la case du JEU k. Les JEU non joués entre les deux sont « sautés » : ni points, ni pénalité, ni effets de case. */
+  function moveTable(G, T, k, now) {
+    var ix = caseIx(k); if (ix < 0 || T.done) return false; T.skip = T.skip || {}; T.played = T.played || {};
+    var from = T.pos, act = T.players.map(function (s) { return G.players[s]; }).filter(function (p) { return !p.done; });
+    for (var i = Math.max(1, from); i < ix; i++) { var c = D.cases[i]; if (c.type === "jeu" && !T.played[c.jeu]) { T.skip[c.jeu] = true; act.forEach(function (p) { (p.skip = p.skip || {})[c.jeu] = true; }); } }
+    if (from === ix) return false;
+    T.pos = ix; act.forEach(function (p) { p.pos = ix; }); T.jumped = { jeu: String(k), to: ix, from: from, at: now }; delete T.jump;
+    return true;
+  }
+  /* L'enseignant (ou la diapositive du PowerPoint) ouvre le JEU k : toutes les tables y vont. Une table au milieu d'une carte la termine d'abord. */
+  function gotoJeu(G, k, now) {
+    k = String(k); if (!D.jeux[k]) return G.jeux[0]; G.jeux = [k]; resetRead(G, k);
+    Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.done || G.status === "lobby" && T.pos === 0) return; if (T.cur) T.jump = k; else moveTable(G, T, k, now || 0); });
+    return k;
+  }
+  function setJeu(G, k, now) { return gotoJeu(G, k, now); }
+  function nextJeu(G, dir, now) { var ks = Object.keys(D.jeux), i = ks.indexOf(G.jeux[0]), n = Math.max(0, Math.min(ks.length - 1, (i < 0 ? 0 : i) + (dir || 1))); return gotoJeu(G, ks[n], now); }
+  /* Retire un joueur (il a quitté la partie, ou l'enseignant retire un doublon). Sans « force », seulement s'il n'a encore rien joué. */
+  function leave(G, sid, force) {
+    var p = G.players[sid]; if (!p) return false; if (!force && (p.res.length || p.pend)) { p.last = 0; return false; }
+    var T = G.tables[p.table]; if (T) { T.players = T.players.filter(function (s) { return s !== sid; }); if (T.cur) delete T.cur.ans[sid]; }
+    delete G.players[sid]; if (G.nudge) delete G.nudge[sid]; return true;
+  }
   function cardOf(jeu, id) { var src = jeu === "P" ? D.pieges : D.jeux[jeu]; return src.cartes.filter(function (c) { return c.id === id; })[0]; }
   function draw(G, sid, now) {
     if (!canDraw(G, sid, now)) return false;
@@ -182,8 +207,10 @@
     }
     T.pos = to; act.forEach(function (p) { p.pos = to; res[p.sid].to = to; res[p.sid].final = to; res[p.sid].mv = to - from; });
     if (D.cases[to] && D.cases[to].type === "exam") { T.done = true; T.players.forEach(function (s) { G.players[s].done = true; G.players[s].pos = to; }); }
-    (T.seen[cur.jeu] = T.seen[cur.jeu] || []).push(cur.id); (T.played = T.played || {})[cur.jeu] = true;
+    (T.seen[cur.jeu] = T.seen[cur.jeu] || []).push(cur.id); (T.played = T.played || {})[cur.jeu] = true; if (T.skip) delete T.skip[cur.jeu]; act.forEach(function (p) { if (p.skip) delete p.skip[cur.jeu]; });
     T.last = { round: rd, jeu: cur.jeu, id: cur.id, res: res, at: now, zone: z, gauge: gaugeLvl(T, z, T.players.length), bonus: solid, from: from, to: to, path: path, tscore: tableScore(G, T) }; T.cur = null; T.round++;
+    if (T.jump && !T.done) { var jk = T.jump; delete T.jump; if (moveTable(G, T, jk, now)) { T.last.to = T.pos; T.last.jump = jk; act.forEach(function (p) { res[p.sid].to = res[p.sid].final = T.pos; res[p.sid].mv = T.pos - from; res[p.sid].jump = jk; }); } }
+    else delete T.jump;
     return true;
   }
 
@@ -348,12 +375,12 @@
     return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, gate: D.caps.gate, max: D.caps.max, tpos: T.pos, here: jeuHere(T), tdone: !!T.done, tscore: tableScore(G, T), gauges: Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }), mast: G.status === "ended" || T.done ? masteryAll(p) : null,
       me: { sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
       canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
-      table: { id: T.id, round: T.round,
+      table: { id: T.id, round: T.round, jumped: T.jumped || null,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),
         cur: T.cur ? { jeu: T.cur.jeu, id: T.cur.id, at: T.cur.at, answered: Object.keys(T.cur.ans), mine: !!T.cur.ans[sid] } : null,
         last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res, zone: T.last.zone, gauge: T.last.gauge, bonus: T.last.bonus, from: T.last.from, to: T.last.to, path: T.last.path } : null } };
   }
-  var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
+  var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, gotoJeu: gotoJeu, moveTable: moveTable, leave: leave, caseIx: caseIx, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
     act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);
