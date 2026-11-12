@@ -42,7 +42,7 @@
 
   function entry() {
     mount(h("h1", {}, "La route de l'état de l'art"),
-      h("p", { class: "meta" }, "Un plateau de 63 cases pour 45 JEU, dans l'ordre du cours. L'enseignant ouvre un JEU à la fois ; chaque joueur coche ses critères sur son téléphone ou son ordinateur."),
+      h("p", { class: "meta" }, "Un plateau de 63 cases pour 45 JEUX, dans l'ordre du cours. L'enseignant ouvre un JEU à la fois ; chaque joueur saisit ses résultats sur son téléphone ou son ordinateur ; l'application les contrôle."),
       h("div", { class: "grid" }, h("a", { class: "tile", href: "#/j" }, h("b", {}, "Je suis un joueur"), h("div", { class: "meta" }, "Rejoindre la partie : prénom, numéro de table, code ROUTE")),
         h("a", { class: "tile f", href: "#/plateau/regles" }, h("b", {}, "Règles et jeux"), h("div", { class: "meta" }, Object.keys(D.jeux).length + " JEUX, numérotés de 1 à " + Object.keys(D.jeux).length)),
         h("a", { class: "tile r", href: "#/tour" }, h("b", {}, "Tour de contrôle"), h("div", { class: "meta" }, "Enseignant : PIN, partie, simulation, mode test"))),
@@ -54,7 +54,7 @@
       h("div", { class: "card" }, h("ol", {},
         h("li", {}, "Une table réunit jusqu'à 5 joueurs (tables 1 à 5) autour du même plateau et d'un seul pion. Chaque joueur répond sur son téléphone ou son ordinateur."),
         h("li", {}, "1 case = 1 JEU. Toute la classe joue le même JEU : celui que l'enseignant a ouvert. Quand il ouvre un JEU, placez le pion de votre table sur sa case (l'écran donne le numéro). Une table au milieu d'un JEU le termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité."),
-        h("li", {}, "Pour chaque JEU, chaque joueur coche les critères que sa production remplit : 0 à 3 points. Le pion avance quand toute la table a validé."),
+        h("li", {}, "Pour chaque JEU, chaque joueur saisit ses résultats dans les champs proposés (listes, nombres, liens, textes courts) : 0 à 3 points, un par critère atteint. Le pion avance quand toute la table a validé."),
         h("li", {}, "Votre écran affiche l'énoncé complet de chaque JEU (but, mise en situation, à faire) : le même que sur le support projeté."),
         h("li", {}, "Les cases à effet (légende ci-dessous) se règlent sur votre écran, quelques secondes, et donnent ou retirent des points."),
         h("li", {}, "Cinq jauges de maîtrise, une par objectif : après chaque JEU, l'écran indique le nombre de jetons à poser (sur 10). À la fin de la partie : un niveau Débutant, Confirmé ou Expert par objectif."),

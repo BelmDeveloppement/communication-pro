@@ -43,3 +43,5 @@ body.jx-full header,body.jx-full footer{display:none}body.jx-full{background:#0E
 .jx-ateliers{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}.jx-at{display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:12px;border-bottom:1px dashed #C8D0E4;padding:2px 0;opacity:.55}.jx-at.on{opacity:1}.jx-at i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:2px;border:1px solid #fff}
 .jx-p .jx-at{font-size:14px}
 .jx-p .jx-qr{flex-direction:column;text-align:center}
+
+.jx-drawer{position:fixed;top:0;right:0;bottom:0;width:min(780px,96vw);background:#fff;box-shadow:-8px 0 28px rgba(0,0,0,.3);z-index:60;overflow:auto;padding:14px 18px;display:none}.jx-drawer.on{display:block}

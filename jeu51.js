@@ -155,7 +155,7 @@
         h("b", {}, "Aide"),
         h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal("common"); } }, "Règles"),
         h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal(cur()); } }, "JEU en cours"),
-        h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal(cur() || "common"); } }, "Tous les JEU"));
+        h("button", { class: "sec", style: "margin:0", onclick: function () { aideModal(cur() || "common"); } }, "Tous les JEUX"));
     }
     function chips(T) { return h("div", {}, T.players.map(function (p) { return pastille(p.st, p.nom, p.col); })); }
     /* ----- lecture obligatoire ----- */
@@ -181,7 +181,7 @@
       return box;
     }
     function critEl(k) {
-      var c = D.jeux[k].cartes.filter(function (x) { return x.t === "oral" && !x.extra; })[0]; if (!c || !c.grille) return null;
+      var c = D.jeux[k].cartes.filter(function (x) { return (x.t === "oral" || x.t === "saisie") && !x.extra; })[0]; if (!c || !c.grille) return null;
       return h("div", {}, h("p", { style: "margin-bottom:0" }, h("b", {}, "Les 3 critères (1 point chacun)")), h("ul", {}, c.grille.map(function (g) { return h("li", {}, g); })));
     }
     function ficheEl(k) {
@@ -258,6 +258,22 @@
       } else if (c.t === "texte") {
         var ta = h("textarea", { rows: c.rows || 2, placeholder: "Votre requête" }); ans = ""; ta.addEventListener("input", function () { ans = ta.value; }); box.appendChild(ta);
         ready = function () { return !!String(ans).trim(); };
+      } else if (c.t === "saisie") {
+        ans = c.champs.map(function (f) { return f.k === "multi" ? [] : f.k === "sel" ? -1 : f.k === "liste" ? f.items.map(function () { return -1; }) : f.k === "paires" ? (function () { var a = []; for (var q = 0; q < f.n; q++) a.push({ t: "", s: -1 }); return a; })() : ""; });
+        var filled = function (f, i) { var v = ans[i]; if (f.k === "sel") return v >= 0; if (f.k === "multi") return v.length > 0; if (f.k === "liste") return v.some(function (x) { return x >= 0; }); if (f.k === "paires") return v.some(function (r) { return String(r.t).trim().length > 0; }); return String(v).trim().length > 0; };
+        var selEl = function (f, ord, cur, onch) { var sl = h("select", {}, [h("option", { value: "-1" }, "Choisir…")].concat(ord.map(function (k) { return h("option", { value: String(k) }, f.opts[k]); }))); sl.value = String(cur); sl.addEventListener("change", function () { onch(+sl.value); }); return sl; };
+        c.champs.forEach(function (f, i) {
+          var ord = order && order[i] ? order[i] : (f.opts || []).map(function (o, k) { return k; }), cell = h("div", { class: "card", style: "background:#fff" }, h("p", {}, h("b", {}, f.lab), f.c < 0 ? h("small", { class: "meta" }, "  (non noté)") : null));
+          if (f.ph) cell.appendChild(h("p", { class: "meta" }, f.ph));
+          if (f.k === "sel") cell.appendChild(selEl(f, ord, -1, function (v) { ans[i] = v; }));
+          else if (f.k === "multi") ord.forEach(function (k) { var cb = h("input", { type: "checkbox", style: "width:auto;margin-right:8px" }); cb.addEventListener("change", function () { var j = ans[i].indexOf(k); if (cb.checked && j < 0) ans[i].push(k); if (!cb.checked && j >= 0) ans[i].splice(j, 1); }); cell.appendChild(h("label", { style: "display:block;margin:4px 0;cursor:pointer" }, cb, f.opts[k])); });
+          else if (f.k === "liste") f.items.forEach(function (it, q) { cell.appendChild(h("div", { style: "margin:6px 0" }, h("p", { class: "meta", style: "margin:0 0 2px" }, it.txt), selEl(f, ord, -1, function (v) { ans[i][q] = v; }))); });
+          else if (f.k === "paires") for (var q = 0; q < f.n; q++) (function (q) { var tx = h("input", { placeholder: f.ph2 || "Votre texte", style: "margin-bottom:4px" }); tx.addEventListener("input", function () { ans[i][q].t = tx.value; }); cell.appendChild(h("div", { style: "margin:6px 0" }, tx, selEl(f, ord, -1, function (v) { ans[i][q].s = v; }))); })(q);
+          else { var many = f.k === "txt" && (f.rows || 1) > 1, el = many ? h("textarea", { rows: f.rows }) : h("input", { placeholder: f.k === "url" ? "https://…" : f.k === "num" ? "Un nombre" : "", inputmode: f.k === "num" ? "decimal" : null }); el.addEventListener("input", function () { ans[i] = el.value; }); cell.appendChild(el); if (f.unit) cell.appendChild(h("small", { class: "meta" }, " " + f.unit)); }
+          box.appendChild(cell);
+        });
+        ready = function () { return c.champs.some(filled); };
+        return { get: function () { return ans; }, ok: ready, empty: function () { return c.champs.filter(function (f, i) { return f.c >= 0 && !filled(f, i); }).length; } };
       } else {
         box.appendChild(h("p", { class: "meta" }, "Cochez seulement ce que votre production montre réellement :")); ans = c.grille.map(function () { return false; });
         c.grille.forEach(function (g, i) { var cb = h("input", { type: "checkbox", style: "width:auto" }); cb.addEventListener("change", function () { ans[i] = cb.checked; }); box.appendChild(h("label", { style: "display:block;margin:6px 0" }, cb, " " + g)); });
@@ -275,14 +291,15 @@
     function drawCard(cur) {
       var c = C.cardOf(cur.jeu, cur.id), j = D.jeux[cur.jeu], box = h("div", { class: "card" });
       box.appendChild(h("h2", {}, "JEU " + cur.jeu + " · " + j.titre));
-      var en = c.t === "oral" && cur.jeu !== "P" ? enonceEl(cur.jeu) : null;
-      if (en) { box.appendChild(en); box.appendChild(h("p", { class: "big" }, "Quand vous avez terminé, cochez les critères que votre production remplit : 1 point chacun.")); }
+      var en = (c.t === "oral" || c.t === "saisie") && cur.jeu !== "P" ? enonceEl(cur.jeu) : null;
+      if (en) { box.appendChild(en); box.appendChild(h("p", { class: "big" }, c.t === "saisie" ? "Saisissez vos résultats dans les champs ci-dessous : l'application les contrôle. 1 point par critère atteint, 3 au maximum." : "Quand vous avez terminé, cochez les critères que votre production remplit : 1 point chacun.")); }
       else box.appendChild(h("p", { class: "big" }, c.q));
       if (cur.jeu !== "P" && C.exactTool(cur.jeu)) box.appendChild(h("p", {}, helpBtn(C.exactTool(cur.jeu))));
       var f = cardForm(c, me.sid + c.id, box), bet = { checked: false };
       var msg = h("p", { class: "warn", style: "display:none" }, "Répondez avant de valider.");
       box.appendChild(h("button", { class: "ok", onclick: function () {
         if (!f.ok()) { msg.style.display = "block"; return; }
+        if (f.empty && f.empty() && !confirm(f.empty() + " champ(s) vide(s) : ils compteront pour 0. Valider quand même ?")) return;
         send({ t: "ans", ans: f.get(), bet: bet.checked }); key = "wait:"; body.innerHTML = ""; body.appendChild(h("div", { class: "card" }, h("h2", {}, "Réponse envoyée"), h("p", {}, "En attente des autres joueurs de la table…")));
       } }, "Valider ma réponse"), msg); body.appendChild(box);
     }
@@ -301,8 +318,8 @@
       function details() {
         body.innerHTML = "";
         body.appendChild(h("div", { class: "card" }, h("h2", {}, r.pts + " point" + (r.pts > 1 ? "s" : "") + " sur 3 · JEU " + last.jeu), r.answered ? null : h("p", { class: "warn" }, "Pas de réponse envoyée à temps."),
-          c.t === "choix" ? null : h("ul", {}, r.detail.map(function (d) { return h("li", { style: "color:" + (d.ok ? "#1b6b45" : "#a33") }, (d.ok ? "✓ " : "✗ ") + d.lab); })),
-          h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)));
+          c.t === "choix" ? null : h("ul", {}, r.detail.map(function (d) { return h("li", { style: "color:" + (d.ok ? "#1b6b45" : "#a33") }, (d.ok ? "✓ " : "✗ ") + d.lab, d.sub && d.sub.length ? h("ul", { class: "meta", style: "color:#333;font-weight:400" }, d.sub.map(function (x) { return h("li", {}, h("b", { style: "color:" + (x.ok ? "#1b6b45" : x.part ? "#B36B00" : "#a33") }, (x.ok ? "✓ " : x.part ? "◐ " : "✗ ") + x.lab), h("div", {}, "Votre saisie : " + x.got), x.ok ? null : h("div", {}, h("b", {}, "Attendu : "), x.exp), x.why ? h("div", { class: "meta" }, x.why) : null, x.note ? h("div", { class: "meta" }, "ℹ " + x.note) : null); })) : null); })),
+          c.t === "saisie" ? null : h("p", {}, h("b", {}, "Réponse attendue : "), correctText(c)), h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl)));
         body.appendChild(h("div", { class: "warn big" }, moveText(r, m, last)));
         if (r.ev && r.ev.k === "aleas") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #7A3FB5" }, h("b", {}, "Aléa : " + r.ev.titre), h("p", {}, r.ev.txt), h("p", { class: "big" }, (r.ev.move > 0 ? "Vous gagnez " : r.ev.move < 0 ? "Vous perdez " : "Aucun point en jeu") + (r.ev.move ? Math.abs(r.ev.move) + " point" + (Math.abs(r.ev.move) > 1 ? "s" : "") + "." : "."))));
         if (r.ev && r.ev.k === "gate") body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("b", {}, "Case 31 : mi-parcours"), h("p", {}, "Bravo, vous êtes à mi-chemin du plateau. Pas d'effet : continuez.")));
@@ -341,8 +358,8 @@
         }
       } else if (pe.k === "rel") {
         var rc = C.cardOf(pe.jeu, pe.id); box.appendChild(h("h2", {}, "Case Relecture : lisez la réponse de " + pe.au)); box.appendChild(h("p", { class: "meta" }, "Question : " + rc.q)); box.appendChild(h("p", { class: "big" }, "Réponse de " + pe.au + " : " + pe.ans));
-        box.appendChild(h("p", {}, "Cette réponse est-elle entièrement correcte ? Vous gagnez 1 point pour la relecture ; si une coche vous semble fausse, l'enseignant arbitre."));
-        box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "rev", verdict: "err" }); feedback("Verdict envoyé", ["Vous avez signalé une coche douteuse : l'enseignant arbitre. +1 point pour la relecture."]); } }, "Une coche me semble fausse"));
+        box.appendChild(h("p", {}, "Cette réponse est-elle entièrement correcte ? Vous gagnez 1 point pour la relecture ; si une saisie vous semble fausse, l'enseignant arbitre."));
+        box.appendChild(h("button", { class: "ok", onclick: function () { send({ t: "rev", verdict: "err" }); feedback("Verdict envoyé", ["Vous avez signalé une saisie douteuse : l'enseignant arbitre. +1 point pour la relecture."]); } }, "Une coche me semble fausse"));
         box.appendChild(h("button", { class: "sec", onclick: function () { send({ t: "rev", verdict: "ok" }); feedback("Verdict envoyé", ["Coches validées. +1 point pour la relecture."]); } }, "Rien à redire"));
       }
       body.appendChild(box);
@@ -439,6 +456,7 @@
       if (c.t === "trous") return c.slots.map(function (sl) { if (r() < sk) return sl.ok; return Math.floor(r() * sl.opts.length); });
       if (c.t === "multi") { var a = []; c.opts.forEach(function (o, i) { var good = c.oks.indexOf(i) >= 0; if (r() < (good ? sk : (1 - sk) * 0.3)) a.push(i); }); return a; }
       if (c.t === "oral") return c.grille.map(function () { return r() < sk; });
+      if (c.t === "saisie") return PE.modelAnswer(c).map(function (v) { if (r() < sk) return v; return typeof v === "string" ? "" : Array.isArray(v) ? [] : -1; });
       var target = Math.round(3 * Math.max(0, Math.min(1, sk + (r() - 0.5) * 0.7))), words = c.modele.split(" "), best = "Nous n'avons rien trouvé de précis.", bd = 9;
       for (var n = words.length; n >= Math.min(3, words.length); n--) { var cand = words.slice(0, n).join(" "), d = Math.abs(PE.score(c, cand).pts - target); if (d < bd) { bd = d; best = cand; } if (d === 0) break; }
       return best;
@@ -460,13 +478,13 @@
     }
 
     /* ----- vue ----- */
-    var rows = {}, racesEl = h("div", { class: "jx-races" }), sideEl = h("div", { class: "jx-side" }), headEl = h("div", { class: "jx-head" }), tabsEl = h("div", { class: "jx-tabs" }), detEl = h("div", {});
+    var pj = "", rows = {}, racesEl = h("div", { class: "jx-races" }), sideEl = h("div", { class: "jx-side" }), headEl = h("div", { class: "jx-head" }), tabsEl = h("div", { class: "jx-tabs" }), detEl = h("div", {});
     wrap.appendChild(headEl); wrap.appendChild(tabsEl);
-    var main = h("div", { class: "jx-main" }, racesEl, sideEl); wrap.appendChild(main); wrap.appendChild(detEl);
+    var main = h("div", { class: "jx-main" }, racesEl, sideEl); wrap.appendChild(main); wrap.appendChild(detEl); var drawerEl = h("div", { class: "jx-drawer" }); wrap.appendChild(drawerEl);
     mount(wrap);
     function setView(v) { view = v; document.body.classList.toggle("jx-full", v === "proj"); wrap.className = "jx " + (v === "proj" ? "jx-p" : "jx-t"); refresh(); }
     function exportCsv(S) {
-      var l = ["Table;Prénom;Case de la table;Points;JEU joués;Réussite;Temps moyen (s);" + Object.keys(D.zones).map(function (z) { return "Maîtrise " + z; }).join(";")]; S.players.forEach(function (p) { l.push([p.table, p.nom, p.pos, p.score, p.n, Math.round(p.rate * 100) + "%", p.ms == null ? "" : Math.round(p.ms / 1000)].concat(p.mast.map(function (m) { return m.lvl ? m.lvl + " " + Math.round(m.pct * 100) + "%" : ""; })).join(";")); });
+      var l = ["Table;Prénom;Case de la table;Points;JEUX joués;Réussite;Temps moyen (s);" + Object.keys(D.zones).map(function (z) { return "Maîtrise " + z; }).join(";")]; S.players.forEach(function (p) { l.push([p.table, p.nom, p.pos, p.score, p.n, Math.round(p.rate * 100) + "%", p.ms == null ? "" : Math.round(p.ms / 1000)].concat(p.mast.map(function (m) { return m.lvl ? m.lvl + " " + Math.round(m.pct * 100) + "%" : ""; })).join(";")); });
       var a = h("a", { href: "data:text/csv;charset=utf-8," + encodeURIComponent("﻿" + l.join("\n")), download: "route-" + G.code + ".csv" }); document.body.appendChild(a); a.click(); a.remove();
     }
     function refresh() {
@@ -485,6 +503,7 @@
       ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { if (confirm("Revenir au JEU " + jk[ji - 1] + " ? Toutes les tables reviennent sur ce JEU.")) { C.nextJeu(G, -1, now()); dirty = true; refresh(); } } }, "◀ JEU précédent"));
       ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Ouvrir le JEU " + jk[ji + 1] + " ? Toutes les tables passent sur ce JEU. Une table au milieu d'une carte la termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité.")) { C.nextJeu(G, 1, now()); dirty = true; refresh(); } } }, "Ouvrir le JEU " + (ji < jk.length - 1 ? jk[ji + 1] : "") + " ▶"));
       if (cn.extra) ctr.appendChild(h("button", { class: G.extra ? "ok" : "sec", onclick: function () { C.setExtra(G, !G.extra); dirty = true; refresh(); } }, G.extra ? "Cartes supplémentaires : activées (" + (cn.base + cn.extra) + ")" : "Débloquer les cartes supplémentaires (+" + cn.extra + ")"));
+      if (view === "prof") ctr.appendChild(h("button", { class: tab === "corr" ? "ok" : "", onclick: function () { tab = tab === "corr" ? "ens" : "corr"; refresh(); } }, tab === "corr" ? "Fermer le corrigé" : "📖 Corrigé du JEU " + G.jeux[0]));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { exportCsv(S); } }, "Export CSV"));
       var endBtn = G.status === "play" ? h("button", { class: "r", style: "margin-left:28px", onclick: function () { if (confirm("Terminer la partie pour toute la classe ? Les joueurs verront leur bilan. À faire seulement à la fin du cours (vous pourrez la rouvrir en cas d'erreur).")) { C.stop(G, now()); dirty = true; refresh(); } } }, "Terminer la partie (fin du cours)") : null;
       ctr.appendChild(h("a", { class: "btn sec", href: "#/test", target: "_blank", style: "text-decoration:none;display:inline-block" }, "Mode test"));
@@ -528,7 +547,7 @@
       if (view === "prof") {
         sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement individuel (enseignant)"), h("table", {}, S.players.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 12).map(function (p, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom + " (" + p.table + ")"), h("td", {}, p.score + " pt")); }))));
         var op = (G.arbit || []).map(function (x, i) { return [x, i]; }).filter(function (y) { return !y[0].done; });
-        sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Relectures à arbitrer (" + op.length + ")"), op.length ? op.slice(0, 5).map(function (y) { var x = y[0]; return h("p", { class: "meta" }, x.rev + " conteste une coche de " + x.au + " (JEU " + x.jeu + ", " + x.pts + "/3) ", h("button", { class: "r jx-mini", onclick: function () { C.arbitrate(G, y[1], true, now()); dirty = true; refresh(); } }, "Coche fausse : −1 pt"), h("button", { class: "sec jx-mini", onclick: function () { C.arbitrate(G, y[1], false, now()); dirty = true; refresh(); } }, "Coche correcte")); }) : h("p", { class: "meta" }, "Aucune.")));
+        sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Relectures à arbitrer (" + op.length + ")"), op.length ? op.slice(0, 5).map(function (y) { var x = y[0]; return h("p", { class: "meta" }, x.rev + " conteste une saisie de " + x.au + " (JEU " + x.jeu + ", " + x.pts + "/3) ", h("button", { class: "r jx-mini", onclick: function () { C.arbitrate(G, y[1], true, now()); dirty = true; refresh(); } }, "Saisie fausse : −1 pt"), h("button", { class: "sec jx-mini", onclick: function () { C.arbitrate(G, y[1], false, now()); dirty = true; refresh(); } }, "Saisie correcte")); }) : h("p", { class: "meta" }, "Aucune.")));
       }
       var nrd = S.players.filter(function (p) { return p.rd !== "ok" && p.online && !p.done; }).length;
       if (G.status !== "lobby") sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Lecture des règles"), h("p", {}, nrd ? nrd + " joueur(s) n'ont pas fini de lire (pastille 📖 sur chaque table)." : "Tous les joueurs connectés ont lu."),
@@ -542,10 +561,11 @@
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Alertes"), S.alerts.length ? S.alerts.slice(0, 6).map(function (a) { return h("p", { class: "jx-al" }, "⚠ " + a.txt, a.k === "tool" ? h("button", { class: "r jx-mini", onclick: function () { C.setTool(G, a.tool, true); dirty = true; refresh(); } }, "Désactiver cet outil") : null); }) : h("p", { class: "meta" }, "Rien à signaler.")));
       /* onglets enseignant */
       var sig = [view, tab, G.jeux[0], !!G.extra, pp.st, ppt.mode, ppt.topic, pp.last ? pp.last.at : 0].join("|");
-      if (view === "prof" && (tab === "corr" || tab === "ppt") && sig === lastSig && detEl.firstChild) return; lastSig = sig;
-      tabsEl.innerHTML = detEl.innerHTML = ""; if (view !== "prof") return;
-      [["ens", "Joueurs"], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "corr" || a[0] === "ppt") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
-      if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEU joués", "Réussite", "Temps moyen", "Duels", "État", "Retirer"].map(function (c) { return h("th", {}, c); })),
+      drawerEl.className = "jx-drawer" + (view === "prof" && tab === "corr" ? " on" : "");
+      if (view === "prof" && ((tab === "corr" && drawerEl.firstChild) || (tab === "ppt" && detEl.firstChild)) && sig === lastSig) return; lastSig = sig;
+      tabsEl.innerHTML = detEl.innerHTML = drawerEl.innerHTML = ""; if (view !== "prof") return;
+      [["ens", "Joueurs"], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["prod", "Productions"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "ppt" || a[0] === "prod") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
+      if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEUX joués", "Réussite", "Temps moyen", "Duels", "État", "Retirer"].map(function (c) { return h("th", {}, c); })),
         S.players.slice().sort(function (a, b) { return b.score - a.score; }).map(function (p, i) { return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1]), h("td", {}, p.online ? "" : h("button", { class: "sec jx-mini", title: "Retirer un doublon ou un joueur parti", onclick: function () { if (confirm("Retirer " + p.nom + " (" + p.table + ") de la partie ? Ses points sont perdus.")) { C.leave(G, p.sid, true); dirty = true; refresh(); } } }, "Retirer"))); })));
       if (tab === "mast") {
         var zs = Object.keys(D.zones), cell = function (m) { return h("td", { style: "font-weight:700;color:" + (m.lvl ? LV[m.lvl] : "#8A93A8") }, m.lvl ? m.lvl + " (" + Math.round(m.pct * 100) + " %)" : "—"); };
@@ -566,10 +586,19 @@
       }
       if (tab === "corr") {
         var kj = G.jeux[0], J = D.jeux[kj], fo = D.lecture.fiches[kj], cs = J.cartes.filter(function (c) { return G.extra || !c.extra; });
-        detEl.appendChild(h("div", { class: "warn" }, "Réservé à l'enseignant : cet onglet n'existe pas dans la « Vue projetée ». Ne projetez pas cet écran pendant que les tables jouent."));
-        detEl.appendChild(h("div", { class: "card" }, h("h2", {}, "JEU " + kj + " · " + J.titre), h("p", { class: "meta" }, "Objectif " + J.zone + " · " + cs.length + " carte(s) en jeu" + (G.extra ? " (cartes supplémentaires comprises)" : "") + ". Chaque joueur reçoit une de ces cartes."),
+        drawerEl.appendChild(h("div", { style: "display:flex;justify-content:space-between;align-items:center;gap:10px" }, h("b", {}, "Corrigé réservé à l'enseignant"), h("button", { class: "sec", onclick: function () { tab = "ens"; refresh(); } }, "Fermer ✕")));
+        drawerEl.appendChild(h("div", { class: "warn" }, "Absent de la « Vue projetée ». Ne projetez pas cet écran pendant que les tables jouent."));
+        drawerEl.appendChild(h("div", { class: "card" }, h("h2", {}, "JEU " + kj + " · " + J.titre), h("p", { class: "meta" }, "Objectif " + J.zone + " · " + cs.length + " carte(s) en jeu" + (G.extra ? " (cartes supplémentaires comprises)" : "") + ". Chaque joueur reçoit une de ces cartes."),
           fo ? h("p", {}, h("b", {}, "Objectif annoncé aux joueurs : "), fo.obj) : null, fo ? h("p", {}, h("b", {}, "Règle : "), fo.regle) : null, fo && fo.ex ? h("ul", { class: "meta" }, fo.ex.map(function (x) { return h("li", {}, x); })) : null));
-        cs.forEach(function (c, i) { detEl.appendChild(h("p", { class: "meta", style: "margin:10px 0 2px" }, "Carte " + (i + 1) + " / " + cs.length + (c.extra ? " · supplémentaire" : ""))); detEl.appendChild(answerEl(c)); });
+        cs.forEach(function (c, i) { drawerEl.appendChild(h("p", { class: "meta", style: "margin:10px 0 2px" }, "Carte " + (i + 1) + " / " + cs.length + (c.extra ? " · supplémentaire" : ""))); drawerEl.appendChild(answerEl(c)); });
+      }
+      if (tab === "prod") {
+        if (!pj) pj = G.jeux[0];
+        var psel = h("select", { style: "max-width:420px", onchange: function () { pj = psel.value; lastSig = ""; refresh(); } }, Object.keys(D.jeux).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === pj) o.selected = true; return o; }));
+        var prows = []; Object.keys(G.players).forEach(function (sid) { var pl = G.players[sid]; pl.res.forEach(function (r) { if (r.jeu === pj) prows.push({ sid: sid, pl: pl, r: r }); }); });
+        prows.sort(function (a, b) { return a.pl.table < b.pl.table ? -1 : a.pl.table > b.pl.table ? 1 : a.pl.nom < b.pl.nom ? -1 : 1; });
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Productions saisies par les joueurs"), h("p", { class: "meta" }, "JEU : "), psel, h("p", { class: "meta" }, "Lisez la saisie ; si l'application s'est trompée ou si le fond doit être jugé (textes libres), corrigez les points avec les boutons 0 à 3."),
+          prows.length ? h("table", {}, h("tr", {}, ["Table", "Joueur", "Points", "Saisie", "Corriger"].map(function (c) { return h("th", {}, c); })), prows.map(function (x) { return h("tr", {}, h("td", {}, x.pl.table), h("td", {}, x.pl.nom), h("td", {}, String(x.r.pts)), h("td", { style: "white-space:pre-wrap;font-size:13px;max-width:560px" }, x.r.txt || "(JEU déclaratif ou pas de saisie)"), h("td", {}, [0, 1, 2, 3].map(function (v) { return h("button", { class: v === x.r.pts ? "" : "sec jx-mini", onclick: function () { C.fixJeu(G, x.sid, pj, v, now()); dirty = true; lastSig = ""; refresh(); } }, String(v)); }))); })) : h("p", { class: "meta" }, "Aucune production pour ce JEU pour l'instant.")));
       }
       if (tab === "ppt") {
         var modeSel = h("select", { style: "max-width:420px", onchange: function () { ppt.mode = modeSel.value; LSset("j-ppt", ppt); pp.pend = null; listen(); refresh(); } }, [["auto", "Automatique : la diapositive d'un JEU ouvre ce JEU"], ["ask", "Avec confirmation : un bouton « Ouvrir le JEU n » apparaît"], ["off", "Désactivée"]].map(function (m) { var o = h("option", { value: m[0] }, m[1]); if (m[0] === ppt.mode) o.selected = true; return o; }));
@@ -605,6 +634,7 @@
     else if (c.t === "multi") c.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (c.oks.indexOf(i) >= 0 ? "good" : "") }, (c.oks.indexOf(i) >= 0 ? "✓ " : "") + o)); });
     else if (c.t === "trous") { card.appendChild(h("p", {}, h("b", {}, "Phrase modèle : "), c.modele)); c.slots.forEach(function (sl) { card.appendChild(h("p", {}, h("b", {}, sl.lab + " : "))); sl.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (i === sl.ok ? "good" : "") }, (i === sl.ok ? "✓ " : "") + o)); }); }); }
     else if (c.t === "assoc") c.items.forEach(function (x) { card.appendChild(h("div", { class: "card", style: "background:#fff" }, x.txt, h("b", {}, "  →  " + c.labels[x.ok]))); });
+    else if (c.t === "saisie") { c.champs.forEach(function (f) { card.appendChild(h("div", { class: "card", style: "background:#fff" }, h("p", {}, h("b", {}, f.lab), f.c >= 0 ? h("small", { class: "meta" }, "  · critère " + (f.c + 1) + " : " + c.grille[f.c]) : h("small", { class: "meta" }, "  · non noté")), h("p", { class: "good opt", style: "margin:4px 0" }, h("b", {}, f.k === "txt" || f.k === "url" ? "Exemple de réponse : " : "Attendu : "), PE.expTxt(f) || "(libre)"), f.why ? h("p", { class: "meta" }, f.why) : null, f.soft ? h("p", { class: "meta" }, "Forme contrôlée par l'application ; le fond est à valider par l'enseignant (onglet « Productions »).") : null)); }); }
     else if (c.t === "texte") { card.appendChild(h("p", {}, h("b", {}, "Critères notés (1 point chacun) :"))); card.appendChild(h("ul", {}, c.checks.map(function (k) { return h("li", {}, k.lab); }))); card.appendChild(h("p", {}, h("b", {}, "Réponse modèle : "), c.modele)); }
     else if (c.grille) card.appendChild(h("ul", {}, c.grille.map(function (g) { return h("li", {}, g); })));
     card.appendChild(h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl));
@@ -650,7 +680,7 @@
       var it = list[ix], c = it.c, j = D.jeux[it.jeu], n = list.filter(function (x) { return x.jeu === it.jeu; }), pos = n.indexOf(it) + 1;
       box.innerHTML = "";
       var cb = h("input", { type: "checkbox", style: "width:auto" }); cb.checked = sync; cb.addEventListener("change", function () { sync = cb.checked; if (sync) pushJeu(); showInfo(); });
-      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être. Les 45 JEU sont parcourus."));
+      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être. Les 45 JEUX sont parcourus."));
       box.appendChild(h("label", { style: "display:block;margin:6px 0" }, cb, " Synchroniser la partie : changer de jeu ici change le jeu des joueurs"), info); showInfo();
       box.appendChild(h("h1", {}, "JEU " + it.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "meta" }, "Zone " + j.zone + " · carte " + pos + " / " + n.length + (c.extra ? " · carte supplémentaire" : "") + " · type " + c.t + " · " + (ix + 1) + " / " + list.length + " au total"));
       box.appendChild(answerEl(c));

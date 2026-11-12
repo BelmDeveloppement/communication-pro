@@ -3,8 +3,11 @@ var fs = require("fs"), vm = require("vm"); global.window = {}; vm.runInThisCont
 var PE = require("./plateau-engine.js"); global.window.PEngine = PE; var J = require("./jeu51-core.js"); J.setData(window.PLATEAU_DATA);
 var D = window.PLATEAU_DATA, n = 0; function ok(c, m) { n++; if (!c) { console.log("FAIL", m); process.exitCode = 1; } } function eq(a, b, m) { ok(JSON.stringify(a) === JSON.stringify(b), m + " : " + JSON.stringify(a) + " ≠ " + JSON.stringify(b)); }
 var NOW = 1000;
+function ansPts(c, q) { return PE.modelAnswer(c).map(function (v, i) { return c.champs[i].c < q ? v : (typeof v === "string" ? "" : Array.isArray(v) ? [] : -1); }); }
+function ansFor(G, sid, q) { var T = G.tables[G.players[sid].table], c = J.cardOf(T.cur.jeu, T.cur.id); return ansPts(c, q); }
+
 function game(nb, table) { var G = J.newGame({}); for (var i = 0; i < nb; i++) { var sid = "s" + (table || 1) + i; J.join(G, { sid: sid, nom: "P" + i, table: String(table || 1), sim: true }, NOW); } J.start(G, NOW); return G; }
-function play(G, t, pts, bets) { var T = G.tables[t], tr = J.tireur(G, T, NOW); if (!J.draw(G, tr.sid, NOW)) return false; T.players.forEach(function (s, i) { var q = typeof pts === "function" ? pts(s, i) : pts; J.answer(G, s, [0, 1, 2].map(function (k) { return k < q; }), NOW + 1, bets && bets[i]); }); return true; }
+function play(G, t, pts, bets) { var T = G.tables[t], tr = J.tireur(G, T, NOW); if (!J.draw(G, tr.sid, NOW)) return false; T.players.forEach(function (s, i) { var q = typeof pts === "function" ? pts(s, i) : pts; J.answer(G, s, ansFor(G, s, q), NOW + 1, bets && bets[i]); }); return true; }
 function settleAll(G) { Object.keys(G.players).forEach(function (s) { var p = G.players[s]; if (!p.pend) return; var k = p.pend.k;
   if (k === "outil") J.act(G, s, { t: "outil", ok: true }, NOW); else if (k === "piege") J.act(G, s, { t: "pans", ans: [] }, NOW); else if (k === "rel") J.act(G, s, { t: "rev", verdict: "ok" }, NOW);
   else if (k === "duel") { p.pend.st = "solo"; p.pend.card = J.soloCard(G, "1", "x"); J.tick(G, NOW); J.act(G, s, { t: "dans", ans: [] }, NOW); } }); }
@@ -51,7 +54,7 @@ J.gotoJeu(Gj, "5", NOW); eq([D.cases[Gj.tables.T1.pos].jeu, D.cases[Gj.tables.T2
 var zj = D.jeux["5"].zone, skz = ["1", "2", "3", "4"].filter(function (k) { return D.jeux[k].zone === zj; }).length; play(Gj, "T1", 3);
 eq(J.stats(Gj, NOW).players.filter(function (p) { return p.sid === "s10"; })[0].mast.filter(function (m) { return m.z === zj; })[0].pct, 3 / (3 * (D.nz[zj] - skz)), "maîtrise : JEU sautés retirés du total possible");
 settleAll(Gj); var Tj = Gj.tables.T2, trj = J.tireur(Gj, Tj, NOW); ok(J.draw(Gj, trj.sid, NOW), "table 2 tire le JEU 5"); J.gotoJeu(Gj, "9", NOW); eq(D.cases[Tj.pos].jeu, "5", "carte en cours : la table 2 ne saute pas tout de suite"); eq(Tj.jump, "9", "saut différé noté");
-eq(D.cases[Gj.tables.T1.pos].jeu, "9", "la table 1, sans carte en cours, saute au JEU 9"); J.answer(Gj, "t20", [true, true, true], NOW + 1); eq(D.cases[Tj.pos].jeu, "9", "carte terminée : la table 2 saute au JEU 9"); eq(Tj.last.jump, "9", "le résultat annonce le saut"); eq(Gj.players.t20.score, 3, "points de la carte terminée conservés");
+eq(D.cases[Gj.tables.T1.pos].jeu, "9", "la table 1, sans carte en cours, saute au JEU 9"); J.answer(Gj, "t20", ansFor(Gj, "t20", 3), NOW + 1); eq(D.cases[Tj.pos].jeu, "9", "carte terminée : la table 2 saute au JEU 9"); eq(Tj.last.jump, "9", "le résultat annonce le saut"); eq(Gj.players.t20.score, 3, "points de la carte terminée conservés");
 ok(!Tj.skip["5"] && Tj.skip["6"] && Tj.skip["8"], "JEU 5 joué, JEU 6 à 8 sautés"); J.gotoJeu(Gj, "6", NOW); settleAll(Gj); play(Gj, "T2", 2); ok(!Tj.skip["6"], "retour en arrière : un JEU rejoué n'est plus sauté");
 var Gs = J.newGame({ jeux: ["7"] }); J.join(Gs, { sid: "a", nom: "A", table: "1", sim: true }, NOW); J.start(Gs, NOW); eq(D.cases[Gs.tables.T1.pos].jeu, "7", "partie ouverte sur le JEU 7 : le pion part du JEU 7"); J.join(Gs, { sid: "b", nom: "B", table: "3", sim: true }, NOW); eq(D.cases[Gs.tables.T3.pos].jeu, "7", "table créée en cours de séance : sur le JEU ouvert");
 // joueur fantôme : retrait

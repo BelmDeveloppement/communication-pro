@@ -1,5 +1,5 @@
 /* © 2026 SAS BELM DEVELOPPEMENT. Tous droits réservés. Créé avec l'aide de Claude (Anthropic), relu par l'auteur.
-   Logique « tables et joueurs » du plateau « La route de l'état de l'art » (45 JEU, 63 cases, un pion par table, points, jauges de maîtrise).
+   Logique « tables et joueurs » du plateau « La route de l'état de l'art » (45 JEUX, 63 cases, un pion par table, points, jauges de maîtrise).
    Pur, sans DOM, testable sous Node. Le navigateur de l'enseignant fait autorité : les joueurs envoient leurs actions, il note et renvoie l'état.
    Règles : 1 case = 1 JEU, toute la classe joue le JEU ouvert par l'enseignant : à l'ouverture, toutes les tables y placent leur pion (une table au milieu d'une carte la termine d'abord ; un JEU non joué est sauté, neutre). Après un JEU, le pion avance jusqu'au JEU suivant et y attend.
    Points : 0 à 3 par JEU, pari ±1, effets en points, bonus « table solidaire » ; jauges de maîtrise par objectif (10 jetons) ; niveau Débutant / Confirmé / Expert (seuils cachés). */
@@ -28,7 +28,7 @@
   /* Jauge de la table pour un objectif : 10 jetons = maîtrise complète (points obtenus / points possibles sur tout l'objectif). */
   function caseIx(k) { for (var i = 0; i < D.cases.length; i++) if (D.cases[i].type === "jeu" && String(D.cases[i].jeu) === String(k)) return i; return -1; }
   function startPos(G) { var i = caseIx(G.jeux[0]); return i > 0 ? i : 1; }
-  /* JEU sautés (l'enseignant est passé à un autre JEU avant que la table ne les joue) : neutres, retirés du total possible. */
+  /* JEUX sautés (l'enseignant est passé à un autre JEU avant que la table ne les joue) : neutres, retirés du total possible. */
   function skN(sk, z) { var n = 0; Object.keys(sk || {}).forEach(function (j) { if (D.jeux[j] && D.jeux[j].zone === z) n++; }); return n; }
   function gaugeLvl(T, z, np) { var sum = (T.zs[z] || 0), den = 3 * Math.max(1, D.nz[z] - skN(T.skip, z)) * Math.max(1, np); return Math.max(0, Math.min(10, Math.round(10 * sum / den))); }
   function levelOf(pct) { return pct < 0.45 ? "Débutant" : pct < 0.75 ? "Confirmé" : "Expert"; }
@@ -142,13 +142,14 @@
     if (card.t === "assoc") return card.items.map(function (it, i) { return it.txt + " → " + (ans && ans[i] >= 0 ? card.labels[ans[i]] : "?"); }).join(" ; ");
     if (card.t === "trous") return card.slots.map(function (s, i) { return s.lab + " : " + (ans && ans[i] >= 0 ? s.opts[ans[i]] : "?"); }).join(" ; ");
     if (card.t === "oral") return (ans || []).map(function (v, i) { return (v ? "✓ " : "✗ ") + card.grille[i]; }).join(" ; ");
+    if (card.t === "saisie") return PE.saisieText(card, ans);
     return String(ans || "(pas de réponse)");
   }
   function critOf(card, i, d) {
     if (card.t === "texte") return crit(d.lab);
     if (card.t === "assoc") return card.labels[card.items[i].ok];
     if (card.t === "trous") return card.slots[i].lab;
-    if (card.t === "oral") return String(d.lab).slice(0, 30);
+    if (card.t === "oral" || card.t === "saisie") return String(d.lab).slice(0, 30);
     if (card.t === "multi") return d.lab.indexOf("À cocher") === 0 ? "cases à cocher" : "cases à laisser vides";
     return "réponse unique";
   }
@@ -198,7 +199,7 @@
       p.score += r.pts + bet; p.zp[z] = (p.zp[z] || 0) + r.pts; p.zn[z] = (p.zn[z] || 0) + 1; T.zs[z] = (T.zs[z] || 0) + r.pts; if (r.pts < 2) low = true;
       var ms = a ? a.at - cur.at : null, det = r.detail.map(function (d, i) { return { ok: !!d.ok, lab: d.lab, c: critOf(card, i, d) }; });
       res[p.sid] = { pts: r.pts, gain: r.pts + bet, mv: 1, bet: { on: !!(a && a.bet), d: bet }, detail: r.detail, from: from, to: to, final: to, ev: null, evs: [], answered: !!a, ms: ms };
-      p.res.push({ n: rd, jeu: cur.jeu, id: cur.id, pts: r.pts, ms: ms, answered: !!a, detail: det });
+      p.res.push({ n: rd, jeu: cur.jeu, id: cur.id, pts: r.pts, ms: ms, answered: !!a, detail: det, txt: a && card.t === "saisie" ? ansText(card, a.ans).slice(0, 2400) : "" });
     });
     var solid = act.length > 0 && act.every(function (p) { return res[p.sid].pts >= 2; }); if (solid) T.bonus = (T.bonus || 0) + 1;
     /* le pion traverse les cases une par une jusqu'au prochain JEU (ou l'arrivée) */
@@ -276,13 +277,13 @@
     var p = G.players[sid]; if (!p || !p.pend || p.pend.k !== "rel") return false;
     var pend = p.pend, err = verdict === "err"; p.revN++; p.revOk++; pt(G, p, 1);
     if (err) { G.arbit.unshift({ au: pend.au, aus: pend.aus, rev: p.nom, revs: sid, jeu: pend.jeu, pts: pend.pts, at: now, done: false }); G.arbit = G.arbit.slice(0, 30); say(G, p, "Relecture de " + pend.au + " : une coche te semble fausse, l'enseignant arbitre (+1 point)", now); }
-    else say(G, p, "Relecture de " + pend.au + " : coches validées (+1 point)", now);
+    else say(G, p, "Relecture de " + pend.au + " : saisies validées (+1 point)", now);
     p.pend = null; return { right: !err, pts: pend.pts };
   }
-  /* Arbitrage de l'enseignant : une coche fausse retire 1 point à l'auteur ; sinon rien. */
+  /* Arbitrage de l'enseignant : une saisie fausse retire 1 point à l'auteur ; sinon rien. */
   function arbitrate(G, i, ok, now) {
     var x = G.arbit[i]; if (!x || x.done) return false; x.done = true; x.ok = !!ok; var au = G.players[x.aus];
-    if (ok && au) { pt(G, au, -1); say(G, au, "Relecture : une coche fausse a été confirmée (−1 point)", now); } return true;
+    if (ok && au) { pt(G, au, -1); say(G, au, "Relecture : une saisie fausse a été confirmée (−1 point)", now); } return true;
   }
   /* Correction d'un score de JEU par l'enseignant (met à jour points, jauge et classement). */
   function fixJeu(G, sid, jeu, newPts, now) {

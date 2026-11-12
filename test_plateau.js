@@ -3,13 +3,13 @@ var P = require("./plateau-engine.js"), fs = require("fs"), vm = require("vm");
 var ctx = { window: {} }; vm.runInNewContext(fs.readFileSync("plateau-data.js", "utf8"), ctx); var D = ctx.window.PLATEAU_DATA, bad = 0, n = 0;
 function ok(c, m) { n++; if (!c) { bad++; console.log("ÉCHEC", m); } }
 function eq(a, b, m) { ok(JSON.stringify(a) === JSON.stringify(b), m + " " + JSON.stringify(a) + " ≠ " + JSON.stringify(b)); }
-function best(c) { return c.t === "choix" ? c.ok : c.t === "multi" ? c.oks : c.t === "assoc" ? c.items.map(function (i) { return i.ok; }) : c.t === "trous" ? c.slots.map(function (s) { return s.ok; }) : c.grille.map(function () { return true; }); }
+function best(c) { return c.t === "saisie" ? P.modelAnswer(c) : c.t === "choix" ? c.ok : c.t === "multi" ? c.oks : c.t === "assoc" ? c.items.map(function (i) { return i.ok; }) : c.t === "trous" ? c.slots.map(function (s) { return s.ok; }) : c.grille.map(function () { return true; }); }
 function empty(c) { return c.t === "choix" ? -1 : c.t === "multi" ? [] : c.t === "assoc" ? c.items.map(function () { return -1; }) : c.t === "trous" ? c.slots.map(function () { return -1; }) : []; }
 // 39 JEUX : une carte à trois critères
 var ks = Object.keys(D.jeux); eq(ks.length, 45, "45 JEU");
 ks.forEach(function (k, i) { var j = D.jeux[k], c = j.cartes[0]; ok(k === String(i + 1), "ordre " + k);
-  ok(j.titre && j.court && j.court.length <= 16 && j.mode && D.zones[j.zone], k + " champs"); ok(j.cartes.length === 1 && c.t === "oral" && c.grille.length === 3, k + " carte à 3 critères");
-  eq(P.score(c, best(c)).pts, 3, k + " 3 critères = 3 pts"); eq(P.score(c, [true, false, true]).pts, 2, k + " 2 pts"); eq(P.score(c, []).pts, 0, k + " rien = 0");
+  ok(j.titre && j.court && j.court.length <= 16 && j.mode && D.zones[j.zone], k + " champs"); ok(j.cartes.length === 1 && c.t === "saisie" && c.grille.length === 3, k + " carte à 3 critères");
+  eq(P.score(c, best(c)).pts, 3, k + " 3 critères = 3 pts"); eq(P.score(c, P.modelAnswer(c).map(function (v, i) { return c.champs[i].c === 1 ? (typeof v === "string" ? "" : Array.isArray(v) ? [] : -1) : v; })).pts, 2, k + " 2 pts"); eq(P.score(c, []).pts, 0, k + " rien = 0");
   ok(c.grille.every(function (g) { return g.length > 8 && g.length < 110; }), k + " critères lisibles"); ok(c.expl.length > 20, k + " erreur fréquente");
   ok(!/5\.\d/.test(j.titre + j.regle + c.grille.join("")), k + " pas de 5.x"); ok(D.lecture.fiches[k] && D.lecture.fiches[k].obj && D.lecture.fiches[k].ex.length === 3, k + " fiche de lecture"); });
 // banque de questions rapides (anciens quiz) : Piège, Duel, Relecture
