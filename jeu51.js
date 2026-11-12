@@ -364,9 +364,31 @@
     }
     var ctl = null;
     try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "tool") { C.setTool(G, m.tool, !!m.off); dirty = true; refresh(); } if (m.t === "jeu") { C.setJeu(G, m.jeu); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
+
+    /* ----- liaison PowerPoint : la macro envoie « JEU|n|diapo » sur un relais, la tour l'écoute ----- */
+    var ppt = pptCfg(), es = null, lastSig = "", pp = { st: "…", last: null, pend: null, note: "" };
+    function jeuIx(k) { return Object.keys(D.jeux).indexOf(String(k)); }
+    function openJeu(k, why) { C.setJeu(G, String(k)); pp.pend = null; pp.note = why || ""; dirty = true; refresh(); }
+    function onSignal(kind, k, slide) {
+      pp.last = { kind: kind, jeu: k, slide: slide, at: now() };
+      if (kind === "TEST") { pp.note = "Signal de test reçu : la liaison fonctionne."; return refresh(); }
+      if (kind !== "JEU" || !D.jeux[k] || ppt.mode === "off") return refresh();
+      if (k === G.jeux[0]) { pp.pend = null; pp.note = "Diapositive du JEU " + k + " : déjà ouvert."; return refresh(); }
+      if (ppt.mode === "auto" && jeuIx(k) > jeuIx(G.jeux[0])) return openJeu(k, "JEU " + k + " ouvert par le PowerPoint (diapositive " + slide + ").");
+      pp.pend = k; pp.note = jeuIx(k) < jeuIx(G.jeux[0]) ? "Retour en arrière : le JEU " + k + " n'est pas relancé automatiquement." : "Le PowerPoint est sur le JEU " + k + "."; refresh();
+    }
+    function listen() {
+      try { es && es.close(); } catch (e) {} es = null; if (ppt.mode === "off" || typeof EventSource === "undefined") { pp.st = ppt.mode === "off" ? "off" : "err"; return; }
+      pp.st = "…";
+      try { es = new EventSource(relayBase() + "/" + ppt.topic + "/sse");
+        es.onopen = function () { pp.st = "ok"; refresh(); }; es.onerror = function () { pp.st = "err"; refresh(); };
+        es.onmessage = function (e) { try { var d = JSON.parse(e.data); if (d.event && d.event !== "message") return; var m = String(d.message || "").split("|"); onSignal(m[0], m[1], m[2] || "?"); } catch (x) {} };
+      } catch (e) { pp.st = "err"; }
+    }
+    listen();
     net = hostNet(G.code, onmsg, function (s) { status = s; refresh(); });
     var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); refresh(); }, 1000);
-    onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
+    onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} try { es && es.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
 
     /* simulation (démo) */
     function simStart() {
@@ -432,6 +454,10 @@
       ctr.appendChild(h("a", { class: "btn sec", href: "#/test", target: "_blank", style: "text-decoration:none;display:inline-block" }, "Mode test"));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { if (confirm("Terminer et effacer cette partie ?")) { try { localStorage.removeItem(GK); } catch (e) {} dead = true; location.hash = "#/tour"; setTimeout(function () { location.reload(); }, 50); } } }, "Nouvelle partie"));
       headEl.appendChild(ctr);
+      var ppTxt = { ok: "● PowerPoint relié", err: "○ relais PowerPoint indisponible", off: "○ liaison PowerPoint désactivée" }[pp.st] || "… liaison PowerPoint";
+      var ppBar = h("div", { class: "jx-ctl jx-ppt" }, h("small", {}, ppTxt + (pp.note ? " · " + pp.note : "")));
+      if (pp.pend && D.jeux[pp.pend]) { ppBar.appendChild(h("button", { class: "ok", onclick: function () { openJeu(pp.pend, "JEU " + pp.pend + " ouvert à la main depuis le signal du PowerPoint."); } }, "Ouvrir le JEU " + pp.pend + " (diapositive affichée)")); ppBar.appendChild(h("button", { class: "sec", onclick: function () { pp.pend = null; pp.note = ""; refresh(); } }, "Ignorer")); }
+      headEl.appendChild(ppBar);
       /* courses */
       var ids = S.tables.map(function (x) { return x.id; });
       if (!ids.length) { racesEl.innerHTML = ""; rows = {}; racesEl.appendChild(h("div", { class: "jx-empty" }, h("img", { src: "qr-j.svg", alt: "QR de connexion", width: 220, height: 220 }), h("div", {}, h("h2", {}, "Les joueurs se connectent"), h("p", {}, "Scannez le QR ou ouvrez le lien, choisissez votre table (1 à 5) et saisissez le code " + G.code + "."), h("p", { class: "jx-link" }, "belmdeveloppement.github.io/communication-pro/#/j"), h("p", { class: "jx-link2" }, "code  ", h("b", { class: "jx-code" }, G.code)), h("p", { class: "meta" }, "Les tables apparaissent ici dès qu'un joueur s'y inscrit.")))); }
@@ -478,8 +504,10 @@
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Points gagnés par carte"), h("div", { class: "jx-dist" }, S.dist.map(function (n, i) { var tot = S.dist.reduce(function (a, b) { return a + b; }, 0) || 1; return h("div", {}, h("u", { style: "height:" + Math.round(n / tot * 70) + "px" }), h("b", {}, String(i)), h("small", {}, String(n))); }))));
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Alertes"), S.alerts.length ? S.alerts.slice(0, 6).map(function (a) { return h("p", { class: "jx-al" }, "⚠ " + a.txt, a.k === "tool" ? h("button", { class: "r jx-mini", onclick: function () { C.setTool(G, a.tool, true); dirty = true; refresh(); } }, "Désactiver cet outil") : null); }) : h("p", { class: "meta" }, "Rien à signaler.")));
       /* onglets enseignant */
+      var sig = [view, tab, G.jeux[0], !!G.extra, pp.st, ppt.mode, ppt.topic, pp.last ? pp.last.at : 0].join("|");
+      if (view === "prof" && (tab === "corr" || tab === "ppt") && sig === lastSig && detEl.firstChild) return; lastSig = sig;
       tabsEl.innerHTML = detEl.innerHTML = ""; if (view !== "prof") return;
-      [["ens", "Joueurs"], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); } }, a[1])); });
+      [["ens", "Joueurs"], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "corr" || a[0] === "ppt") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
       if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEU joués", "Réussite", "Temps moyen", "Paris", "Duels", "État"].map(function (c) { return h("th", {}, c); })),
         S.players.slice().sort(function (a, b) { return b.score - a.score; }).map(function (p, i) { return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.betsWon + "/" + p.bets), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1])); })));
       if (tab === "mast") {
@@ -499,6 +527,31 @@
         var cards = Object.keys(S.cards).map(function (k) { return S.cards[k]; }).sort(function (a, b) { return a.pts / a.n - b.pts / b.n; });
         detEl.appendChild(h("table", {}, h("tr", {}, ["Carte", "Énoncé, critères et modèle", "Réponses", "Moyenne /3", "Temps moyen"].map(function (c) { return h("th", {}, c); })), cards.map(function (c) { var card = C.cardOf(c.jeu, c.id); return h("tr", {}, h("td", {}, c.jeu + "·" + c.id), h("td", {}, h("div", {}, card.q), card.checks ? h("ul", { class: "meta" }, card.checks.map(function (k) { return h("li", {}, k.lab); })) : null, card.modele ? h("div", { class: "meta" }, h("b", {}, "Modèle : "), card.modele) : null), h("td", {}, String(c.n)), h("td", {}, (c.pts / c.n).toFixed(2)), h("td", {}, c.nms ? Math.round(c.ms / c.nms / 1000) + " s" : "—")); })));
       }
+      if (tab === "corr") {
+        var kj = G.jeux[0], J = D.jeux[kj], fo = D.lecture.fiches[kj], cs = J.cartes.filter(function (c) { return G.extra || !c.extra; });
+        detEl.appendChild(h("div", { class: "warn" }, "Réservé à l'enseignant : cet onglet n'existe pas dans la « Vue projetée ». Ne projetez pas cet écran pendant que les tables jouent."));
+        detEl.appendChild(h("div", { class: "card" }, h("h2", {}, "JEU " + kj + " · " + J.titre), h("p", { class: "meta" }, "Objectif " + J.zone + " · " + cs.length + " carte(s) en jeu" + (G.extra ? " (cartes supplémentaires comprises)" : "") + ". Chaque joueur reçoit une de ces cartes."),
+          fo ? h("p", {}, h("b", {}, "Objectif annoncé aux joueurs : "), fo.obj) : null, fo ? h("p", {}, h("b", {}, "Règle : "), fo.regle) : null, fo && fo.ex ? h("ul", { class: "meta" }, fo.ex.map(function (x) { return h("li", {}, x); })) : null));
+        cs.forEach(function (c, i) { detEl.appendChild(h("p", { class: "meta", style: "margin:10px 0 2px" }, "Carte " + (i + 1) + " / " + cs.length + (c.extra ? " · supplémentaire" : ""))); detEl.appendChild(answerEl(c)); });
+      }
+      if (tab === "ppt") {
+        var modeSel = h("select", { style: "max-width:420px", onchange: function () { ppt.mode = modeSel.value; LSset("j-ppt", ppt); pp.pend = null; listen(); refresh(); } }, [["auto", "Automatique : la diapositive d'un JEU ouvre ce JEU"], ["ask", "Avec confirmation : un bouton « Ouvrir le JEU n » apparaît"], ["off", "Désactivée"]].map(function (m) { var o = h("option", { value: m[0] }, m[1]); if (m[0] === ppt.mode) o.selected = true; return o; }));
+        var jsel = h("select", { style: "max-width:420px" }, Object.keys(D.jeux).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === G.jeux[0]) o.selected = true; return o; }));
+        var key = h("input", { value: ppt.topic, style: "max-width:320px" });
+        detEl.appendChild(h("div", { class: "card" }, h("h2", {}, "Liaison PowerPoint"),
+          h("p", {}, "Quand vous arrivez, en diaporama, sur la diapositive d'énoncé d'un JEU, la tour ouvre ce JEU : les écrans des joueurs, cette vue et la vue projetée le suivent. Les 45 diapositives d'énoncé du support portent une étiquette invisible (ROUTE_JEU)."),
+          h("p", {}, h("b", {}, "État : "), ({ ok: "relais joignable, la tour écoute.", err: "relais injoignable (réseau ou pare-feu). Utilisez le secours manuel ci-dessous.", off: "liaison désactivée." }[pp.st] || "connexion en cours…"), pp.last ? " Dernier signal : " + (pp.last.kind === "TEST" ? "test" : "JEU " + pp.last.jeu + ", diapositive " + pp.last.slide) + " à " + new Date(pp.last.at).toLocaleTimeString("fr-FR") + "." : " Aucun signal reçu pour l'instant."),
+          h("p", {}, h("b", {}, "Mode : "), modeSel), h("p", { class: "meta" }, "Retour en arrière : revenir sur la diapositive d'un JEU déjà passé ne le relance pas ; un bouton « Ouvrir le JEU n » apparaît en haut de la tour.")));
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Secours manuel (Mac, macros bloquées, relais indisponible)"), h("p", {}, "Je suis au JEU n° ", jsel, " ", h("button", { onclick: function () { openJeu(jsel.value, "JEU " + jsel.value + " ouvert à la main."); } }, "Ouvrir ce JEU"))));
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Installation sous Windows (une seule fois)"),
+          h("ol", {}, ["Téléchargez les deux fichiers ci-dessous. Ils contiennent déjà la clé de liaison de ce navigateur.", "Ouvrez le support PowerPoint. Alt+F11, menu Fichier, Importer un fichier : importez RouteJeu.bas puis clsRoute.cls. Fermez la fenêtre.", "Enregistrez sous le type « Présentation PowerPoint prenant en charge les macros (.pptm) ».", "Essai : Alt+F8, TesterRoute, Exécuter. Cette page doit afficher « Signal de test reçu ».", "Avant chaque séance : ouvrez la tour sur ce navigateur, puis dans PowerPoint Alt+F8, LancerRoute. Le diaporama démarre, relié à la tour."].map(function (x) { return h("li", {}, x); })),
+          h("button", { onclick: function () { dl("RouteJeu.bas", macroBas(ppt.topic)); } }, "Télécharger RouteJeu.bas"), " ", h("button", { onclick: function () { dl("clsRoute.cls", macroCls()); } }, "Télécharger clsRoute.cls"),
+          h("p", { class: "meta" }, "Variante sans geste à chaque séance : enregistrez une présentation vide contenant ces deux fichiers sous le type « Complément PowerPoint (.ppam) », puis activez-la dans Fichier, Options, Compléments. La liaison se branche alors toute seule à l'ouverture de PowerPoint."),
+          h("p", { class: "meta" }, "La macro n'a pas pu être exécutée sous PowerPoint pendant la conception : faites l'essai TesterRoute avant le premier cours.")));
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Clé de liaison"), h("p", { class: "meta" }, "La clé est propre à ce navigateur et reste la même d'une séance à l'autre. Sur un autre ordinateur, collez ici la clé d'origine (elle figure dans RouteJeu.bas, après le dernier « / » de ROUTE_URL), ou retéléchargez les deux fichiers."),
+          key, " ", h("button", { class: "sec", onclick: function () { var v = key.value.trim(); if (!/^[A-Za-z0-9_-]{8,64}$/.test(v)) return alert("Clé invalide : 8 à 64 lettres, chiffres ou tirets."); ppt.topic = v; LSset("j-ppt", ppt); listen(); refresh(); } }, "Enregistrer la clé"),
+          h("p", { class: "meta" }, "Seul le numéro du JEU passe par le relais public ntfy.sh : aucun nom, aucune réponse d'étudiant.")));
+      }
       if (tab === "err") { var er = Object.keys(S.err).sort(function (a, b) { return S.err[b] - S.err[a]; }).slice(0, 8); detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Critères les plus souvent manqués"), er.length ? h("ol", {}, er.map(function (k) { return h("li", {}, k + " : " + S.err[k] + " fois"); })) : h("p", { class: "meta" }, "Pas encore de données."))); }
       if (tab === "eng") { var tot = S.expected || 1, rs = S.resp.length ? S.resp.reduce(function (a, b) { return a + b; }, 0) / S.resp.length : 0; detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Engagement"), h("p", {}, "Réponses envoyées : " + S.answered + " sur " + S.expected + " attendues (" + pct(S.answered / tot) + ")."), h("p", {}, "Temps de réponse moyen : " + (rs ? Math.round(rs / 1000) + " s" : "—") + "."), h("p", {}, "Joueurs hors ligne : " + S.players.filter(function (p) { return !p.online; }).length + " sur " + S.players.length + "."))); }
     }
@@ -506,6 +559,43 @@
     setView(sim ? "proj" : "prof");
     window.J51._G = function () { return G; };
   }
+
+
+  /* ---------- Corrigé d'une carte (tour de contrôle et mode test) ---------- */
+  function answerEl(c) {
+    var card = h("div", { class: "card" }); card.appendChild(h("p", { class: "big" }, c.q));
+    if (c.t === "choix") c.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (i === c.ok ? "good" : "") }, (i === c.ok ? "✓ " : "") + o)); });
+    else if (c.t === "multi") c.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (c.oks.indexOf(i) >= 0 ? "good" : "") }, (c.oks.indexOf(i) >= 0 ? "✓ " : "") + o)); });
+    else if (c.t === "trous") { card.appendChild(h("p", {}, h("b", {}, "Phrase modèle : "), c.modele)); c.slots.forEach(function (sl) { card.appendChild(h("p", {}, h("b", {}, sl.lab + " : "))); sl.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (i === sl.ok ? "good" : "") }, (i === sl.ok ? "✓ " : "") + o)); }); }); }
+    else if (c.t === "assoc") c.items.forEach(function (x) { card.appendChild(h("div", { class: "card", style: "background:#fff" }, x.txt, h("b", {}, "  →  " + c.labels[x.ok]))); });
+    else if (c.t === "texte") { card.appendChild(h("p", {}, h("b", {}, "Critères notés (1 point chacun) :"))); card.appendChild(h("ul", {}, c.checks.map(function (k) { return h("li", {}, k.lab); }))); card.appendChild(h("p", {}, h("b", {}, "Réponse modèle : "), c.modele)); }
+    else if (c.grille) card.appendChild(h("ul", {}, c.grille.map(function (g) { return h("li", {}, g); })));
+    card.appendChild(h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl));
+    return card;
+  }
+
+  /* ---------- Liaison PowerPoint : fichiers de macro (Windows) ---------- */
+  var RELAY0 = "https://ntfy.sh";
+  function relayBase() { return (LSget("j-relay") || RELAY0).replace(/\/+$/, ""); }
+  function pptCfg() { var c = LSget("j-ppt"); if (!c || !c.topic) { c = { topic: "route-" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12), mode: "auto" }; LSset("j-ppt", c); } return c; }
+  function macroBas(topic) {
+    return ['Attribute VB_Name = "RouteJeu"', "Option Explicit", "' (c) 2026 SAS BELM DEVELOPPEMENT. Tous droits reserves. Cree avec l'aide de Claude (Anthropic), relu par l'auteur.",
+      "' Liaison PowerPoint -> tour de controle du plateau (La route de l'etat de l'art).", "' Quand une diapositive etiquetee ROUTE_JEU apparait en diaporama, son numero de JEU est envoye a la tour.",
+      'Public Const ROUTE_URL As String = "' + relayBase() + "/" + topic + '"', "Private mApp As clsRoute", "Private mHttp As Object", "Private mLast As String", "",
+      "Private Sub Brancher()", "    If mApp Is Nothing Then", "        Set mApp = New clsRoute", "        Set mApp.App = Application", "    End If", "End Sub", "",
+      "' Complement .ppam : branchement automatique au chargement.", "Sub Auto_Open()", "    Brancher", "End Sub", "",
+      "' A lancer par Alt+F8 : branche la liaison puis demarre le diaporama.", "Sub LancerRoute()", "    Brancher", "    mLast = \"\"", "    If Not ActivePresentation Is Nothing Then ActivePresentation.SlideShowSettings.Run", "End Sub", "",
+      "' Evenement automatique de PowerPoint (secours si la classe n'est pas branchee).", "Sub OnSlideShowPageChange(ByVal Wn As SlideShowWindow)", "    On Error Resume Next", "    RouteSignal Wn.View.Slide", "End Sub", "",
+      "Public Sub RouteSignal(ByVal sld As Object)", "    On Error Resume Next", "    Dim n As String", "    n = sld.Tags(\"ROUTE_JEU\")", "    If n = \"\" Then Exit Sub", "    If n = mLast Then Exit Sub", "    mLast = n",
+      "    Set mHttp = CreateObject(\"MSXML2.ServerXMLHTTP.6.0\")", "    mHttp.Open \"POST\", ROUTE_URL, True", "    mHttp.setRequestHeader \"Content-Type\", \"text/plain\"", "    mHttp.send \"JEU|\" & n & \"|\" & sld.SlideIndex", "End Sub", "",
+      "' Test : envoie un signal d'essai et affiche le resultat.", "Sub TesterRoute()", "    On Error GoTo Rate", "    Dim h As Object", "    Set h = CreateObject(\"MSXML2.ServerXMLHTTP.6.0\")", "    h.Open \"POST\", ROUTE_URL, False", "    h.setRequestHeader \"Content-Type\", \"text/plain\"", "    h.send \"TEST|0|0\"",
+      "    If h.Status = 200 Then", "        MsgBox \"Liaison OK : la tour de controle doit afficher 'Signal de test recu'.\", vbInformation, \"Route\"", "    Else", "        MsgBox \"Le relais a repondu : \" & h.Status, vbExclamation, \"Route\"", "    End If", "    Exit Sub", "Rate:", "    MsgBox \"Envoi impossible : \" & Err.Description, vbCritical, \"Route\"", "End Sub", ""].join("\r\n");
+  }
+  function macroCls() {
+    return ["VERSION 1.0 CLASS", "BEGIN", "  MultiUse = -1  'True", "END", 'Attribute VB_Name = "clsRoute"', "Attribute VB_GlobalNameSpace = False", "Attribute VB_Creatable = False", "Attribute VB_PredeclaredId = False", "Attribute VB_Exposed = False", "Option Explicit",
+      "Public WithEvents App As Application", "", "Private Sub App_SlideShowNextSlide(ByVal Wn As SlideShowWindow)", "    On Error Resume Next", "    RouteSignal Wn.View.Slide", "End Sub", "", "Private Sub App_SlideShowBegin(ByVal Wn As SlideShowWindow)", "    On Error Resume Next", "    RouteSignal Wn.View.Slide", "End Sub", ""].join("\r\n");
+  }
+  function dl(name, txt) { var a = h("a", { href: URL.createObjectURL(new Blob([txt], { type: "text/plain" })), download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 
   /* ---------- Mode test : parcourir tous les jeux et toutes les cartes sans répondre ---------- */
   function testPage() {
@@ -523,18 +613,10 @@
       var it = list[ix], c = it.c, j = D.jeux[it.jeu], n = list.filter(function (x) { return x.jeu === it.jeu; }), pos = n.indexOf(it) + 1;
       box.innerHTML = "";
       var cb = h("input", { type: "checkbox", style: "width:auto" }); cb.checked = sync; cb.addEventListener("change", function () { sync = cb.checked; if (sync) pushJeu(); showInfo(); });
-      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être. Les 40 JEUX sont parcourus."));
+      box.appendChild(h("div", { class: "warn" }, "Mode test : les réponses attendues sont affichées. Aucune carte n'est envoyée aux joueurs ; seul le jeu choisi peut l'être. Les 45 JEU sont parcourus."));
       box.appendChild(h("label", { style: "display:block;margin:6px 0" }, cb, " Synchroniser la partie : changer de jeu ici change le jeu des joueurs"), info); showInfo();
       box.appendChild(h("h1", {}, "JEU " + it.jeu + " · " + j.titre)); box.appendChild(h("p", { class: "meta" }, "Zone " + j.zone + " · carte " + pos + " / " + n.length + (c.extra ? " · carte supplémentaire" : "") + " · type " + c.t + " · " + (ix + 1) + " / " + list.length + " au total"));
-      var card = h("div", { class: "card" }); box.appendChild(card);
-      card.appendChild(h("p", { class: "big" }, c.q));
-      if (c.t === "choix") c.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (i === c.ok ? "good" : "") }, (i === c.ok ? "✓ " : "") + o)); });
-      else if (c.t === "multi") c.opts.forEach(function (o, i) { card.appendChild(h("div", { class: "opt " + (c.oks.indexOf(i) >= 0 ? "good" : "") }, (c.oks.indexOf(i) >= 0 ? "✓ " : "") + o)); });
-      else if (c.t === "trous") { card.appendChild(h("p", {}, h("b", {}, "Phrase modèle : "), c.modele)); c.slots.forEach(function (sl) { card.appendChild(h("p", {}, h("b", {}, sl.lab + " : ")), sl.opts.map(function (o, i) { return h("div", { class: "opt " + (i === sl.ok ? "good" : "") }, (i === sl.ok ? "✓ " : "") + o); })); }); }
-      else if (c.t === "assoc") c.items.forEach(function (x) { card.appendChild(h("div", { class: "card", style: "background:#fff" }, x.txt, h("b", {}, "  →  " + c.labels[x.ok]))); });
-      else if (c.t === "texte") { card.appendChild(h("p", {}, h("b", {}, "Critères notés (1 point chacun) :")), h("ul", {}, c.checks.map(function (k) { return h("li", {}, k.lab); })), h("p", {}, h("b", {}, "Requête modèle : "), c.modele)); }
-      else card.appendChild(h("ul", {}, c.grille.map(function (g) { return h("li", {}, g); })));
-      box.appendChild(h("div", { class: "corr" }, h("b", {}, "Corrigé : "), c.expl));
+      box.appendChild(answerEl(c));
       box.appendChild(h("p", { class: "meta" }, "Flèches du clavier : ← → pour les cartes, haut/bas pour les jeux. ", h("a", { href: "#/tour" }, "Tour de contrôle")));
     }
     var bar = h("div", { class: "jx-fab" },

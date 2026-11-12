@@ -16,3 +16,7 @@ Pages : `#/plateau` (accueil), `#/plateau/regles`, `#/j` (joueurs, code ROUTE), 
 Lecture obligatoire : document commun (10 s) avant le premier jeu, fiche du jeu (8 s) quand on y arrive ; personne ne tire tant qu'un joueur connecté de la table n'a pas lu. Aide outil à trois niveaux par outil, bouton « Cet outil ne marche pas » (tour passé sans pénalité), désactivation d'un outil depuis la tour. Les guides des outils sont rédigés sans test en direct : à vérifier.
 Tests : `node test_plateau.js` (contenu, notation, équilibrage des réponses, ordre des items) et `node test_j51.js` (règles).
 PDF à imprimer : `Plateau_80x60.pdf` (plateau unique 80 × 60 cm, fond perdu 5 mm). La fiche enseignant (corrigés) n'est pas publiée ici.
+
+## Liaison PowerPoint et corrigés (12 novembre 2026)
+Liaison : les 45 diapositives d'énoncé du support v16 portent l'étiquette `ROUTE_JEU`. Sous Windows, une macro (fichiers `RouteJeu.bas` et `clsRoute.cls`, téléchargés depuis l'onglet « Liaison PowerPoint » de la tour, vue enseignant) envoie le numéro du JEU au relais public ntfy.sh ; la tour l'écoute et ouvre le JEU (modes automatique, avec confirmation, désactivé ; retour en arrière jamais automatique). Secours : « Je suis au JEU n° ». Seul le numéro du JEU transite. Macro non exécutée sous PowerPoint pendant la conception : essai `TesterRoute` à faire.
+Corrigés : onglet « Corrigé du JEU ouvert » de la vue enseignant (réponses attendues et explications de chaque carte), absent de la vue projetée.
