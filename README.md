@@ -22,3 +22,5 @@ Liaison : les 45 diapositives d'énoncé du support v16 portent l'étiquette `RO
 Corrigés : onglet « Corrigé du JEU ouvert » de la vue enseignant (réponses attendues et explications de chaque carte), absent de la vue projetée.
 
 Corrections du 12 novembre 2026 (soir) : compteur de lecture qui ne repart plus, joueur attaché à une seule partie (message si deux tours répondent), « Quitter la partie » revient au formulaire, bouton « Retirer » pour un joueur hors ligne (onglet Joueurs).
+
+Version du 12 novembre 2026 (nuit) : la partie n'est plus chronométrée (« Démarrer la partie », « Terminer la partie », « Rouvrir la partie ») ; vocabulaire limité à « partie » et « JEU » ; l'écran joueur affiche l'énoncé de chaque JEU, extrait du support (`enonces` dans `plateau-data.js`) ; bouton « Aide outil » seulement pour l'outil rattaché au JEU ; mise (pari) retirée des cartes déclaratives.

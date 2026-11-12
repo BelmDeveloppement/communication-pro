@@ -55,9 +55,11 @@
     G.players[p.sid] = p; T.players.push(p.sid); return { ok: true, player: p };
   }
   function settle(G) { Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.pos === 0 && G.status === "play") { if (!moveTable(G, T, G.jeux[0], 0)) { T.pos = 1; T.players.forEach(function (s) { G.players[s].pos = 1; }); } delete T.jumped; } }); }
-  function start(G, now) { if (G.status === "play") return; G.status = "play"; G.start = now; G.end = now + G.min * 60000; settle(G); }
+  /* Une partie n'est pas chronométrée : elle dure jusqu'à ce que l'enseignant la termine, et peut être rouverte. */
+  function start(G, now) { if (G.status === "play") return; G.status = "play"; G.start = G.start || now; G.end = 0; settle(G); }
+  function reopen(G, now) { if (G.status === "ended") { G.status = "play"; G.end = 0; } }
   function stop(G, now) { G.end = now; if (G.status === "play") G.status = "ended"; }
-  function running(G, now) { return G.status === "play" && now < G.end; }
+  function running(G, now) { return G.status === "play"; }
   function tireur(G, T, now) {
     var ps = T.players.map(function (s) { return G.players[s]; }).filter(function (p) { return !p.done; }); if (!ps.length) return null;
     return ps[T.round % ps.length];
@@ -156,6 +158,8 @@
     if (!pl.length) { var ps = D.pieges.cartes; return { jeu: "P", id: PE.shuffle(ps.map(function (c) { return c.id; }), seed)[0] }; }
     return { jeu: jeu, id: PE.shuffle(pl.map(function (c) { return c.id; }), seed)[0] };
   }
+  /* Outil rattaché exactement à ce JEU (sinon aucun) ; toolFor sert aux cases Outil : dernier outil rencontré. */
+  function exactTool(jeu) { return D.outils.filter(function (o) { return String(o.jeu) === String(jeu); })[0] || null; }
   function toolFor(jeu) { var n = parseInt(jeu, 10), best = null; D.outils.forEach(function (o) { if (parseInt(o.jeu, 10) <= n) best = o; }); return best || D.outils[0]; }
   function pt(G, p, delta) { p.score += delta; return delta; }
 
@@ -300,7 +304,6 @@
   }
   function tick(G, now) {
     settle(G);
-    if (G.status === "play" && now >= G.end) G.status = "ended";
     Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.cur && now - T.cur.at > CARD_MAX_MS) closeRound(G, t, now); });
     Object.keys(G.players).forEach(function (s) {
       var p = G.players[s], pd = p.pend; if (!pd) return;
@@ -381,6 +384,6 @@
         last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res, zone: T.last.zone, gauge: T.last.gauge, bonus: T.last.bonus, from: T.last.from, to: T.last.to, path: T.last.path } : null } };
   }
   var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, gotoJeu: gotoJeu, moveTable: moveTable, leave: leave, caseIx: caseIx, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
-    act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
+    act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, exactTool: exactTool, reopen: reopen, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);
