@@ -300,6 +300,19 @@
       if (c.t === "trous") return c.slots.map(function (sl) { return sl.lab + " : " + sl.opts[sl.ok]; }).join(" ; ");
       return c.modele || "";
     }
+    function reportModal() {
+      var ov = h("div", { style: "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:90;display:flex;align-items:center;justify-content:center;padding:12px" }), box = h("div", { class: "card", style: "max-width:520px;width:100%;max-height:92vh;overflow:auto" });
+      var kind = h("select", {}, ["Énoncé ou consigne erronée", "Correction ou points injustes", "Problème d'affichage ou bouton qui ne marche pas", "Connexion", "Autre"].map(function (k) { return h("option", { value: k }, k); }));
+      var tx = h("textarea", { rows: 4, placeholder: "Décrivez en une ou deux phrases ce qui ne va pas.", maxlength: 600 }), st = h("p", { class: "meta" });
+      var cur = snap && snap.table && snap.table.cur ? snap.table.cur : null;
+      box.appendChild(h("h2", {}, "Signaler un problème")); box.appendChild(h("p", { class: "meta" }, "Le message part à l'enseignant avec votre prénom, votre table et le JEU en cours.")); box.appendChild(kind); box.appendChild(tx); box.appendChild(st);
+      box.appendChild(h("button", { class: "ok", onclick: function () {
+        if (!tx.value.trim()) { st.className = "warn"; st.textContent = "Écrivez quelques mots."; return; }
+        if (!linkOk) { st.className = "warn"; st.textContent = "Vous êtes hors ligne : le message ne peut pas partir. Reconnectez-vous puis réessayez."; return; }
+        send({ t: "report", kind: kind.value, txt: tx.value.trim(), jeu: cur ? cur.jeu : "" }); st.className = "meta"; st.textContent = "Merci, le message est envoyé à l'enseignant."; setTimeout(function () { try { document.body.removeChild(ov); } catch (e) {} }, 1400);
+      } }, "Envoyer"));
+      box.appendChild(h("button", { class: "sec", onclick: function () { try { document.body.removeChild(ov); } catch (e) {} } }, "Fermer")); ov.appendChild(box); document.body.appendChild(ov);
+    }
     function drawSending() {
       body.appendChild(h("div", { class: "card" }, h("h2", {}, "Envoi de votre réponse…"), h("p", {}, "Votre réponse n'est pas encore arrivée chez l'enseignant. L'application la renvoie toute seule toutes les quelques secondes : gardez cette page ouverte."), h("p", { class: "meta" }, linkOk ? "● Connecté : confirmation attendue." : "○ Hors ligne : changez de réseau (partage de connexion du téléphone) ou rechargez la page ; votre réponse est conservée sur cet appareil."), h("button", { class: "sec", onclick: function () { resend(); send({ t: "join", nom: me.nom, table: me.table }); } }, "Renvoyer maintenant")));
     }
@@ -380,7 +393,7 @@
       body.appendChild(box);
     }
     mount(aideBar(), h("h1", {}, "5 · La route de l'état de l'art"), head, board, body,
-      h("p", {}, h("a", { href: "#/plateau/regles" }, "Règles"), "  ·  ", h("a", { href: "#", onclick: function (e) { e.preventDefault(); if (confirm("Quitter la partie ? Vous reviendrez au formulaire d'inscription. Vos points sont conservés si vous rejoignez la même table avec le même prénom.")) { send({ t: "leave" }); try { localStorage.removeItem(MK); } catch (x) {} setTimeout(function () { stopAll(); if (/^#\/j$/.test(location.hash)) joinPage(); else location.hash = "#/j"; }, 150); } } }, "Quitter la partie")));
+      h("p", {}, h("a", { href: "#/plateau/regles" }, "Règles"), "  ·  ", h("a", { href: "#", onclick: function (e) { e.preventDefault(); reportModal(); } }, "⚠ Signaler un problème"), "  ·  ", h("a", { href: "#", onclick: function (e) { e.preventDefault(); if (confirm("Quitter la partie ? Vous reviendrez au formulaire d'inscription. Vos points sont conservés si vous rejoignez la même table avec le même prénom.")) { send({ t: "leave" }); try { localStorage.removeItem(MK); } catch (x) {} setTimeout(function () { stopAll(); if (/^#\/j$/.test(location.hash)) joinPage(); else location.hash = "#/j"; }, 150); } } }, "Quitter la partie")));
     body.appendChild(h("p", { class: "meta" }, "Connexion…"));
   }
 
@@ -579,7 +592,8 @@
       drawerEl.className = "jx-drawer" + (view === "prof" && tab === "corr" ? " on" : "");
       if (view === "prof" && ((tab === "corr" && drawerEl.firstChild) || (tab === "ppt" && detEl.firstChild)) && sig === lastSig) return; lastSig = sig;
       tabsEl.innerHTML = detEl.innerHTML = drawerEl.innerHTML = ""; if (view !== "prof") return;
-      [["ens", "Joueurs"], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["prod", "Productions"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "ppt" || a[0] === "prod") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
+      var nrep = (G.reports || []).filter(function (r) { return !r.done; }).length;
+      [["ens", "Joueurs"], ["prod", "Saisies des joueurs"], ["rep", "Signalements" + (nrep ? " (" + nrep + ")" : "")], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { style: a[0] === "rep" && nrep ? "background:#C0392B" : "", class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "ppt" || a[0] === "prod") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
       if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEUX joués", "Réussite", "Temps moyen", "Duels", "État", "Retirer"].map(function (c) { return h("th", {}, c); })),
         S.players.slice().sort(function (a, b) { return b.score - a.score; }).map(function (p, i) { return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1]), h("td", {}, p.online ? "" : h("button", { class: "sec jx-mini", title: "Retirer un doublon ou un joueur parti", onclick: function () { if (confirm("Retirer " + p.nom + " (" + p.table + ") de la partie ? Ses points sont perdus.")) { C.leave(G, p.sid, true); dirty = true; refresh(); } } }, "Retirer"))); })));
       if (tab === "mast") {
@@ -607,12 +621,18 @@
           fo ? h("p", {}, h("b", {}, "Objectif annoncé aux joueurs : "), fo.obj) : null, fo ? h("p", {}, h("b", {}, "Règle : "), fo.regle) : null, fo && fo.ex ? h("ul", { class: "meta" }, fo.ex.map(function (x) { return h("li", {}, x); })) : null));
         cs.forEach(function (c, i) { drawerEl.appendChild(h("p", { class: "meta", style: "margin:10px 0 2px" }, "Carte " + (i + 1) + " / " + cs.length + (c.extra ? " · supplémentaire" : ""))); drawerEl.appendChild(answerEl(c)); });
       }
+      if (tab === "rep") {
+        var rl = G.reports || [], hh = function (t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Signalements des joueurs (" + nrep + " à traiter)"), h("p", { class: "meta" }, "Envoyés depuis le bouton « Signaler un problème » de l'écran joueur. « Traité » retire la ligne de la liste à traiter ; « Copier » exporte tout pour corriger l'application après le cours."),
+          h("button", { class: "sec", onclick: function () { var tx = rl.map(function (r) { return hh(r.at) + " · " + r.table + " " + r.nom + " · JEU " + (r.jeu || "?") + " · " + r.kind + " · " + r.txt + (r.done ? " [traité]" : ""); }).join("\n"); try { navigator.clipboard.writeText(tx); } catch (e) {} } }, "Copier tous les signalements"),
+          rl.length ? h("table", {}, h("tr", {}, ["Heure", "Table", "Joueur", "JEU", "Type", "Message", "Statut"].map(function (c) { return h("th", {}, c); })), rl.slice().reverse().map(function (r) { return h("tr", {}, h("td", {}, hh(r.at)), h("td", {}, r.table), h("td", {}, r.nom), h("td", {}, r.jeu || "—"), h("td", {}, r.kind), h("td", { style: "white-space:pre-wrap" }, r.txt), h("td", {}, r.done ? "traité" : h("button", { class: "sec", onclick: function () { r.done = true; dirty = true; lastSig = ""; refresh(); } }, "Traité"))); })) : h("p", { class: "meta" }, "Aucun signalement pour l'instant.")));
+      }
       if (tab === "prod") {
         if (!pj) pj = G.jeux[0];
         var psel = h("select", { style: "max-width:420px", onchange: function () { pj = psel.value; lastSig = ""; refresh(); } }, Object.keys(D.jeux).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === pj) o.selected = true; return o; }));
         var prows = []; Object.keys(G.players).forEach(function (sid) { var pl = G.players[sid]; pl.res.forEach(function (r) { if (r.jeu === pj) prows.push({ sid: sid, pl: pl, r: r }); }); });
         prows.sort(function (a, b) { return a.pl.table < b.pl.table ? -1 : a.pl.table > b.pl.table ? 1 : a.pl.nom < b.pl.nom ? -1 : 1; });
-        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Productions saisies par les joueurs"), h("p", { class: "meta" }, "JEU : "), psel, h("p", { class: "meta" }, "Lisez la saisie ; si l'application s'est trompée ou si le fond doit être jugé (textes libres), corrigez les points avec les boutons 0 à 3."),
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Saisies des joueurs sur ce JEU : " + prows.length + " sur " + Object.keys(G.players).length + " joueurs"), h("p", { class: "meta" }, "JEU : "), psel, h("p", { class: "meta" }, "Lisez la saisie ; si l'application s'est trompée ou si le fond doit être jugé (textes libres), corrigez les points avec les boutons 0 à 3."),
           prows.length ? h("table", {}, h("tr", {}, ["Table", "Joueur", "Points", "Saisie", "Corriger"].map(function (c) { return h("th", {}, c); })), prows.map(function (x) { return h("tr", {}, h("td", {}, x.pl.table), h("td", {}, x.pl.nom), h("td", {}, String(x.r.pts)), h("td", { style: "white-space:pre-wrap;font-size:13px;max-width:560px" }, x.r.txt || "(JEU déclaratif ou pas de saisie)"), h("td", {}, [0, 1, 2, 3].map(function (v) { return h("button", { class: v === x.r.pts ? "" : "sec jx-mini", onclick: function () { C.fixJeu(G, x.sid, pj, v, now()); dirty = true; lastSig = ""; refresh(); } }, String(v)); }))); })) : h("p", { class: "meta" }, "Aucune production pour ce JEU pour l'instant.")));
       }
       if (tab === "ppt") {

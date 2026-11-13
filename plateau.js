@@ -62,7 +62,7 @@
       h("div", { class: "card" }, h("h2", {}, "Légende des cases"), legend()),
       h("div", { class: "card" }, h("h2", {}, "Les cinq zones du syllabus"), Object.keys(D.zones).map(function (z) { return h("p", {}, h("span", { class: "team", style: "background:" + D.zones[z].col }, z), D.zones[z].syl); })),
       h("div", {}, Object.keys(D.jeux).map(function (k) { var j = D.jeux[k], o = D.outils.filter(function (x) { return x.jeu === k; })[0]; return h("div", { class: "card" }, h("h2", {}, "Jeu " + k + " · " + j.titre), h("p", { class: "meta" }, "Bloc " + D.zones[j.zone].nom + " · " + j.mode), h("p", {}, j.regle), o ? h("p", { class: "meta" }, "Outil du jeu : ", h("a", { href: o.url, target: "_blank", rel: "noopener" }, o.nom), " — " + o.tache) : null); })),
-      h("p", {}, h("a", { href: "#/plateau" }, "← Retour")));
+      h("p", {}, (function () { var me = null; try { me = JSON.parse(localStorage.getItem("j-me")); } catch (e) {} return me && me.sid ? h("a", { class: "btn", href: "#/j", style: "text-decoration:none;display:inline-block" }, "← Retour au JEU en cours") : h("a", { href: "#/plateau" }, "← Retour"); })()));
   }
   window.PLATEAU = { boardSvg: boardSvg, legend: legend, TS: TS, route: function (p) { var a = p[0] || ""; if (a === "regles") return rules(); return entry(); } };
   if ((location.hash || "").indexOf("#/plateau") === 0) window.dispatchEvent(new Event("hashchange"));

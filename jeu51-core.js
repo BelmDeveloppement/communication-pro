@@ -292,6 +292,7 @@
     r.pts = newPts; r.fixed = true; p.score += d; p.zp[z] = (p.zp[z] || 0) + d; G.tables[p.table].zs[z] = (G.tables[p.table].zs[z] || 0) + d; say(G, p, "Score du JEU " + jeu + " corrigé par l'enseignant : " + newPts + "/3", now); return true;
   }
   function act(G, sid, m, now) {
+    if (m.t === "report") { var pr = G.players[sid]; G.reports = G.reports || []; G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : "?", table: pr ? pr.table : "?", kind: String(m.kind || "").slice(0, 40), txt: String(m.txt || "").slice(0, 600), jeu: String(m.jeu || "").slice(0, 4), done: false }); if (G.reports.length > 300) G.reports.shift(); return true; }
     if (m.t === "draw") return draw(G, sid, now);
     if (m.t === "ans") { var pp = G.players[sid], TT = pp && G.tables[pp.table]; if (m.card && TT && TT.cur && m.card !== TT.round + ":" + TT.cur.jeu + ":" + TT.cur.id) return false; return answer(G, sid, m.ans, now, m.bet); }
     if (m.t === "outil") return actOutil(G, sid, !!m.ok, now);
