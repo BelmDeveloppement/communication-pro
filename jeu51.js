@@ -238,6 +238,8 @@
       if (e.clair) box.appendChild(h("p", { class: "big", style: "margin:0 0 6px" }, h("b", {}, "En clair, vous : "), e.clair));
       if (e.rend) box.appendChild(h("p", {}, h("b", {}, "Vous rendez : "), e.rend));
       if (e.but) box.appendChild(h("p", {}, h("b", {}, "But du JEU : "), e.but));
+      var zz = D.jeux[k] && D.zones[D.jeux[k].zone]; if (zz) box.appendChild(h("p", { class: "meta", style: "margin:2px 0 6px" }, "Lien avec le syllabus ECUE-S7-1-2 : " + zz.syl + "."));
+      if (k === "28") { var f27 = snap && snap.me.fiche27; box.appendChild(h("div", { style: "background:#FFF8E1;border-left:4px solid #E9A400;padding:4px 8px;margin:6px 0" }, h("b", {}, "Votre fiche de Toulmin du JEU 27 (copie) : "), f27 ? h("div", { style: "white-space:pre-wrap" }, f27) : h("span", { class: "meta" }, "aucune fiche trouvée pour votre équipe : reprenez-la dans votre carnet."))); }
       if (e.consigne) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "Consigne"))); para(e.consigne).forEach(function (x) { box.appendChild(x); }); }
       if (e.situation) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "Mise en situation"))); para(e.situation).forEach(function (x) { box.appendChild(x); }); }
       if (e.afaire && e.afaire.length) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "À faire"))); box.appendChild(h("ol", {}, e.afaire.map(function (l) { return h("li", {}, l); }))); }

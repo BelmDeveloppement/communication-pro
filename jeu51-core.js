@@ -391,10 +391,17 @@
     return v;
   }
   function nudge(G, sid, now) { G.nudge[sid] = now; }
+  /* fiche saisie plus tôt (par le joueur, sinon par un coéquipier) : sert à recopier la fiche de Toulmin du JEU 27 dans le JEU 28 */
+  function ficheOf(G, p, jeu) {
+    var own = (p.res || []).filter(function (r) { return String(r.jeu) === String(jeu) && r.txt; })[0]; if (own) return own.txt;
+    var T = G.tables[p.table]; if (!T) return "";
+    for (var i = 0; i < T.players.length; i++) { var q = G.players[T.players[i]]; var r = q && (q.res || []).filter(function (x) { return String(x.jeu) === String(jeu) && x.txt; })[0]; if (r) return r.txt; }
+    return "";
+  }
   function snapshot(G, sid, now) {
     var p = G.players[sid]; if (!p) return null; var T = G.tables[p.table], tr = tireur(G, T, now);
     return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, gate: D.caps.gate, max: D.caps.max, tpos: T.pos, here: jeuHere(T), tdone: !!T.done, tscore: tableScore(G, T), gauges: Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }), mast: G.status === "ended" || T.done ? masteryAll(p) : null,
-      me: { sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
+      me: { fiche27: ficheOf(G, p, "27"), sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
       sujets: sujetsView(G), canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
       table: { id: T.id, round: T.round, jumped: T.jumped || null,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),

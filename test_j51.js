@@ -74,4 +74,9 @@ ok(J.exactTool("1") && !J.exactTool("2") && J.exactTool("4"), "outil exact : JEU
   var sn = J.snapshot(G2, a, NOW); eq(sn.me.sujet, S[0][0], "snapshot : mon sujet"); eq(sn.sujets[S[0][0]], "P0", "snapshot : propriétaire"); eq(sn.sujets[S[2][0]], null, "snapshot : sujet libre");
   J.releaseSujet(G2, S[0][0]); eq(G2.players[a].sujet, undefined, "libération par l'enseignant"); ok(J.act(G2, c, { t: "sujet", sujet: S[0][0] }, NOW), "C prend le sujet libéré");
   J.leave(G2, c, true); ok(!G2.sujets[S[0][0]], "un joueur qui part libère son sujet"); })();
+
+// fiche du JEU 27 reprise dans le JEU 28 (joueur, sinon coéquipier)
+(function () { var G3 = game(2); G3.players.s10.res.push({ jeu: "27", id: "x", pts: 3, txt: "Affirmation : A ; Données : B" });
+  eq(J.snapshot(G3, "s10", NOW).me.fiche27, "Affirmation : A ; Données : B", "fiche 27 du joueur"); eq(J.snapshot(G3, "s11", NOW).me.fiche27, "Affirmation : A ; Données : B", "fiche 27 reprise d'un coéquipier");
+  eq(J.snapshot(game(1, 2), "s20", NOW).me.fiche27, "", "pas de fiche : chaîne vide"); })();
 console.log(process.exitCode ? "ÉCHECS" : "logique tables/joueurs : " + n + " vérifications, tout passe");
