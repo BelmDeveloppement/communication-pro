@@ -220,7 +220,7 @@
       if (e.afaire && e.afaire.length) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "À faire"))); box.appendChild(h("ol", {}, e.afaire.map(function (l) { return h("li", {}, l); }))); }
       if (e.livrable) box.appendChild(h("p", {}, h("b", {}, "Livrable : "), e.livrable));
       if (e.outil) box.appendChild(h("p", {}, h("b", {}, "Outil : "), e.outil));
-      box.appendChild(h("p", { class: "meta", style: "margin:6px 0 0" }, "Même énoncé que la diapositive " + e.page + " du support projeté."));
+      if (e.page > 0) box.appendChild(h("p", { class: "meta", style: "margin:6px 0 0" }, "Même énoncé que la diapositive " + e.page + " du support projeté."));
       return box;
     }
     function critEl(k) {
@@ -275,7 +275,7 @@
       if (nt) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Dernier événement : "), nt));
       jumpNote();
       if (!j) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Rien à jouer pour l'instant"), h("p", {}, "Votre pion est sur la case " + snap.tpos + ".")));
-      if (snap.wait) return body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), h("p", { class: "big" }, "L'enseignant n'a pas encore ouvert ce JEU."), h("p", {}, "Votre table a de l'avance sur le cours : préparez-vous en relisant le support, le pion n'ira pas plus loin avant l'ouverture.")));
+      if (snap.wait) return body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), h("p", { class: "big" }, "Attendez le signal de l'enseignant : ce JEU n'est pas encore ouvert."), h("p", {}, "L'enseignant est sur le JEU " + (snap.jeux && snap.jeux[0] ? snap.jeux[0] : "…") + ". Votre table est en avance : ne cherchez pas à passer au suivant, l'écran se débloquera tout seul à l'ouverture. En attendant, relisez le concept du JEU précédent.")));
       body.appendChild(h("div", { class: "card" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), enonceEl(hj) || h("p", {}, j.regle), C.exactTool(hj) ? h("p", {}, helpBtn(C.exactTool(hj))) : null,
         snap.canDraw ? h("div", {}, h("p", { class: "big" }, "C'est à vous de lancer le JEU pour la table."), h("button", { class: "ok", onclick: function () { send({ t: "draw" }); } }, "Commencer le JEU"))
           : h("p", { class: "big" }, "Au tour de " + (snap.tireur || "…") + " de lancer le JEU."), chips(T)));
@@ -479,6 +479,7 @@
     /* ----- liaison PowerPoint : la macro envoie « JEU|n|diapo » sur un relais, la tour l'écoute ----- */
     var ppt = pptCfg(), es = null, lastSig = "", pp = { st: "…", last: null, pend: null, note: "" };
     function jeuIx(k) { return Object.keys(D.jeux).indexOf(String(k)); }
+    function unfinishedTxt() { var n = 0, tot = 0; Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (!T.players || !T.players.length) return; tot++; if (T.cur) n++; }); return n ? "\n\n⚠ " + n + " table(s) sur " + tot + " sont au milieu d'une carte du JEU en cours : elles la terminent avant de passer au suivant (aucune saisie perdue)." : ""; }
     function openJeu(k, why) { C.gotoJeu(G, String(k), now()); pp.pend = null; pp.note = why || ""; dirty = true; refresh(); }
     function onSignal(kind, k, slide) {
       pp.last = { kind: kind, jeu: k, slide: slide, at: now() };
@@ -560,7 +561,7 @@
       if (view === "proj") ctr.appendChild(h("button", { class: "sec", onclick: function () { try { document.documentElement.requestFullscreen(); } catch (e) {} } }, "Plein écran"));
       var jk = Object.keys(D.jeux), ji = jk.indexOf(G.jeux[0]), cn = C.counts(G, G.jeux[0]);
       ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { if (confirm("Revenir au JEU " + jk[ji - 1] + " ? Toutes les tables reviennent sur ce JEU.")) { C.nextJeu(G, -1, now()); dirty = true; refresh(); } } }, "◀ JEU précédent"));
-      ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Ouvrir le JEU " + jk[ji + 1] + " ? Toutes les tables passent sur ce JEU. Une table au milieu d'une carte la termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité.")) { C.nextJeu(G, 1, now()); dirty = true; refresh(); } } }, "Ouvrir le JEU " + (ji < jk.length - 1 ? jk[ji + 1] : "") + " ▶"));
+      ctr.appendChild(h("button", { disabled: ji >= jk.length - 1 ? "disabled" : null, onclick: function () { if (confirm("Ouvrir le JEU " + jk[ji + 1] + " ?" + unfinishedTxt() + " Toutes les tables passent sur ce JEU. Une table au milieu d'une carte la termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité.")) { C.nextJeu(G, 1, now()); dirty = true; refresh(); } } }, "Ouvrir le JEU " + (ji < jk.length - 1 ? jk[ji + 1] : "") + " ▶"));
       if (cn.extra) ctr.appendChild(h("button", { class: G.extra ? "ok" : "sec", onclick: function () { C.setExtra(G, !G.extra); dirty = true; refresh(); } }, G.extra ? "Cartes supplémentaires : activées (" + (cn.base + cn.extra) + ")" : "Débloquer les cartes supplémentaires (+" + cn.extra + ")"));
       if (view === "prof") ctr.appendChild(h("button", { class: tab === "corr" ? "ok" : "", onclick: function () { tab = tab === "corr" ? "ens" : "corr"; refresh(); } }, tab === "corr" ? "Fermer le corrigé" : "📖 Corrigé du JEU " + G.jeux[0]));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { exportCsv(S); } }, "Export CSV"));
@@ -668,7 +669,7 @@
           prows.length ? h("table", {}, h("tr", {}, ["Table", "Joueur", "Points", "Saisie", "Corriger"].map(function (c) { return h("th", {}, c); })), prows.map(function (x) { return h("tr", {}, h("td", {}, x.pl.table), h("td", {}, x.pl.nom), h("td", {}, String(x.r.pts)), h("td", { style: "white-space:pre-wrap;font-size:13px;max-width:560px" }, x.r.txt || "(JEU déclaratif ou pas de saisie)"), h("td", {}, [0, 1, 2, 3].map(function (v) { return h("button", { class: v === x.r.pts ? "" : "sec jx-mini", onclick: function () { C.fixJeu(G, x.sid, pj, v, now()); dirty = true; lastSig = ""; refresh(); } }, String(v)); }))); })) : h("p", { class: "meta" }, "Aucune production pour ce JEU pour l'instant.")));
       }
       if (tab === "ppt") {
-        var modeSel = h("select", { style: "max-width:420px", onchange: function () { ppt.mode = modeSel.value; LSset("j-ppt", ppt); pp.pend = null; listen(); refresh(); } }, [["auto", "Automatique : la diapositive d'un JEU ouvre ce JEU"], ["ask", "Avec confirmation : un bouton « Ouvrir le JEU n » apparaît"], ["off", "Désactivée"]].map(function (m) { var o = h("option", { value: m[0] }, m[1]); if (m[0] === ppt.mode) o.selected = true; return o; }));
+        var modeSel = h("select", { style: "max-width:420px", onchange: function () { ppt.mode = modeSel.value; LSset("j-ppt", ppt); pp.pend = null; listen(); refresh(); } }, [["ask", "Avec confirmation (recommandé) : un bouton « Ouvrir le JEU n » apparaît, rien ne s'ouvre sans votre clic"], ["auto", "Automatique : la diapositive d'un JEU ouvre ce JEU (déconseillé en classe)"], ["off", "Désactivée"]].map(function (m) { var o = h("option", { value: m[0] }, m[1]); if (m[0] === ppt.mode) o.selected = true; return o; }));
         var jsel = h("select", { style: "max-width:420px" }, Object.keys(D.jeux).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === G.jeux[0]) o.selected = true; return o; }));
         var key = h("input", { value: ppt.topic, style: "max-width:320px" });
         detEl.appendChild(h("div", { class: "card" }, h("h2", {}, "Liaison PowerPoint"),
@@ -711,7 +712,7 @@
   /* ---------- Liaison PowerPoint : fichiers de macro (Windows) ---------- */
   var RELAY0 = "https://ntfy.sh";
   function relayBase() { return (LSget("j-relay") || RELAY0).replace(/\/+$/, ""); }
-  function pptCfg() { var c = LSget("j-ppt"); if (!c || !c.topic) { c = { topic: "route-" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12), mode: "auto" }; LSset("j-ppt", c); } return c; }
+  function pptCfg() { var c = LSget("j-ppt"); if (!c || !c.topic) { c = { topic: "route-" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12), mode: "ask", v: 2 }; LSset("j-ppt", c); } else if (c.v !== 2) { c.v = 2; if (c.mode === "auto") c.mode = "ask"; LSset("j-ppt", c); } return c; }
   function macroBas(topic) {
     return ['Attribute VB_Name = "RouteJeu"', "Option Explicit", "' (c) 2026 SAS BELM DEVELOPPEMENT. Tous droits reserves. Cree avec l'aide de Claude (Anthropic), relu par l'auteur.",
       "' Liaison PowerPoint -> tour de controle du plateau (La route de l'etat de l'art).", "' Quand une diapositive etiquetee ROUTE_JEU apparait en diaporama, son numero de JEU est envoye a la tour.",
