@@ -156,11 +156,33 @@
     tmr = setInterval(function () { hello(); resend(); }, 4000); A.timers.push(setInterval(resend, 2000));
     A.timers.push(setInterval(clockTick, 500));
 
+    /* ----- sujet de l'état de l'art : un sujet par joueur, un joueur par sujet ----- */
+    function sujetTxt() { var k = snap && snap.me.sujet; if (!k) return null; var x = (D.sujets || []).filter(function (y) { return y[0] === k; })[0]; return x ? { nom: x[0], q: x[1] } : { nom: k, q: "" }; }
+    function sujetLine() {
+      var s = sujetTxt();
+      return h("div", { style: "margin:6px 0" }, s ? h("span", {}, h("b", {}, "Votre sujet : "), s.nom, h("span", { class: "meta" }, s.q ? " · " + s.q : "")) : h("span", { class: "warn", style: "padding:2px 6px" }, "Vous n'avez pas encore choisi de sujet."), " ",
+        s ? null : h("button", { class: "ok", style: "margin:0", onclick: sujetModal }, "Choisir mon sujet"));
+    }
+    function sujetModal() {
+      var ov = h("div", { style: "position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;overflow:auto;padding:12px" }), box = h("div", { class: "card", style: "max-width:640px;margin:0 auto" }), list = h("div", {});
+      function draw() {
+        list.innerHTML = ""; var mine = snap.me.sujet, res = snap.me.sujetRes;
+        if (res && !res.ok && !mine) list.appendChild(h("p", { class: "warn" }, res.reason === "pris" ? "Trop tard : ce sujet est déjà pris par " + res.par + "." : res.reason === "dejachoisi" ? "Vous avez déjà choisi un sujet." : "Choix impossible."));
+        (D.sujets || []).forEach(function (x, i) {
+          var o = (snap.sujets || {})[x[0]], isMine = mine === x[0], b = isMine ? h("b", {}, "Votre sujet ✓") : o ? h("span", { class: "meta" }, "Pris par " + o) : mine ? h("span", { class: "meta" }, "libre") : h("button", { class: "ok", style: "margin:0", onclick: function () { send({ t: "sujet", sujet: x[0] }); } }, "Choisir");
+          list.appendChild(h("div", { style: "display:flex;justify-content:space-between;gap:8px;align-items:center;border-bottom:1px solid #e4e8f0;padding:6px 0" }, h("div", {}, h("b", {}, (i + 1) + ". " + x[0]), h("div", { class: "meta" }, x[1])), b));
+        });
+      }
+      box.appendChild(h("h2", {}, "Choisir mon sujet"));
+      box.appendChild(h("p", { class: "meta" }, "Un seul sujet par personne ; un sujet ne peut être pris que par une seule personne (le premier qui appuie est servi). Vous le retrouverez dans tous les JEUX qui suivent. Vous ne pourrez pas en changer sans l'enseignant."));
+      box.appendChild(list); box.appendChild(h("button", { class: "sec", onclick: function () { clearInterval(iv); ov.remove(); } }, "Fermer")); ov.appendChild(box); document.body.appendChild(ov); draw();
+      var last = ""; var iv = setInterval(function () { var sg = JSON.stringify([snap.me.sujet, snap.sujets, snap.me.sujetRes]); if (sg !== last) { last = sg; draw(); } }, 400); onLeave(function () { clearInterval(iv); try { ov.remove(); } catch (e) {} });
+    }
     function pawns() { return [{ pos: snap.tpos, col: "#1F2A5C", label: "Table " + snap.table.id.slice(1) }]; }
     function render() {
       var m = snap.me, ci = m.ci;
       head.innerHTML = ""; head.appendChild(h("div", { class: "card" }, h("span", { class: "jx-dot", style: "background:" + m.col }), h("b", {}, " " + m.nom), "  ·  " + C.COLNAMES[ci] + "  ·  table " + m.table.slice(1),
-        h("div", { class: "big" }, "Pion de la table sur la case " + snap.tpos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "")), info), dualEl); dualShow();
+        h("div", { class: "big" }, "Pion de la table sur la case " + snap.tpos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "")), sujetLine(), info), dualEl); dualShow();
       board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns()));
       var T = snap.table, k, pe = snap.me.pend, last = T.last && T.last.res[m.sid] && T.last.round >= ack ? T.last : null;
       if (pa && (!T.cur || T.cur.mine || pa.card !== cardId(T))) { pa = null; paSave(); }
@@ -212,6 +234,7 @@
     function enonceEl(k) {
       var e = (D.enonces || {})[k]; if (!e) return null; var box = h("div", { class: "card", style: "background:#F4F7FF;border-left:6px solid #3B6FD8" });
       function para(t) { return String(t).split("\n").map(function (l) { return h("p", { style: "margin:4px 0" }, l); }); }
+      if (/sujet/i.test(JSON.stringify(e))) { var sj = sujetTxt(); box.appendChild(sj ? h("p", { style: "margin:0 0 6px;background:#E4F6EC;padding:4px 8px;border-radius:6px" }, h("b", {}, "Votre sujet : "), sj.nom, sj.q ? " · " + sj.q : "") : h("p", { class: "warn", style: "margin:0 0 6px" }, "Choisissez d'abord votre sujet (bouton « Choisir mon sujet » en haut de l'écran).")); }
       if (e.clair) box.appendChild(h("p", { class: "big", style: "margin:0 0 6px" }, h("b", {}, "En clair, vous : "), e.clair));
       if (e.rend) box.appendChild(h("p", {}, h("b", {}, "Vous rendez : "), e.rend));
       if (e.but) box.appendChild(h("p", {}, h("b", {}, "But du JEU : "), e.but));
@@ -626,7 +649,7 @@
       if (view === "prof" && ((tab === "corr" && drawerEl.firstChild) || (tab === "ppt" && detEl.firstChild)) && sig === lastSig) return; lastSig = sig;
       tabsEl.innerHTML = detEl.innerHTML = drawerEl.innerHTML = ""; if (view !== "prof") return;
       var nrep = (G.reports || []).filter(function (r) { return !r.done; }).length;
-      [["ens", "Joueurs"], ["prod", "Saisies des joueurs"], ["rep", "Signalements" + (nrep ? " (" + nrep + ")" : "")], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { style: a[0] === "rep" && nrep ? "background:#C0392B" : "", class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "ppt" || a[0] === "prod") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
+      [["ens", "Joueurs"], ["prod", "Saisies des joueurs"], ["suj", "Sujets (" + Object.keys(G.sujets || {}).length + "/" + (D.sujets || []).length + ")"], ["rep", "Signalements" + (nrep ? " (" + nrep + ")" : "")], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { style: a[0] === "rep" && nrep ? "background:#C0392B" : "", class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "ppt" || a[0] === "prod") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
       if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEUX joués", "Réussite", "Temps moyen", "Duels", "État", "Retirer"].map(function (c) { return h("th", {}, c); })),
         S.players.slice().sort(function (a, b) { return b.score - a.score; }).map(function (p, i) { return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1]), h("td", {}, p.online ? "" : h("button", { class: "sec jx-mini", title: "Retirer un doublon ou un joueur parti", onclick: function () { if (confirm("Retirer " + p.nom + " (" + p.table + ") de la partie ? Ses points sont perdus.")) { C.leave(G, p.sid, true); dirty = true; refresh(); } } }, "Retirer"))); })));
       if (tab === "mast") {
@@ -653,6 +676,12 @@
         drawerEl.appendChild(h("div", { class: "card" }, h("h2", {}, "JEU " + kj + " · " + J.titre), h("p", { class: "meta" }, "Objectif " + J.zone + " · " + cs.length + " carte(s) en jeu" + (G.extra ? " (cartes supplémentaires comprises)" : "") + ". Chaque joueur reçoit une de ces cartes."),
           fo ? h("p", {}, h("b", {}, "Objectif annoncé aux joueurs : "), fo.obj) : null, fo ? h("p", {}, h("b", {}, "Règle : "), fo.regle) : null, fo && fo.ex ? h("ul", { class: "meta" }, fo.ex.map(function (x) { return h("li", {}, x); })) : null));
         cs.forEach(function (c, i) { drawerEl.appendChild(h("p", { class: "meta", style: "margin:10px 0 2px" }, "Carte " + (i + 1) + " / " + cs.length + (c.extra ? " · supplémentaire" : ""))); drawerEl.appendChild(answerEl(c)); });
+      }
+      if (tab === "suj") {
+        var sjr = (D.sujets || []).map(function (x, i) { var sd = (G.sujets || {})[x[0]], pl = sd && G.players[sd]; return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, x[0]), h("td", {}, pl ? pl.nom + " (" + pl.table + ")" : h("span", { class: "meta" }, "libre")), h("td", {}, pl ? h("button", { class: "sec jx-mini", onclick: function () { C.releaseSujet(G, x[0]); dirty = true; refresh(); } }, "Libérer") : "")); });
+        var sans = Object.keys(G.players).map(function (k) { return G.players[k]; }).filter(function (q) { return !q.sujet && !q.sim; });
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Sujets choisis par les joueurs"), h("table", {}, h("tr", {}, ["N°", "Sujet", "Joueur", ""].map(function (c) { return h("th", {}, c); })), sjr),
+          h("p", { class: "meta" }, sans.length ? "Sans sujet : " + sans.map(function (q) { return q.nom + " (" + q.table + ")"; }).join(", ") : "Tous les joueurs connectés ont un sujet."), h("p", { class: "meta" }, "« Libérer » rend le sujet disponible et permet au joueur d'en choisir un autre.")));
       }
       if (tab === "rep") {
         var rl = G.reports || [], hh = function (t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };

@@ -14,7 +14,7 @@
 
   function newGame(cfg) {
     cfg = cfg || {};
-    return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: true, help: {}, broken: {}, off: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["1"], min: cfg.min || 480, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [], arbit: [] };
+    return { v: 3, gid: Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36), extra: false, n2: true, help: {}, broken: {}, off: {}, sujets: {}, nudge: {}, code: (cfg.code || "ROUTE").toUpperCase(), jeux: cfg.jeux || ["1"], min: cfg.min || 480, status: "lobby", start: 0, end: 0, tables: {}, players: {}, log: [], arbit: [] };
   }
   function tid(n) { var k = parseInt(String(n).replace(/\D/g, ""), 10); return k >= 1 && k <= MAXT ? "T" + k : null; }
   function tableOf(G, t) { return G.tables[t] || (G.tables[t] = { id: t, players: [], round: 0, seen: {}, cur: null, last: null, pos: G.status === "play" ? startPos(G) : 0, bonus: 0, zs: {}, skip: {}, done: false }); }
@@ -115,6 +115,7 @@
   function leave(G, sid, force) {
     var p = G.players[sid]; if (!p) return false; if (!force && (p.res.length || p.pend)) { p.last = 0; return false; }
     var T = G.tables[p.table]; if (T) { T.players = T.players.filter(function (s) { return s !== sid; }); if (T.cur) delete T.cur.ans[sid]; }
+    if (p.sujet && G.sujets && G.sujets[p.sujet] === sid) delete G.sujets[p.sujet];
     delete G.players[sid]; if (G.nudge) delete G.nudge[sid]; return true;
   }
   function cardOf(jeu, id) { var src = jeu === "P" ? D.pieges : D.jeux[jeu]; return src.cartes.filter(function (c) { return c.id === id; })[0]; }
@@ -291,7 +292,22 @@
     newPts = Math.max(0, Math.min(3, newPts | 0)); var d = newPts - r.pts, z = zoneOf(r.jeu); if (!d) return true;
     r.pts = newPts; r.fixed = true; p.score += d; p.zp[z] = (p.zp[z] || 0) + d; G.tables[p.table].zs[z] = (G.tables[p.table].zs[z] || 0) + d; say(G, p, "Score du JEU " + jeu + " corrigé par l'enseignant : " + newPts + "/3", now); return true;
   }
+  /* Sujets de l'état de l'art : un sujet par joueur, un joueur par sujet (premier arrivé, premier servi). G.sujets = { nom du sujet : sid } */
+  function sujetList() { return (D && D.sujets) || []; }
+  function sujetOf(G, sid) { var p = G.players[sid]; return p && p.sujet ? sujetList().filter(function (x) { return x[0] === p.sujet; })[0] || null : null; }
+  function claimSujet(G, sid, key, now) {
+    var p = G.players[sid]; if (!p) return { ok: false, reason: "joueur" };
+    G.sujets = G.sujets || {};
+    if (!sujetList().some(function (x) { return x[0] === key; })) return { ok: false, reason: "inconnu" };
+    if (p.sujet === key) return { ok: true, reason: "deja" };
+    if (p.sujet) return { ok: false, reason: "dejachoisi", mine: p.sujet };
+    var o = G.sujets[key]; if (o && G.players[o] && o !== sid) return { ok: false, reason: "pris", par: G.players[o].nom };
+    G.sujets[key] = sid; p.sujet = key; p.sujetAt = now; return { ok: true, reason: "ok" };
+  }
+  function releaseSujet(G, key) { G.sujets = G.sujets || {}; var o = G.sujets[key]; if (o && G.players[o]) { delete G.players[o].sujet; delete G.players[o].sujetAt; } delete G.sujets[key]; }
+  function sujetsView(G) { var o = {}; sujetList().forEach(function (x) { var s = (G.sujets || {})[x[0]], p = s && G.players[s]; o[x[0]] = p ? p.nom : null; }); return o; }
   function act(G, sid, m, now) {
+    if (m.t === "sujet") { var rs = claimSujet(G, sid, String(m.sujet || ""), now); G.players[sid] && (G.players[sid].sujetRes = rs); return rs.ok; }
     if (m.t === "report") { var pr = G.players[sid]; G.reports = G.reports || []; G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : "?", table: pr ? pr.table : "?", kind: String(m.kind || "").slice(0, 40), txt: String(m.txt || "").slice(0, 600), jeu: String(m.jeu || "").slice(0, 4), done: false }); if (G.reports.length > 300) G.reports.shift(); return true; }
     if (m.t === "draw") return draw(G, sid, now);
     if (m.t === "ans") { var pp = G.players[sid], TT = pp && G.tables[pp.table]; if (m.card && TT && TT.cur && m.card !== TT.round + ":" + TT.cur.jeu + ":" + TT.cur.id) return false; return answer(G, sid, m.ans, now, m.bet); }
@@ -378,14 +394,14 @@
   function snapshot(G, sid, now) {
     var p = G.players[sid]; if (!p) return null; var T = G.tables[p.table], tr = tireur(G, T, now);
     return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, gate: D.caps.gate, max: D.caps.max, tpos: T.pos, here: jeuHere(T), tdone: !!T.done, tscore: tableScore(G, T), gauges: Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }), mast: G.status === "ended" || T.done ? masteryAll(p) : null,
-      me: { sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
-      canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
+      me: { sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
+      sujets: sujetsView(G), canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
       table: { id: T.id, round: T.round, jumped: T.jumped || null,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),
         cur: T.cur ? { jeu: T.cur.jeu, id: T.cur.id, at: T.cur.at, answered: Object.keys(T.cur.ans), mine: !!T.cur.ans[sid] } : null,
         last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res, zone: T.last.zone, gauge: T.last.gauge, bonus: T.last.bonus, from: T.last.from, to: T.last.to, path: T.last.path } : null } };
   }
   var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, gotoJeu: gotoJeu, moveTable: moveTable, leave: leave, caseIx: caseIx, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
-    act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, exactTool: exactTool, reopen: reopen, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
+    claimSujet: claimSujet, releaseSujet: releaseSujet, sujetOf: sujetOf, sujetsView: sujetsView, act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, exactTool: exactTool, reopen: reopen, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);

@@ -62,4 +62,16 @@ var Gl = game(2); ok(J.leave(Gl, "s11"), "un joueur qui n'a rien joué peut quit
 // partie sans chronomètre : elle ne se termine que sur décision de l'enseignant, et peut être rouverte
 var Gc = game(1); ok(J.running(Gc, NOW + 100 * 3600000), "pas de fin automatique, même 100 heures plus tard"); J.tick(Gc, NOW + 100 * 3600000); eq(Gc.status, "play", "toujours en cours après un tick tardif"); J.stop(Gc, NOW); eq(Gc.status, "ended", "terminée par l'enseignant"); ok(!J.canDraw(Gc, "s10", NOW), "plus de tirage une fois terminée"); J.reopen(Gc, NOW); eq(Gc.status, "play", "rouverte");
 ok(J.exactTool("1") && !J.exactTool("2") && J.exactTool("4"), "outil exact : JEU 1 et 4 en ont un, pas le JEU 2"); eq(Object.keys(D.enonces).length, 45, "45 énoncés repris du support"); ok(Object.keys(D.enonces).every(function (k) { var e = D.enonces[k]; return e.page >= 0 && (e.but || e.consigne); }), "chaque énoncé a un but ou une consigne");
+
+// sujets : un par joueur, un joueur par sujet, reconnu dans le snapshot
+(function () { var G2 = game(3), S = D.sujets, a = "s10", b = "s11", c = "s12";
+  eq(S.length, 19, "19 sujets choisissables");
+  ok(J.act(G2, a, { t: "sujet", sujet: S[0][0] }, NOW), "joueur A prend le sujet 1"); eq(G2.players[a].sujet, S[0][0], "sujet enregistré");
+  ok(!J.act(G2, b, { t: "sujet", sujet: S[0][0] }, NOW), "joueur B ne peut pas prendre le même sujet"); eq(G2.players[b].sujetRes.reason, "pris", "motif : pris"); eq(G2.players[b].sujetRes.par, "P0", "pris par P0");
+  ok(J.act(G2, b, { t: "sujet", sujet: S[1][0] }, NOW), "B prend le sujet 2");
+  ok(!J.act(G2, b, { t: "sujet", sujet: S[2][0] }, NOW), "un seul sujet par joueur"); eq(G2.players[b].sujet, S[1][0], "B garde son sujet");
+  ok(!J.act(G2, c, { t: "sujet", sujet: "inexistant" }, NOW), "sujet inconnu refusé");
+  var sn = J.snapshot(G2, a, NOW); eq(sn.me.sujet, S[0][0], "snapshot : mon sujet"); eq(sn.sujets[S[0][0]], "P0", "snapshot : propriétaire"); eq(sn.sujets[S[2][0]], null, "snapshot : sujet libre");
+  J.releaseSujet(G2, S[0][0]); eq(G2.players[a].sujet, undefined, "libération par l'enseignant"); ok(J.act(G2, c, { t: "sujet", sujet: S[0][0] }, NOW), "C prend le sujet libéré");
+  J.leave(G2, c, true); ok(!G2.sujets[S[0][0]], "un joueur qui part libère son sujet"); })();
 console.log(process.exitCode ? "ÉCHECS" : "logique tables/joueurs : " + n + " vérifications, tout passe");
