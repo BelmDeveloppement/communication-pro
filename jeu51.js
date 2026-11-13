@@ -21,43 +21,74 @@
     { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
     { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
     { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" } ] } };
+  var RELAY = window.CPRO_RELAY || "wss://cpro-relay.belmdeveloppement.workers.dev/ws";
+  /* Liaison WebSocket vers le relais (Cloudflare) : reconnexion automatique, battement toutes les 20 s */
+  function relaySock(url, onopen, onmsg, onstate, onreplaced) {
+    var ws = null, dead = false, retry = null, hb = null, tries = 0, up = false;
+    function st(v) { if (v !== up) { up = v; onstate(v); } }
+    function open() {
+      if (dead || typeof WebSocket === "undefined") return; clearTimeout(retry);
+      try { ws = new WebSocket(url); } catch (e) { return again(); }
+      var me = ws;
+      ws.onopen = function () { tries = 0; st(true); clearInterval(hb); hb = setInterval(function () { try { me.send("ping"); } catch (e) {} }, 20000); onopen(); };
+      ws.onmessage = function (e) { if (e.data === "pong") return; try { onmsg(JSON.parse(e.data)); } catch (x) {} };
+      ws.onclose = function (e) { if (me === ws) { st(false); clearInterval(hb); if (e && e.code === 4001) { dead = true; if (onreplaced) onreplaced(); } else again(); } };
+      ws.onerror = function () { try { me.close(); } catch (e) {} };
+    }
+    function again() { if (dead) return; tries++; clearTimeout(retry); retry = setTimeout(open, Math.min(8000, 1500 * tries)); }
+    open();
+    return { ok: function () { return up && ws && ws.readyState === 1; }, send: function (o) { try { ws.send(typeof o === "string" ? o : JSON.stringify(o)); return true; } catch (e) { return false; } },
+      close: function () { dead = true; clearTimeout(retry); clearInterval(hb); try { ws && ws.close(); } catch (e) {} } };
+  }
   function hostNet(code, onmsg, onstatus, local) {
-    var conns = {}, peer = null, dead = false, bc = null, retry = null;
+    var conns = {}, peer = null, dead = false, bc = null, retry = null, via = {}, rl = null, rlOk = false, pst = "…", pd = "";
+    var emit = onstatus; function report() { if (rlOk) emit("ok"); else emit(pst, pd); }
+    if (!local) rl = relaySock(RELAY + "?room=" + encodeURIComponent(code) + "&role=host", function () {}, function (m) { if (m && m.sid) { via[m.sid] = "r"; onmsg(m, null); } }, function (v) { rlOk = v; report(); }, function () { pst = "busy"; report(); });
+    onstatus = function (s, d) { pst = s; pd = d || ""; report(); };
     try { bc = new BroadcastChannel("cpro-j-" + code); bc.onmessage = function (e) { if (e.data && e.data.to === "host") onmsg(e.data.m, null); }; } catch (e) {}
     function open() {
       if (dead || local || typeof Peer === "undefined") { onstatus(bc ? "local" : "off"); return; }
       try {
         peer = new Peer("cpro-j-" + code, PCFG);
         peer.on("open", function () { onstatus("ok"); });
-        peer.on("connection", function (c) { c.on("data", function (m) { if (m && m.sid) { conns[m.sid] = c; onmsg(m, c); } }); });
+        peer.on("connection", function (c) { c.on("data", function (m) { if (m && m.sid) { conns[m.sid] = c; via[m.sid] = "p"; onmsg(m, c); } }); });
         peer.on("error", function (e) { var ty = e && e.type; if (ty === "unavailable-id") { onstatus("busy"); retry = setTimeout(function () { try { peer.destroy(); } catch (x) {} open(); }, 5000); } else if (ty === "network" || ty === "server-error" || ty === "socket-error" || ty === "socket-closed" || ty === "ssl-unavailable") { onstatus("err", ty); clearTimeout(retry); retry = setTimeout(function () { try { peer.destroy(); } catch (x) {} open(); }, 6000); } /* autres erreurs (liaison ratée d'un joueur) : la tour reste en service */ });
         peer.on("disconnected", function () { onstatus("err"); if (!dead) try { peer.reconnect(); } catch (e) {} });
       } catch (e) { onstatus("err"); }
     }
     open();
-    return { send: function (sid, m) { var c = conns[sid]; if (c && c.open) try { c.send(m); } catch (e) {} if (bc) try { bc.postMessage({ to: sid, m: m }); } catch (e) {} },
-      bind: function (real, sid) { if (conns[sid]) conns[real] = conns[sid]; },
-      close: function () { dead = true; clearTimeout(retry); try { peer && peer.destroy(); } catch (e) {} try { bc && bc.close(); } catch (e) {} } };
+    return { send: function (sid, m) { var c = conns[sid], done = false; if (via[sid] === "r" && rl && rl.ok()) done = rl.send({ to: sid, m: m }); if (!done && c && c.open) try { c.send(m); } catch (e) {} if (bc) try { bc.postMessage({ to: sid, m: m }); } catch (e) {} },
+      bind: function (real, sid) { if (conns[sid]) conns[real] = conns[sid]; if (via[sid]) via[real] = via[sid]; },
+      close: function () { dead = true; clearTimeout(retry); try { rl && rl.close(); } catch (e) {} try { peer && peer.destroy(); } catch (e) {} try { bc && bc.close(); } catch (e) {} } };
   }
   function clientNet(code, getSid, onmsg, onlink, hello, local) {
-    var peer = null, conn = null, dead = false, retry = null, bc = null;
+    var peer = null, conn = null, dead = false, retry = null, bc = null, rl = null, hostUp = false, peerLink = false, peerOn = false, late = null;
     try { bc = new BroadcastChannel("cpro-j-" + code); bc.onmessage = function (e) { if (e.data && e.data.to === getSid()) { onmsg(e.data.m); onlink(true); } }; } catch (e) {}
+    function link() { onlink((rl && rl.ok() && hostUp) || peerLink); }
+    if (!local) {
+      rl = relaySock(RELAY + "?room=" + encodeURIComponent(code) + "&role=client&sid=" + encodeURIComponent(getSid()), function () {}, function (m) {
+        if (m && m.__ctl === "host") { var was = hostUp; hostUp = !!m.up; if (hostUp) { hello(); } link(); return; }
+        onmsg(m); hostUp = true; link();
+      }, function (v) { if (!v) { hostUp = false; link(); } });
+      /* repli : si le relais ne répond pas en 5 s, on tente aussi la liaison directe */
+      late = setTimeout(function () { if (!(rl && rl.ok()) && !peerOn) { peerOn = true; connect(); } }, 5000);
+    }
     function connect() {
       if (dead || local || typeof Peer === "undefined") return; clearTimeout(retry);
-      var again = function (ms) { onlink(false); clearTimeout(retry); retry = setTimeout(connect, ms); };
+      var again = function (ms) { peerLink = false; link(); clearTimeout(retry); retry = setTimeout(connect, ms); };
       try {
         if (peer) try { peer.destroy(); } catch (e) {}
         peer = new Peer(undefined, PCFG); peer.on("open", function () {
           conn = peer.connect("cpro-j-" + code, { reliable: true });
-          conn.on("open", function () { onlink(true); hello(); }); conn.on("data", function (m) { onmsg(m); });
+          conn.on("open", function () { peerLink = true; link(); hello(); }); conn.on("data", function (m) { onmsg(m); });
           conn.on("close", function () { again(3000); }); conn.on("error", function () { again(5000); });
         });
         peer.on("error", function () { again(6000); }); peer.on("disconnected", function () { again(5000); });
       } catch (e) { again(8000); }
     }
-    connect();
-    return { send: function (m) { if (conn && conn.open) try { conn.send(m); } catch (e) {} if (bc) try { bc.postMessage({ to: "host", m: m }); } catch (e) {} },
-      close: function () { dead = true; clearTimeout(retry); try { peer && peer.destroy(); } catch (e) {} try { bc && bc.close(); } catch (e) {} } };
+    if (local) connect();
+    return { send: function (m) { var done = false; if (rl && rl.ok() && hostUp) done = rl.send(m); if (!done && conn && conn.open) try { conn.send(m); } catch (e) {} if (bc) try { bc.postMessage({ to: "host", m: m }); } catch (e) {} },
+      close: function () { dead = true; clearTimeout(retry); clearTimeout(late); try { rl && rl.close(); } catch (e) {} try { peer && peer.destroy(); } catch (e) {} try { bc && bc.close(); } catch (e) {} } };
   }
 
   /* ---------- Roue révélatrice (0 à 3 cases) ---------- */
