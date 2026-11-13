@@ -293,7 +293,7 @@
   }
   function act(G, sid, m, now) {
     if (m.t === "draw") return draw(G, sid, now);
-    if (m.t === "ans") return answer(G, sid, m.ans, now, m.bet);
+    if (m.t === "ans") { var pp = G.players[sid], TT = pp && G.tables[pp.table]; if (m.card && TT && TT.cur && m.card !== TT.round + ":" + TT.cur.jeu + ":" + TT.cur.id) return false; return answer(G, sid, m.ans, now, m.bet); }
     if (m.t === "outil") return actOutil(G, sid, !!m.ok, now);
     if (m.t === "read") return actRead(G, sid, m.doc, now);
     if (m.t === "help") return actHelp(G, sid, m.tool, m.lvl, now);

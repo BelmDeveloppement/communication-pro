@@ -30,7 +30,7 @@
         peer = new Peer("cpro-j-" + code, PCFG);
         peer.on("open", function () { onstatus("ok"); });
         peer.on("connection", function (c) { c.on("data", function (m) { if (m && m.sid) { conns[m.sid] = c; onmsg(m, c); } }); });
-        peer.on("error", function (e) { if (e && e.type === "unavailable-id") { onstatus("busy"); retry = setTimeout(function () { try { peer.destroy(); } catch (x) {} open(); }, 5000); } else onstatus("err"); });
+        peer.on("error", function (e) { var ty = e && e.type; if (ty === "unavailable-id") { onstatus("busy"); retry = setTimeout(function () { try { peer.destroy(); } catch (x) {} open(); }, 5000); } else if (ty === "network" || ty === "server-error" || ty === "socket-error" || ty === "socket-closed" || ty === "ssl-unavailable") { onstatus("err", ty); clearTimeout(retry); retry = setTimeout(function () { try { peer.destroy(); } catch (x) {} open(); }, 6000); } /* autres erreurs (liaison ratée d'un joueur) : la tour reste en service */ });
         peer.on("disconnected", function () { onstatus("err"); if (!dead) try { peer.reconnect(); } catch (e) {} });
       } catch (e) { onstatus("err"); }
     }
@@ -94,6 +94,10 @@
   function play(me) {
     LSset(MK, me);
     var snap = null, net = null, key = "", linkOk = false, gidCur = null, rolled = -1, ack = 0, answers = null, tmr = null;
+    var pa = (function () { var o = LSget("j-pa"); return o && o.sid === me.sid ? o.pa : null; })();
+    function paSave() { LSset("j-pa", pa ? { sid: me.sid, pa: pa } : {}); }
+    function cardId(T) { return T && T.cur ? T.round + ":" + T.cur.jeu + ":" + T.cur.id : ""; }
+    function resend() { if (pa && snap && snap.table.cur && !snap.table.cur.mine && pa.card === cardId(snap.table)) send(pa.msg); }
     var head = h("div", {}), board = h("div", {}), body = h("div", {}), info = h("p", { class: "meta" }, "○ Connexion à l'enseignant…");
     function fk() { return me.code + me.sid + ":" + gidCur; }
     function loadFlags() { var r = LSget("j-roll") || {}, a = LSget("j-ack") || {}; rolled = r[fk()] != null ? r[fk()] : -1; ack = a[fk()] || 0; }
@@ -118,7 +122,7 @@
     function onlink(ok) { linkOk = ok; info.textContent = ok ? "● Connecté à l'enseignant" : "○ Hors ligne : la partie reprendra à la reconnexion"; info.className = ok ? "meta" : "warn"; }
     net = clientNet(me.code, function () { return me.sid; }, onmsg, onlink, hello);
     setTimeout(hello, 400);
-    tmr = setInterval(hello, 4000);
+    tmr = setInterval(function () { hello(); resend(); }, 4000); A.timers.push(setInterval(resend, 2000));
     A.timers.push(setInterval(clockTick, 500));
 
     function pawns() { return [{ pos: snap.tpos, col: "#1F2A5C", label: "Table " + snap.table.id.slice(1) }]; }
@@ -128,9 +132,11 @@
         h("div", { class: "big" }, "Pion de la table sur la case " + snap.tpos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "")), info), dualEl); dualShow();
       board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns()));
       var T = snap.table, k, pe = snap.me.pend, last = T.last && T.last.res[m.sid] && T.last.round >= ack ? T.last : null;
+      if (pa && (!T.cur || T.cur.mine || pa.card !== cardId(T))) { pa = null; paSave(); }
       var needRead = snap.rd !== "ok" && snap.status !== "ended" && !m.done && !(T.cur && T.cur.mine);
       if (last) k = "res:" + last.round + ":" + (rolled >= last.round ? 1 : 0);
       else if (needRead) k = "read:" + snap.rd + ":" + snap.here + ":" + snap.nudge;
+      else if (T.cur && T.cur.mine === false && pa) k = "send:" + T.round + ":" + T.cur.id;
       else if (T.cur && T.cur.mine === false) k = "card:" + T.round + ":" + T.cur.id;
       else if (pe) k = "pend:" + pe.k + ":" + (pe.st || "") + ":" + (pe.mine ? 1 : 0) + ":" + (pe.opp ? pe.opp.nom + pe.opp.done : "") + ":" + (pe.card ? pe.card.id : "") + ":" + (pe.id || "") + ":" + T.round + ":" + (pe.tool ? pe.tool.off : "");
       else if (T.cur) k = "wait:" + T.round + ":" + T.cur.answered.length + ":" + T.players.length;
@@ -138,6 +144,7 @@
       clockTick(); if (hold) return; if (k === key) return; key = k; body.innerHTML = "";
       if (k.indexOf("read:") === 0) return drawRead();
       if (k.indexOf("pend:") === 0) return drawPend(pe);
+      if (k.indexOf("send:") === 0) return drawSending();
       if (k.indexOf("card:") === 0) return drawCard(T.cur);
       if (k.indexOf("res:") === 0) return drawResult(last);
       if (k.indexOf("wait:") === 0) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Réponse envoyée"), h("p", {}, "En attente des autres joueurs de la table…"), chips(T)));
@@ -293,6 +300,9 @@
       if (c.t === "trous") return c.slots.map(function (sl) { return sl.lab + " : " + sl.opts[sl.ok]; }).join(" ; ");
       return c.modele || "";
     }
+    function drawSending() {
+      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Envoi de votre réponse…"), h("p", {}, "Votre réponse n'est pas encore arrivée chez l'enseignant. L'application la renvoie toute seule toutes les quelques secondes : gardez cette page ouverte."), h("p", { class: "meta" }, linkOk ? "● Connecté : confirmation attendue." : "○ Hors ligne : changez de réseau (partage de connexion du téléphone) ou rechargez la page ; votre réponse est conservée sur cet appareil."), h("button", { class: "sec", onclick: function () { resend(); send({ t: "join", nom: me.nom, table: me.table }); } }, "Renvoyer maintenant")));
+    }
     function drawCard(cur) {
       var c = C.cardOf(cur.jeu, cur.id), j = D.jeux[cur.jeu], box = h("div", { class: "card" });
       box.appendChild(h("h2", {}, "JEU " + cur.jeu + " · " + j.titre));
@@ -305,7 +315,7 @@
       box.appendChild(h("button", { class: "ok", onclick: function () {
         if (!f.ok()) { msg.style.display = "block"; return; }
         if (f.empty && f.empty() && !confirm(f.empty() + " champ(s) vide(s) : ils compteront pour 0. Valider quand même ?")) return;
-        send({ t: "ans", ans: f.get(), bet: bet.checked }); key = "wait:"; body.innerHTML = ""; body.appendChild(h("div", { class: "card" }, h("h2", {}, "Réponse envoyée"), h("p", {}, "En attente des autres joueurs de la table…")));
+        pa = { card: cardId(snap.table), msg: { t: "ans", ans: f.get(), bet: bet.checked, card: cardId(snap.table) } }; paSave(); send(pa.msg); key = ""; render();
       } }, "Valider ma réponse"), msg); body.appendChild(box);
     }
     function moveText(r, m, last) {
@@ -402,7 +412,7 @@
   }
 
   function run(G, sim) {
-    LSset(GK, G); var net = null, status = "…", dirty = true, view = "proj", tab = "ens", simSt = null, link = {}, wrap = h("div", { class: "jx" }), dead = false;
+    LSset(GK, G); var net = null, status = "…", statusDetail = "", dirty = true, view = "proj", tab = "ens", simSt = null, link = {}, wrap = h("div", { class: "jx" }), dead = false;
     function now() { return Date.now(); }
     function save() { LSset(GK, G); }
     function push() { Object.keys(G.players).forEach(function (s) { var p = G.players[s]; if (p.sim) return; var m = C.snapshot(G, s, now()); if (m && net) net.send(s, m); }); }
@@ -443,7 +453,7 @@
       } catch (e) { pp.st = "err"; }
     }
     listen();
-    net = hostNet(G.code, onmsg, function (s) { status = s; refresh(); });
+    net = hostNet(G.code, onmsg, function (s, d) { status = s; statusDetail = d || ""; refresh(); });
     var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); refresh(); }, 1000);
     onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} try { es && es.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
 
@@ -496,7 +506,7 @@
       if (dead) return; var t = now(), S = C.stats(G, t), left = G.status === "play" ? G.end - t : 0;
       var rank = S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x) { return x.id; });
       headEl.innerHTML = "";
-      var stTxt = { ok: "● réseau prêt", local: "◐ mode local (même navigateur)", busy: "○ code déjà utilisé : fermez l'autre tour", err: "○ réseau indisponible", off: "○ PeerJS absent" }[status] || "…";
+      var stTxt = { ok: "● réseau prêt", local: "◐ mode local (même navigateur)", busy: "○ code déjà utilisé : fermez l'autre tour", err: "○ réseau indisponible" + (statusDetail ? " (" + statusDetail + ")" : "") + " · nouvel essai automatique", off: "○ PeerJS absent" }[status] || "…";
       headEl.appendChild(h("div", { class: "jx-title" }, h("b", {}, "La route de l'état de l'art"), h("span", {}, " · JEU ouvert : " + G.jeux.join(" + ") + " · " + (D.jeux[G.jeux[0]] ? D.jeux[G.jeux[0]].titre : "")), h("small", {}, "  rejoindre : belmdeveloppement.github.io/communication-pro/#/j  ·  code "), h("b", { class: "jx-code" }, G.code)));
       headEl.appendChild(h("div", { class: "jx-clock" }, G.status === "lobby" ? "Partie ouverte : inscriptions" : G.status === "ended" ? "Partie terminée" : "Partie en cours", h("small", {}, "  " + Object.keys(G.players).length + " joueurs · " + S.tables.length + " tables · " + stTxt)));
       var ctr = h("div", { class: "jx-ctl" });
