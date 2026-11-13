@@ -21,11 +21,11 @@
     { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
     { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
     { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" } ] } };
-  function hostNet(code, onmsg, onstatus) {
+  function hostNet(code, onmsg, onstatus, local) {
     var conns = {}, peer = null, dead = false, bc = null, retry = null;
     try { bc = new BroadcastChannel("cpro-j-" + code); bc.onmessage = function (e) { if (e.data && e.data.to === "host") onmsg(e.data.m, null); }; } catch (e) {}
     function open() {
-      if (dead || typeof Peer === "undefined") { onstatus(bc ? "local" : "off"); return; }
+      if (dead || local || typeof Peer === "undefined") { onstatus(bc ? "local" : "off"); return; }
       try {
         peer = new Peer("cpro-j-" + code, PCFG);
         peer.on("open", function () { onstatus("ok"); });
@@ -39,11 +39,11 @@
       bind: function (real, sid) { if (conns[sid]) conns[real] = conns[sid]; },
       close: function () { dead = true; clearTimeout(retry); try { peer && peer.destroy(); } catch (e) {} try { bc && bc.close(); } catch (e) {} } };
   }
-  function clientNet(code, getSid, onmsg, onlink, hello) {
+  function clientNet(code, getSid, onmsg, onlink, hello, local) {
     var peer = null, conn = null, dead = false, retry = null, bc = null;
     try { bc = new BroadcastChannel("cpro-j-" + code); bc.onmessage = function (e) { if (e.data && e.data.to === getSid()) { onmsg(e.data.m); onlink(true); } }; } catch (e) {}
     function connect() {
-      if (dead || typeof Peer === "undefined") return; clearTimeout(retry);
+      if (dead || local || typeof Peer === "undefined") return; clearTimeout(retry);
       var again = function (ms) { onlink(false); clearTimeout(retry); retry = setTimeout(connect, ms); };
       try {
         if (peer) try { peer.destroy(); } catch (e) {}
@@ -120,7 +120,7 @@
     function dualShow() { dualEl.style.display = Date.now() - dualAt < 15000 ? "block" : "none"; }
     function clockTick() { if (!snap) return; var left = snap.end - (Date.now() + (snap.now - snapAt)); clockEl.textContent = snap.status === "play" ? mmss(left) : snap.status === "ended" ? "terminée" : "—"; clockEl.style.color = snap.status === "play" && left < 120000 ? "#E4572E" : ""; }
     function onlink(ok) { linkOk = ok; info.textContent = ok ? "● Connecté à l'enseignant" : "○ Hors ligne : la partie reprendra à la reconnexion"; info.className = ok ? "meta" : "warn"; }
-    net = clientNet(me.code, function () { return me.sid; }, onmsg, onlink, hello);
+    net = clientNet(me.code, function () { return me.sid; }, onmsg, onlink, hello, !!me.local);
     setTimeout(hello, 400);
     tmr = setInterval(function () { hello(); resend(); }, 4000); A.timers.push(setInterval(resend, 2000));
     A.timers.push(setInterval(clockTick, 500));
@@ -535,6 +535,7 @@
       ctr.appendChild(h("button", { class: "sec", onclick: function () { exportCsv(S); } }, "Export CSV"));
       var endBtn = G.status === "play" ? h("button", { class: "r", style: "margin-left:28px", onclick: function () { if (confirm("Terminer la partie pour toute la classe ? Les joueurs verront leur bilan. À faire seulement à la fin du cours (vous pourrez la rouvrir en cas d'erreur).")) { C.stop(G, now()); dirty = true; refresh(); } } }, "Terminer la partie (fin du cours)") : null;
       ctr.appendChild(h("a", { class: "btn sec", href: "#/test", target: "_blank", style: "text-decoration:none;display:inline-block" }, "Mode test"));
+      ctr.appendChild(h("a", { class: "btn", href: "#/simu?j=" + G.jeux[0], target: "_blank", style: "text-decoration:none;display:inline-block" }, "Simulation joueur"));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { if (confirm("Terminer et effacer cette partie ?")) { try { localStorage.removeItem(GK); } catch (e) {} dead = true; location.hash = "#/tour"; setTimeout(function () { location.reload(); }, 50); } } }, "Nouvelle partie"));
       if (endBtn) ctr.appendChild(endBtn);
       headEl.appendChild(ctr);
@@ -750,6 +751,32 @@
       h("p", { class: "meta" }, "Certains outils demandent un compte gratuit ou limitent l'offre gratuite : à vérifier aussi. Si l'outil est inaccessible, les joueurs passent leur tour sans pénalité."), rows,
       h("button", { class: "sec", onclick: function () { st = {}; save(); draw(); } }, "Tout effacer"), h("p", {}, h("a", { href: "#/tour" }, "← Tour de contrôle")));
   }
-  window.J51 = { route: function (a) { if (a === "outils-test") return towerGate(toolsTestPage); if (a === "tour") return towerGate(); if (a === "test") return towerGate(testPage); return joinPage(); } };
-  var hs = location.hash || ""; if (/^#\/(j|tour|test|outils-test)(\?|\/|$)/.test(hs)) window.dispatchEvent(new Event("hashchange"));
+  /* ---------- Simulation joueur (enseignant) : même écran que les joueurs, partie privée, aucune table réelle ---------- */
+  function simuPage() {
+    var p = q(), code = "SIM" + Math.random().toString(36).slice(2, 6).toUpperCase(), k0 = D.jeux[p.j] ? p.j : "1", G = C.newGame({ code: code, jeux: [k0] }), net = null, dirty = true, link = {}, dead = false;
+    C.start(G, Date.now());
+    function now() { return Date.now(); }
+    function push() { Object.keys(G.players).forEach(function (s) { var m = C.snapshot(G, s, now()); if (m && net) net.send(s, m); }); }
+    function onmsg(m) {
+      if (!m || !m.sid) return; var t = now(), sid = m.sid;
+      if (m.t === "join") { var r = C.join(G, { sid: sid, nom: m.nom, table: m.table }, t); if (!r.ok) { if (net) net.send(sid, { t: "err", msg: r.err }); return; } if (r.player.sid !== sid) { link[sid] = r.player.sid; if (net) net.bind(r.player.sid, sid); } if (net) net.send(sid, C.snapshot(G, r.player.sid, t)); dirty = true; return; }
+      var real = link[sid] || sid, pl = G.players[real]; if (!pl) return; pl.last = t;
+      if (m.t === "leave") { C.leave(G, real, true); dirty = true; return; }
+      C.act(G, real, m, t); if (net) net.send(sid, C.snapshot(G, real, t)); dirty = true;
+    }
+    net = hostNet(code, onmsg, function () {}, true);
+    var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (dirty) { push(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); }, 1000);
+    onLeave(function () { dead = true; clearInterval(flush); if (net) net.close(); });
+    var me = { sid: rid(), nom: "Enseignant", table: "T1", code: code, local: true };
+    MK = "j-me-simu"; play(me);
+    var sel = h("select", { style: "max-width:360px" }, Object.keys(D.jeux).sort(function (a, b) { return a - b; }).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === k0) o.selected = true; return o; }));
+    var cor = h("div", {}), shown = false;
+    var bar = h("div", { class: "card", style: "background:#FFF6E0;border:2px solid #E9A400" }, h("b", {}, "Simulation joueur (enseignant)"), h("p", { class: "meta" }, "Vous voyez l'écran exact des joueurs, sur une table privée : rien n'est envoyé aux étudiants, rien n'est compté dans la partie. Les cases à effet (Aléa, Outil, Piège, Duel, Relecture) se jouent comme en vrai ; un duel sans adversaire se joue contre la tour."),
+      h("div", {}, sel, " ", h("button", { onclick: function () { C.setJeu(G, sel.value, now()); dirty = true; if (shown) showCor(); } }, "Ouvrir ce JEU"), " ", h("button", { class: "sec", onclick: function () { shown = !shown; if (shown) showCor(); else cor.innerHTML = ""; } }, "Afficher / masquer le corrigé")), cor);
+    function showCor() { cor.innerHTML = ""; var J = D.jeux[sel.value], cs = J.cartes.filter(function (c) { return !c.extra; }); cor.appendChild(h("p", { class: "meta" }, "Corrigé du JEU " + sel.value + " : à ne pas projeter.")); cs.forEach(function (c, i) { cor.appendChild(h("p", { class: "meta" }, "Carte " + (i + 1) + " / " + cs.length)); cor.appendChild(answerEl(c)); }); }
+    sel.addEventListener("change", function () { if (shown) showCor(); });
+    var root = document.getElementById("app"); root.insertBefore(bar, root.firstChild);
+  }
+  window.J51 = { route: function (a) { if (a === "simu") return simuPage(); if (a === "outils-test") return towerGate(toolsTestPage); if (a === "tour") return towerGate(); if (a === "test") return towerGate(testPage); return joinPage(); } };
+  var hs = location.hash || ""; if (/^#\/(j|tour|test|outils-test|simu)(\?|\/|$)/.test(hs)) window.dispatchEvent(new Event("hashchange"));
 })();
