@@ -233,7 +233,7 @@
         h("p", {}, f.ex[2]), to ? toolBlock(to) : null);
     }
     function drawRead() {
-      var common = snap.rd === "common", wait = common ? 10 : 8, k = snap.here, rk = gidCur + ":" + snap.rd + ":" + k, t0 = readT[rk] || (readT[rk] = Date.now());
+      var common = snap.rd === "common", wait = me.local ? 0 : (common ? 10 : 8), k = snap.here, rk = gidCur + ":" + snap.rd + ":" + k, t0 = readT[rk] || (readT[rk] = Date.now());
       function leftS() { return Math.max(0, wait - Math.floor((Date.now() - t0) / 1000)); } /* le compte à rebours garde son heure de départ, même si l'écran se redessine */
       var btn = h("button", { class: "ok" }, "J'ai lu"), tm = null;
       function tickRead() { var l = leftS(); if (l <= 0) { clearInterval(tm); btn.removeAttribute("disabled"); btn.textContent = "J'ai lu"; } else { btn.setAttribute("disabled", "disabled"); btn.textContent = "J'ai lu (" + l + " s)"; } }
