@@ -16,13 +16,18 @@
   function pastille(st, nom, col) { var s = ST[st] || ST.attend; return h("span", { class: "jx-chip", style: "border-color:" + col }, h("i", { style: "background:" + col }), nom, h("b", { style: "color:" + s[2] }, " " + s[0]), h("small", {}, " " + s[1])); }
 
   /* ---------- Transport : PeerJS (autres appareils) + BroadcastChannel (même navigateur) ---------- */
+  var PCFG = { config: { iceServers: [
+    { urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+    { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+    { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" } ] } };
   function hostNet(code, onmsg, onstatus) {
     var conns = {}, peer = null, dead = false, bc = null, retry = null;
     try { bc = new BroadcastChannel("cpro-j-" + code); bc.onmessage = function (e) { if (e.data && e.data.to === "host") onmsg(e.data.m, null); }; } catch (e) {}
     function open() {
       if (dead || typeof Peer === "undefined") { onstatus(bc ? "local" : "off"); return; }
       try {
-        peer = new Peer("cpro-j-" + code);
+        peer = new Peer("cpro-j-" + code, PCFG);
         peer.on("open", function () { onstatus("ok"); });
         peer.on("connection", function (c) { c.on("data", function (m) { if (m && m.sid) { conns[m.sid] = c; onmsg(m, c); } }); });
         peer.on("error", function (e) { if (e && e.type === "unavailable-id") { onstatus("busy"); retry = setTimeout(function () { try { peer.destroy(); } catch (x) {} open(); }, 5000); } else onstatus("err"); });
@@ -42,7 +47,7 @@
       var again = function (ms) { onlink(false); clearTimeout(retry); retry = setTimeout(connect, ms); };
       try {
         if (peer) try { peer.destroy(); } catch (e) {}
-        peer = new Peer(); peer.on("open", function () {
+        peer = new Peer(undefined, PCFG); peer.on("open", function () {
           conn = peer.connect("cpro-j-" + code, { reliable: true });
           conn.on("open", function () { onlink(true); hello(); }); conn.on("data", function (m) { onmsg(m); });
           conn.on("close", function () { again(3000); }); conn.on("error", function () { again(5000); });
