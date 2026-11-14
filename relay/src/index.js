@@ -2,6 +2,7 @@
 // L'enseignant (role=host) et les joueurs (role=client&sid=...) s'y connectent par WebSocket.
 // Le relais ne stocke rien : il transmet les messages (joueur -> enseignant, enseignant -> joueur).
 import { DurableObject } from "cloudflare:workers";
+export { Hub } from "./hub.js";
 
 const ORIGINES = ["https://belmdeveloppement.github.io", "http://localhost:8765", "http://127.0.0.1:8765", "http://localhost:8787"];
 const MAX = 65536;
@@ -9,10 +10,16 @@ const MAX = 65536;
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
-    if (url.pathname !== "/ws") return new Response("Relais des JEUX : en service.", { status: 200 });
+    if (url.pathname !== "/ws" && url.pathname !== "/ps") return new Response("Relais des JEUX : en service.", { status: 200 });
     const origin = req.headers.get("Origin");
-    if (origin && !ORIGINES.includes(origin)) return new Response("Origine refusée", { status: 403 });
+    if (origin && !ORIGINES.includes(origin) && !String(env.ORIGINES_EXTRA || "").split(",").includes(origin)) return new Response("Origine refusée", { status: 403 });
     if (req.headers.get("Upgrade") !== "websocket") return new Response("WebSocket attendu", { status: 426 });
+    if (url.pathname === "/ps") {
+      // Bus publication / abonnement (application LAN Live) : une « salle » par séance, des sujets (topics) libres.
+      const code = (url.searchParams.get("room") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40);
+      if (code.length < 6) return new Response("Paramètres manquants", { status: 400 });
+      return env.HUB.get(env.HUB.idFromName("ps:" + code)).fetch(new Request("https://hub/ps", req));
+    }
     const room = (url.searchParams.get("room") || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
     const role = url.searchParams.get("role") === "host" ? "host" : "client";
     const sid = (url.searchParams.get("sid") || "").replace(/[^\w-]/g, "").slice(0, 40);
