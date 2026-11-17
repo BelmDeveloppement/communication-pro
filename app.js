@@ -668,6 +668,7 @@
   function route() {
     var p = (location.hash || "#/").replace(/\?.*$/, "").split("/").filter(Boolean); p.shift();
     Sess_off(); var a = p[0] || "";
+    document.title = ({ tour: 1, test: 1, simu: 1, "outils-test": 1, prof: 1, session: 1, animateur: 1 })[a] ? "Com' Pro TOUR DE CONTRÔLE" : "Com' Pro Etudiants";
     if (a === "" ) return home();
     if (a === "ex" || a === "f") return exercise(p[1]);
     if (a === "jeu20") return gameEntry("quiz");
