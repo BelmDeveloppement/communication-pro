@@ -480,10 +480,10 @@
       h("p", {}, h("a", { href: "#/test" }, "Mode test : parcourir tous les jeux et toutes les cartes sans répondre"), "  ·  ", h("a", { href: "#/plateau" }, "← Plateau")));
   }
 
-  function run(G, sim) {
-    LSset(GK, G); var net = null, status = "…", statusDetail = "", dirty = true, view = "proj", tab = "ens", simSt = null, link = {}, wrap = h("div", { class: "jx" }), dead = false;
+  function run(G, sim, viewer) {
+    if (!viewer) LSset(GK, G); var net = null, status = "…", statusDetail = "", dirty = true, view = "proj", tab = "ens", simSt = null, link = {}, wrap = h("div", { class: "jx" }), dead = false;
     function now() { return Date.now(); }
-    function save() { LSset(GK, G); }
+    function save() { if (!viewer) LSset(GK, G); }
     function push() { Object.keys(G.players).forEach(function (s) { var p = G.players[s]; if (p.sim) return; var m = C.snapshot(G, s, now()); if (m && net) net.send(s, m); }); }
     function onmsg(m, conn) {
       if (!m || !m.sid) return; var t = now(), sid = m.sid;
@@ -499,7 +499,7 @@
       if (net) net.send(sid, C.snapshot(G, real, t)); dirty = true;
     }
     var ctl = null;
-    try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "tool") { C.setTool(G, m.tool, !!m.off); dirty = true; refresh(); } if (m.t === "jeu") { C.setJeu(G, m.jeu, now()); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
+    if (!viewer) try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "tool") { C.setTool(G, m.tool, !!m.off); dirty = true; refresh(); } if (m.t === "jeu") { C.setJeu(G, m.jeu, now()); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
 
     /* ----- liaison PowerPoint : la macro envoie « JEU|n|diapo » sur un relais, la tour l'écoute ----- */
     var ppt = pptCfg(), es = null, ps = null, lastSig = "", lastRx = "", pp = { st: "…", rl: "…", nt: "…", last: null, pend: null, note: "" };
@@ -540,10 +540,16 @@
       } catch (e) { pp.nt = "err"; }
       st();
     }
-    listen();
-    net = hostNet(G.code, onmsg, function (s, d) { status = s; statusDetail = d || ""; refresh(); });
-    var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); refresh(); }, 1000);
-    onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} try { es && es.close(); } catch (e) {} try { ps && ps.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
+    if (!viewer) listen();
+    if (!viewer) net = hostNet(G.code, onmsg, function (s, d) { status = s; statusDetail = d || ""; refresh(); });
+    /* vue projetée dans un autre onglet : la tour diffuse l'état de la partie (même navigateur), l'onglet projeté l'affiche sans rien modifier */
+    var pj2 = null;
+    try { pj2 = new BroadcastChannel("cpro-j-proj-" + G.code); } catch (e) {}
+    function sendProj() { try { pj2 && pj2.postMessage({ t: "G", g: JSON.parse(JSON.stringify(G)) }); } catch (e) {} }
+    if (viewer) { if (pj2) pj2.onmessage = function (e) { var m = e.data || {}; if (m.t === "G" && m.g) { Object.keys(G).forEach(function (k) { delete G[k]; }); Object.assign(G, m.g); refresh(); } }; try { pj2 && pj2.postMessage({ t: "want" }); } catch (e) {} }
+    else if (pj2) pj2.addEventListener("message", function (e) { if (e.data && e.data.t === "want") sendProj(); });
+    var flush = setInterval(function () { if (dead) return; if (viewer) { refresh(); return; } C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); sendProj(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) { push(); sendProj(); } refresh(); }, 1000);
+    onLeave(function () { dead = true; try { pj2 && pj2.close(); } catch (e) {} clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} try { es && es.close(); } catch (e) {} try { ps && ps.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
 
     /* simulation (démo) */
     function simStart() {
@@ -591,7 +597,7 @@
       var a = h("a", { href: "data:text/csv;charset=utf-8," + encodeURIComponent("﻿" + l.join("\n")), download: "route-" + G.code + ".csv" }); document.body.appendChild(a); a.click(); a.remove();
     }
     function refresh() {
-      if (dead) return; var t = now(), S = C.stats(G, t), left = G.status === "play" ? G.end - t : 0;
+      if (dead) return; document.body.classList.toggle("jx-full", view === "proj"); var t = now(), S = C.stats(G, t), left = G.status === "play" ? G.end - t : 0;
       var rank = S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x) { return x.id; });
       headEl.innerHTML = "";
       var stTxt = { ok: "● réseau prêt", local: "◐ mode local (même navigateur)", busy: "○ code déjà utilisé : fermez l'autre tour", err: "○ réseau indisponible" + (statusDetail ? " (" + statusDetail + ")" : "") + " · nouvel essai automatique", off: "○ PeerJS absent" }[status] || "…";
@@ -600,7 +606,7 @@
       var ctr = h("div", { class: "jx-ctl" });
       if (G.status === "lobby") ctr.appendChild(h("button", { class: "ok", onclick: function () { C.start(G, now()); dirty = true; refresh(); } }, "Démarrer la partie"));
       if (G.status === "ended") ctr.appendChild(h("button", { class: "ok", onclick: function () { C.reopen(G, now()); dirty = true; refresh(); } }, "Rouvrir la partie"));
-      ctr.appendChild(h("button", { class: "sec", onclick: function () { setView(view === "proj" ? "prof" : "proj"); } }, view === "proj" ? "Vue enseignant" : "Vue projetée"));
+      if (!viewer) ctr.appendChild(h("button", { class: "sec", onclick: function () { if (sim) return setView(view === "proj" ? "prof" : "proj"); sendProj(); window.open(location.href.split("#")[0] + "#/projection", "_blank"); } }, sim && view === "proj" ? "Vue enseignant" : "Vue projetée (nouvel onglet)"));
       if (view === "proj") ctr.appendChild(h("button", { class: "sec", onclick: function () { try { document.documentElement.requestFullscreen(); } catch (e) {} } }, "Plein écran"));
       var jk = Object.keys(D.jeux), ji = jk.indexOf(G.jeux[0]), cn = C.counts(G, G.jeux[0]);
       ctr.appendChild(h("button", { class: "sec", disabled: ji <= 0 ? "disabled" : null, onclick: function () { if (confirm("Revenir au JEU " + jk[ji - 1] + " ? Toutes les tables reviennent sur ce JEU.")) { C.nextJeu(G, -1, now()); dirty = true; refresh(); } } }, "◀ JEU précédent"));
@@ -613,11 +619,12 @@
       ctr.appendChild(h("a", { class: "btn", href: "#/simu?j=" + G.jeux[0], target: "_blank", style: "text-decoration:none;display:inline-block" }, "Simulation joueur"));
       ctr.appendChild(h("button", { class: "sec", onclick: function () { if (confirm("Terminer et effacer cette partie ?")) { try { localStorage.removeItem(GK); } catch (e) {} dead = true; location.hash = "#/tour"; setTimeout(function () { location.reload(); }, 50); } } }, "Nouvelle partie"));
       if (endBtn) ctr.appendChild(endBtn);
+      if (viewer) { ctr.innerHTML = ""; ctr.appendChild(h("button", { class: "sec", onclick: function () { try { document.documentElement.requestFullscreen(); } catch (e) {} } }, "Plein écran")); }
       headEl.appendChild(ctr);
       var ppTxt = { ok: "● PowerPoint relié", err: "○ relais PowerPoint indisponible", off: "○ liaison PowerPoint désactivée" }[pp.st] || "… liaison PowerPoint";
       var ppBar = h("div", { class: "jx-ctl jx-ppt" }, h("small", {}, ppTxt + (pp.note ? " · " + pp.note : "")));
       if (pp.pend && D.jeux[pp.pend]) { ppBar.appendChild(h("button", { class: "ok", onclick: function () { openJeu(pp.pend, "JEU " + pp.pend + " ouvert à la main depuis le signal du PowerPoint."); } }, "Ouvrir le JEU " + pp.pend + " (diapositive affichée)")); ppBar.appendChild(h("button", { class: "sec", onclick: function () { pp.pend = null; pp.note = ""; refresh(); } }, "Ignorer")); }
-      headEl.appendChild(ppBar);
+      if (!viewer) headEl.appendChild(ppBar);
       /* courses */
       var ids = S.tables.map(function (x) { return x.id; });
       if (!ids.length) { racesEl.innerHTML = ""; rows = {}; racesEl.appendChild(h("div", { class: "jx-empty" }, h("img", { src: "qr-j.svg", alt: "QR de connexion", width: 220, height: 220 }), h("div", {}, h("h2", {}, "Les joueurs se connectent"), h("p", {}, "Scannez le QR ou ouvrez le lien, choisissez votre table (1 à 5) et saisissez le code " + G.code + "."), h("p", { class: "jx-link" }, "belmdeveloppement.github.io/communication-pro/#/j"), h("p", { class: "jx-link2" }, "code  ", h("b", { class: "jx-code" }, G.code)), h("p", { class: "meta" }, "Les tables apparaissent ici dès qu'un joueur s'y inscrit.")))); }
@@ -718,7 +725,7 @@
           prows.length ? h("table", {}, h("tr", {}, ["Table", "Joueur", "Points", "Saisie", "Corriger"].map(function (c) { return h("th", {}, c); })), prows.map(function (x) { return h("tr", {}, h("td", {}, x.pl.table), h("td", {}, x.pl.nom), h("td", {}, String(x.r.pts)), h("td", { style: "white-space:pre-wrap;font-size:13px;max-width:560px" }, x.r.txt || "(JEU déclaratif ou pas de saisie)"), h("td", {}, [0, 1, 2, 3].map(function (v) { return h("button", { class: v === x.r.pts ? "" : "sec jx-mini", onclick: function () { C.fixJeu(G, x.sid, pj, v, now()); dirty = true; lastSig = ""; refresh(); } }, String(v)); }))); })) : h("p", { class: "meta" }, "Aucune production pour ce JEU pour l'instant.")));
       }
       if (tab === "ppt") {
-        var modeSel = h("select", { style: "max-width:420px", onchange: function () { ppt.mode = modeSel.value; LSset("j-ppt", ppt); pp.pend = null; listen(); refresh(); } }, [["ask", "Avec confirmation (recommandé) : un bouton « Ouvrir le JEU n » apparaît, rien ne s'ouvre sans votre clic"], ["auto", "Automatique : la diapositive d'un JEU ouvre ce JEU (déconseillé en classe)"], ["off", "Désactivée"]].map(function (m) { var o = h("option", { value: m[0] }, m[1]); if (m[0] === ppt.mode) o.selected = true; return o; }));
+        var modeSel = h("select", { style: "max-width:420px", onchange: function () { ppt.mode = modeSel.value; LSset("j-ppt", ppt); pp.pend = null; listen(); refresh(); } }, [["auto", "Automatique (recommandé) : la diapositive d'un JEU placé après le JEU actuel l'ouvre toute seule"], ["ask", "Avec confirmation : un bouton « Ouvrir le JEU n » apparaît, rien ne s'ouvre sans votre clic"], ["off", "Désactivée"]].map(function (m) { var o = h("option", { value: m[0] }, m[1]); if (m[0] === ppt.mode) o.selected = true; return o; }));
         var jsel = h("select", { style: "max-width:420px" }, Object.keys(D.jeux).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === G.jeux[0]) o.selected = true; return o; }));
         var key = h("input", { value: ppt.topic, style: "max-width:320px" });
         detEl.appendChild(h("div", { class: "card" }, h("h2", {}, "Liaison PowerPoint"),
@@ -737,7 +744,7 @@
       if (tab === "eng") { var tot = S.expected || 1, rs = S.resp.length ? S.resp.reduce(function (a, b) { return a + b; }, 0) / S.resp.length : 0; detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Engagement"), h("p", {}, "Réponses envoyées : " + S.answered + " sur " + S.expected + " attendues (" + pct(S.answered / tot) + ")."), h("p", {}, "Temps de réponse moyen : " + (rs ? Math.round(rs / 1000) + " s" : "—") + "."), h("p", {}, "Joueurs hors ligne : " + S.players.filter(function (p) { return !p.online; }).length + " sur " + S.players.length + "."))); }
     }
     if (sim) simStart();
-    setView(sim ? "proj" : "prof");
+    setView(sim || viewer ? "proj" : "prof");
     window.J51._G = function () { return G; };
   }
 
@@ -760,7 +767,7 @@
   var RELAY0 = "https://ntfy.sh";
   function relayBase() { return (LSget("j-relay") || RELAY0).replace(/\/+$/, ""); }
   function cleDuLien() { try { var m = /[?&#]cle=([A-Za-z0-9_-]{8,64})/.exec(location.search + location.hash); return m ? m[1] : ""; } catch (e) { return ""; } }
-  function pptCfg() { var c = LSget("j-ppt"), kl = cleDuLien(); if (kl && c && c.topic !== kl) { c.topic = kl; LSset("j-ppt", c); } else if (kl && !c) { c = { topic: kl, mode: "ask", v: 2 }; LSset("j-ppt", c); } if (!c || !c.topic) { c = { topic: "route-" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12), mode: "ask", v: 2 }; LSset("j-ppt", c); } else if (c.v !== 2) { c.v = 2; if (c.mode === "auto") c.mode = "ask"; LSset("j-ppt", c); } return c; }
+  function pptCfg() { var c = LSget("j-ppt"), kl = cleDuLien(); if (kl && c && c.topic !== kl) { c.topic = kl; LSset("j-ppt", c); } else if (kl && !c) { c = { topic: kl, mode: "auto", v: 3 }; LSset("j-ppt", c); } if (!c || !c.topic) { c = { topic: "route-" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12), mode: "auto", v: 3 }; LSset("j-ppt", c); } else if (c.v !== 3) { c.v = 3; if (c.mode === "ask") c.mode = "auto"; LSset("j-ppt", c); } return c; }
   function dl(name, txt) { var a = h("a", { href: URL.createObjectURL(new Blob([txt], { type: "text/plain" })), download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 
   /* ---------- Mode test : parcourir tous les jeux et toutes les cartes sans répondre ---------- */
@@ -815,6 +822,11 @@
       h("button", { class: "sec", onclick: function () { st = {}; save(); draw(); } }, "Tout effacer"), h("p", {}, h("a", { href: "#/tour" }, "← Tour de contrôle")));
   }
   /* ---------- Simulation joueur (enseignant) : même écran que les joueurs, partie privée, aucune table réelle ---------- */
+  function projPage() {
+    var g = LSget(GK);
+    if (!g) return mount(h("h1", {}, "Vue projetée"), h("div", { class: "warn" }, "Aucune partie en cours sur ce navigateur. Ouvrez la tour de contrôle, puis cliquez sur « Vue projetée »."), h("p", {}, h("a", { href: "#/tour" }, "← Tour de contrôle")));
+    run(g, false, true);
+  }
   function simuPage() {
     var p = q(), code = "SIM" + Math.random().toString(36).slice(2, 6).toUpperCase(), k0 = D.jeux[p.j] ? p.j : "1", G = C.newGame({ code: code, jeux: [k0] }), net = null, dirty = true, link = {}, dead = false;
     C.start(G, Date.now());
@@ -840,6 +852,6 @@
     sel.addEventListener("change", function () { if (shown) showCor(); });
     var root = document.getElementById("app"); root.insertBefore(bar, root.firstChild);
   }
-  window.J51 = { route: function (a) { if (a === "simu") return simuPage(); if (a === "outils-test") return towerGate(toolsTestPage); if (a === "tour") return towerGate(); if (a === "test") return towerGate(testPage); return joinPage(); } };
-  var hs = location.hash || ""; if (/^#\/(j|tour|test|outils-test|simu)(\?|\/|$)/.test(hs)) window.dispatchEvent(new Event("hashchange"));
+  window.J51 = { route: function (a) { if (a === "simu") return simuPage(); if (a === "outils-test") return towerGate(toolsTestPage); if (a === "tour") return towerGate(); if (a === "projection") return towerGate(projPage); if (a === "test") return towerGate(testPage); return joinPage(); } };
+  var hs = location.hash || ""; if (/^#\/(j|tour|projection|test|outils-test|simu)(\?|\/|$)/.test(hs)) window.dispatchEvent(new Event("hashchange"));
 })();

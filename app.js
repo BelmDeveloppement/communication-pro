@@ -668,6 +668,7 @@
   function route() {
     var p = (location.hash || "#/").replace(/\?.*$/, "").split("/").filter(Boolean); p.shift();
     Sess_off(); var a = p[0] || "";
+    document.title = ({ tour: 1, projection: 1, test: 1, simu: 1, "outils-test": 1, prof: 1, session: 1, animateur: 1 })[a] ? "Com' Pro TOUR DE CONTRÔLE" : "Com' Pro Etudiants";
     if (a === "" ) return home();
     if (a === "ex" || a === "f") return exercise(p[1]);
     if (a === "jeu20") return gameEntry("quiz");
@@ -676,7 +677,7 @@
     if (a === "session") return sessionPage();
     if (a === "prof") return profPage();
     if (a === "animateur") return aidePage();
-    if ((a === "j" || a === "tour" || a === "test" || a === "outils-test" || a === "simu") && window.J51) return window.J51.route(a);
+    if ((a === "j" || a === "tour" || a === "test" || a === "outils-test" || a === "simu" || a === "projection") && window.J51) return window.J51.route(a);
     if (a === "plateau" && window.PLATEAU) return window.PLATEAU.route(p.slice(1));
     if (a === "outils") return outilsPage();
     if (a === "sujets") return sujetsPage();
