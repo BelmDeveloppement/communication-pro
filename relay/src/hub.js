@@ -1,7 +1,7 @@
 // © 2026 SAS BELM DEVELOPPEMENT. Bus publication / abonnement d'une séance (application LAN Live).
 // Messages client -> serveur : {a:"sub", t, since} · {a:"pub", t, m, u}.  Serveur -> client : {a:"msg", t, id, m} · {a:"ack", u, n}.
 // Le serveur garde un court historique par sujet pour les abonnés tardifs (rechargement de la tour, joueur qui arrive en retard).
-// Sujet « …h » (état de la partie) : seul l'état le plus récent est conservé. Sujet « …s » (diapos) : seule la dernière diapo est conservée. Publication HTTP : POST /pub (complément PowerPoint). Autres sujets : 1500 messages au plus. Tout est effacé 24 h après la dernière activité.
+// Sujet « …h » (état de la partie) : seul l'état le plus récent est conservé. Sujet « …s » (diapos) : seule la dernière diapo est conservée. Publication HTTP : POST /pub (complément PowerPoint). Sujet « …k » : dernière valeur de chaque clé ({k,v}). Autres sujets : 1500 messages au plus. Tout est effacé 24 h après la dernière activité.
 import { DurableObject } from "cloudflare:workers";
 const MAX = 65536, KEEP = 1500, TOTAL = 900000, TTL = 24 * 3600 * 1000;
 export class Hub extends DurableObject {
@@ -51,7 +51,13 @@ export class Hub extends DurableObject {
         st.list = st.list.filter((x) => { try { const q = JSON.parse(x.m); return q.v >= p.v && !(q.v === p.v && q.i === p.i); } catch (e) { return false; } });
       }
     }
-    st.list.push(item);
+    if (t.endsWith("k")) {                         // sujet « …k » (clé/valeur, jeux à état par clé : Cap Rempart) : m = {k:<clé>, v:<valeur>} ; seule la dernière valeur de chaque clé est conservée ; v:null supprime la clé
+      let p = null; try { p = JSON.parse(m); } catch (e) {}
+      if (p && typeof p.k === "string") {
+        st.list = st.list.filter((x) => x.key !== p.k);
+        if (p.v !== null && p.v !== undefined) item.key = p.k, st.list.push(item);
+      } else st.list.push(item);
+    } else st.list.push(item);
     if (t.endsWith("s")) st.list = st.list.slice(-1);   // sujet « diapos » : seule la dernière diapo compte
     while (st.list.length > KEEP || st.list.reduce((s, x) => s + x.m.length, 0) > TOTAL) st.list.shift();
     await this.ctx.storage.put("t:" + t, st);
