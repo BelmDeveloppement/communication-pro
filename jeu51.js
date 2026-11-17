@@ -502,30 +502,48 @@
     try { ctl = new BroadcastChannel("cpro-j-ctl-" + G.code); ctl.onmessage = function (e) { var m = e.data || {}; if (m.t === "tool") { C.setTool(G, m.tool, !!m.off); dirty = true; refresh(); } if (m.t === "jeu") { C.setJeu(G, m.jeu, now()); dirty = true; refresh(); } if (m.t === "jeu" || m.t === "ping") ctl.postMessage({ t: "pong", jeu: G.jeux[0], extra: !!G.extra }); }; } catch (e) {}
 
     /* ----- liaison PowerPoint : la macro envoie « JEU|n|diapo » sur un relais, la tour l'écoute ----- */
-    var ppt = pptCfg(), es = null, lastSig = "", pp = { st: "…", last: null, pend: null, note: "" };
+    var ppt = pptCfg(), es = null, ps = null, lastSig = "", lastRx = "", pp = { st: "…", rl: "…", nt: "…", last: null, pend: null, note: "" };
     function jeuIx(k) { return Object.keys(D.jeux).indexOf(String(k)); }
     function unfinishedTxt() { var n = 0, tot = 0; Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (!T.players || !T.players.length) return; tot++; if (T.cur) n++; }); return n ? "\n\n⚠ " + n + " table(s) sur " + tot + " sont au milieu d'une carte du JEU en cours : elles la terminent avant de passer au suivant (aucune saisie perdue)." : ""; }
     function openJeu(k, why) { C.gotoJeu(G, String(k), now()); pp.pend = null; pp.note = why || ""; dirty = true; refresh(); }
     function onSignal(kind, k, slide) {
-      pp.last = { kind: kind, jeu: k, slide: slide, at: now() };
+      var rx = kind + "|" + k + "|" + slide, t0 = now(); if (rx === lastRx && t0 - (pp.last ? pp.last.at : 0) < 3000) return; lastRx = rx;   /* même signal reçu par le relais ET par ntfy */
+      pp.last = { kind: kind, jeu: k, slide: slide, at: t0 };
+      if (kind === "JEU" && /^10[1-4]$/.test(String(k))) { pp.note = "Le PowerPoint est sur la question n° " + (k - 100) + " du nuage de mots (diapositive " + slide + ")."; return refresh(); }
       if (kind === "TEST") { pp.note = "Signal de test reçu : la liaison fonctionne."; return refresh(); }
       if (kind !== "JEU" || !D.jeux[k] || ppt.mode === "off") return refresh();
       if (k === G.jeux[0]) { pp.pend = null; pp.note = "Diapositive du JEU " + k + " : déjà ouvert."; return refresh(); }
       if (ppt.mode === "auto" && jeuIx(k) > jeuIx(G.jeux[0])) return openJeu(k, "JEU " + k + " ouvert par le PowerPoint (diapositive " + slide + ").");
       pp.pend = k; pp.note = jeuIx(k) < jeuIx(G.jeux[0]) ? "Retour en arrière : le JEU " + k + " n'est pas relancé automatiquement." : "Le PowerPoint est sur le JEU " + k + "."; refresh();
     }
+    function st() { pp.st = ppt.mode === "off" ? "off" : (pp.rl === "ok" || pp.nt === "ok") ? "ok" : (pp.rl === "err" && pp.nt === "err") ? "err" : "…"; }
+    function room() { return String(ppt.topic).replace(/[^A-Za-z0-9]/g, "").slice(0, 40); }
+    function fromRelay(d) {
+      if (!d || d.a !== "msg" || d.t !== "diapos") return;
+      if (d.ts && Date.now() - d.ts > 30 * 60000) return;   /* dernière diapo rejouée à l'abonnement : ignorée si trop ancienne */
+      var m = String(d.m || "").split("|"); onSignal(m[0], m[1], m[2] || "?");
+    }
     function listen() {
-      try { es && es.close(); } catch (e) {} es = null; if (ppt.mode === "off" || typeof EventSource === "undefined") { pp.st = ppt.mode === "off" ? "off" : "err"; return; }
-      pp.st = "…";
-      try { es = new EventSource(relayBase() + "/" + ppt.topic + "/sse");
-        es.onopen = function () { pp.st = "ok"; refresh(); }; es.onerror = function () { pp.st = "err"; refresh(); };
+      try { es && es.close(); } catch (e) {} es = null; try { ps && ps.close(); } catch (e) {} ps = null;
+      if (ppt.mode === "off") { pp.rl = pp.nt = "off"; st(); return; }
+      pp.rl = pp.nt = "…"; st();
+      /* voie principale : relais Cloudflare (bus /ps, sujet « diapos », salle = clé de liaison) */
+      try {
+        var url = RELAY.replace(/\/ws$/, "/ps") + "?room=" + encodeURIComponent(room());
+        ps = relaySock(url, function () { try { ps.send({ a: "sub", t: "diapos", since: 0 }); } catch (e) {} }, fromRelay, function (v) { pp.rl = v ? "ok" : "err"; st(); refresh(); });
+      } catch (e) { pp.rl = "err"; }
+      /* secours : ntfy.sh (même clé comme sujet) */
+      if (typeof EventSource === "undefined") pp.nt = "err";
+      else try { es = new EventSource(relayBase() + "/" + ppt.topic + "/sse");
+        es.onopen = function () { pp.nt = "ok"; st(); refresh(); }; es.onerror = function () { pp.nt = "err"; st(); refresh(); };
         es.onmessage = function (e) { try { var d = JSON.parse(e.data); if (d.event && d.event !== "message") return; var m = String(d.message || "").split("|"); onSignal(m[0], m[1], m[2] || "?"); } catch (x) {} };
-      } catch (e) { pp.st = "err"; }
+      } catch (e) { pp.nt = "err"; }
+      st();
     }
     listen();
     net = hostNet(G.code, onmsg, function (s, d) { status = s; statusDetail = d || ""; refresh(); });
     var flush = setInterval(function () { if (dead) return; C.tick(G, now()); if (simSt) simStep(); if (dirty) { push(); save(); dirty = false; } else if (Math.floor(now() / 1000) % 5 === 0) push(); refresh(); }, 1000);
-    onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} try { es && es.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
+    onLeave(function () { dead = true; clearInterval(flush); try { ctl && ctl.close(); } catch (e) {} try { es && es.close(); } catch (e) {} try { ps && ps.close(); } catch (e) {} if (net) net.close(); document.body.classList.remove("jx-full"); });
 
     /* simulation (démo) */
     function simStart() {
@@ -704,18 +722,16 @@
         var jsel = h("select", { style: "max-width:420px" }, Object.keys(D.jeux).map(function (k) { var o = h("option", { value: k }, k + " · " + D.jeux[k].titre); if (k === G.jeux[0]) o.selected = true; return o; }));
         var key = h("input", { value: ppt.topic, style: "max-width:320px" });
         detEl.appendChild(h("div", { class: "card" }, h("h2", {}, "Liaison PowerPoint"),
-          h("p", {}, "Quand vous arrivez, en diaporama, sur la diapositive d'énoncé d'un JEU, la tour ouvre ce JEU et place toutes les tables dessus : les écrans des joueurs affichent sa fiche, cette vue et la vue projetée le suivent. Une table au milieu d'une carte la termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité. Les 45 diapositives d'énoncé du support portent une étiquette invisible (ROUTE_JEU)."),
-          h("p", {}, h("b", {}, "État : "), ({ ok: "relais joignable, la tour écoute.", err: "relais injoignable (réseau ou pare-feu). Utilisez le secours manuel ci-dessous.", off: "liaison désactivée." }[pp.st] || "connexion en cours…"), pp.last ? " Dernier signal : " + (pp.last.kind === "TEST" ? "test" : "JEU " + pp.last.jeu + ", diapositive " + pp.last.slide) + " à " + new Date(pp.last.at).toLocaleTimeString("fr-FR") + "." : " Aucun signal reçu pour l'instant."),
+          h("p", {}, "Quand vous arrivez, en diaporama, sur la diapositive d'énoncé d'un JEU, la tour ouvre ce JEU et place toutes les tables dessus : les écrans des joueurs affichent sa fiche, cette vue et la vue projetée le suivent. Une table au milieu d'une carte la termine d'abord. Un JEU non joué est sauté : ni point, ni pénalité. Les diapositives d'énoncé des 45 JEUX et les 4 questions du nuage de mots portent une étiquette invisible (ROUTE_JEU) : rien à modifier jeu par jeu."),
+          h("p", {}, h("b", {}, "État : "), ({ ok: "la tour écoute (relais Cloudflare : " + (pp.rl === "ok" ? "joignable" : "indisponible") + " · secours ntfy : " + (pp.nt === "ok" ? "joignable" : "indisponible") + ").", err: "relais et secours injoignables (réseau ou pare-feu). Utilisez le secours manuel ci-dessous.", off: "liaison désactivée." }[pp.st] || "connexion en cours…"), pp.last ? " Dernier signal : " + (pp.last.kind === "TEST" ? "test" : (/^10[1-4]$/.test(pp.last.jeu) ? "nuage de mots, question " + (pp.last.jeu - 100) : "JEU " + pp.last.jeu) + ", diapositive " + pp.last.slide) + " à " + new Date(pp.last.at).toLocaleTimeString("fr-FR") + "." : " Aucun signal reçu pour l'instant."),
           h("p", {}, h("b", {}, "Mode : "), modeSel), h("p", { class: "meta" }, "Retour en arrière : revenir sur la diapositive d'un JEU déjà passé ne le relance pas ; un bouton « Ouvrir le JEU n » apparaît en haut de la tour.")));
         detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Secours manuel (Mac, macros bloquées, relais indisponible)"), h("p", {}, "Je suis au JEU n° ", jsel, " ", h("button", { onclick: function () { openJeu(jsel.value, "JEU " + jsel.value + " ouvert à la main."); } }, "Ouvrir ce JEU"))));
-        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Installation sous Windows (une seule fois)"),
-          h("ol", {}, ["Téléchargez les deux fichiers ci-dessous. Ils contiennent déjà la clé de liaison de ce navigateur.", "Ouvrez le support PowerPoint. Alt+F11, menu Fichier, Importer un fichier : importez RouteJeu.bas puis clsRoute.cls. Fermez la fenêtre.", "Enregistrez sous le type « Présentation PowerPoint prenant en charge les macros (.pptm) ».", "Essai : Alt+F8, TesterRoute, Exécuter. Cette page doit afficher « Signal de test reçu ».", "Avant chaque cours : ouvrez la tour sur ce navigateur, puis dans PowerPoint Alt+F8, LancerRoute. Le diaporama démarre, relié à la tour."].map(function (x) { return h("li", {}, x); })),
-          h("button", { onclick: function () { dl("RouteJeu.bas", macroBas(ppt.topic)); } }, "Télécharger RouteJeu.bas"), " ", h("button", { onclick: function () { dl("clsRoute.cls", macroCls()); } }, "Télécharger clsRoute.cls"),
-          h("p", { class: "meta" }, "Variante sans geste à chaque cours : enregistrez une présentation vide contenant ces deux fichiers sous le type « Complément PowerPoint (.ppam) », puis activez-la dans Fichier, Options, Compléments. La liaison se branche alors toute seule à l'ouverture de PowerPoint."),
-          h("p", { class: "meta" }, "La macro n'a pas pu être exécutée sous PowerPoint pendant la conception : faites l'essai TesterRoute avant le premier cours.")));
-        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Clé de liaison"), h("p", { class: "meta" }, "La clé est propre à ce navigateur et reste la même d'un cours à l'autre. Sur un autre ordinateur, collez ici la clé d'origine (elle figure dans RouteJeu.bas, après le dernier « / » de ROUTE_URL), ou retéléchargez les deux fichiers."),
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Installation sous Windows (une seule fois par ordinateur)"),
+          h("ol", {}, ["Installez le complément JeuxLive.ppam (le même que pour les autres jeux en direct) : Fichier, Options, Compléments, Atteindre…, Ajouter, puis cochez-le. Il se charge ensuite tout seul à chaque ouverture de PowerPoint.", "Une seule fois : dans PowerPoint, Alt+F8, macro ConfigurerCle, Exécuter, puis collez la clé de liaison ci-dessous. Elle est mémorisée.", "Essai : Alt+F8 (ou la fenêtre Exécution, voir le README), TesterPlateau, puis vérifiez la tour. Cette page doit afficher « Signal de test reçu ».", "Ensuite, rien à faire : lancez le diaporama du support (aucun fichier .pptm, aucun import de macro), la tour suit les diapositives."].map(function (x) { return h("li", {}, x); })),
+          h("p", { class: "meta" }, "Le complément envoie le numéro du JEU au relais Cloudflare (voie principale) et à ntfy.sh (secours). Aucune modification n'est à faire dans les JEUX eux-mêmes. Le complément n'a pas encore été essayé sous PowerPoint : faites l'essai TesterPlateau avant le premier cours.")));
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Clé de liaison"), h("p", { class: "meta" }, "La clé est propre à ce navigateur et reste la même d'un cours à l'autre. Sur un autre ordinateur, collez ici la clé d'origine affichée ci-dessous : copiez-la, puis collez-la dans ConfigurerCle sur l\'autre ordinateur."),
           key, " ", h("button", { class: "sec", onclick: function () { var v = key.value.trim(); if (!/^[A-Za-z0-9_-]{8,64}$/.test(v)) return alert("Clé invalide : 8 à 64 lettres, chiffres ou tirets."); ppt.topic = v; LSset("j-ppt", ppt); listen(); refresh(); } }, "Enregistrer la clé"),
-          h("p", { class: "meta" }, "Seul le numéro du JEU passe par le relais public ntfy.sh : aucun nom, aucune réponse d'étudiant.")));
+          h("p", { class: "meta" }, "Seul le numéro du JEU et celui de la diapositive transitent par le relais (Cloudflare, ntfy.sh en secours) : aucun nom, aucune réponse d'étudiant.")));
       }
       if (tab === "err") { var er = Object.keys(S.err).sort(function (a, b) { return S.err[b] - S.err[a]; }).slice(0, 8); detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Critères les plus souvent manqués"), er.length ? h("ol", {}, er.map(function (k) { return h("li", {}, k + " : " + S.err[k] + " fois"); })) : h("p", { class: "meta" }, "Pas encore de données."))); }
       if (tab === "eng") { var tot = S.expected || 1, rs = S.resp.length ? S.resp.reduce(function (a, b) { return a + b; }, 0) / S.resp.length : 0; detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Engagement"), h("p", {}, "Réponses envoyées : " + S.answered + " sur " + S.expected + " attendues (" + pct(S.answered / tot) + ")."), h("p", {}, "Temps de réponse moyen : " + (rs ? Math.round(rs / 1000) + " s" : "—") + "."), h("p", {}, "Joueurs hors ligne : " + S.players.filter(function (p) { return !p.online; }).length + " sur " + S.players.length + "."))); }
@@ -744,23 +760,6 @@
   var RELAY0 = "https://ntfy.sh";
   function relayBase() { return (LSget("j-relay") || RELAY0).replace(/\/+$/, ""); }
   function pptCfg() { var c = LSget("j-ppt"); if (!c || !c.topic) { c = { topic: "route-" + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12), mode: "ask", v: 2 }; LSset("j-ppt", c); } else if (c.v !== 2) { c.v = 2; if (c.mode === "auto") c.mode = "ask"; LSset("j-ppt", c); } return c; }
-  function macroBas(topic) {
-    return ['Attribute VB_Name = "RouteJeu"', "Option Explicit", "' (c) 2026 SAS BELM DEVELOPPEMENT. Tous droits reserves. Cree avec l'aide de Claude (Anthropic), relu par l'auteur.",
-      "' Liaison PowerPoint -> tour de controle du plateau (La route de l'etat de l'art).", "' Quand une diapositive etiquetee ROUTE_JEU apparait en diaporama, son numero de JEU est envoye a la tour.",
-      'Public Const ROUTE_URL As String = "' + relayBase() + "/" + topic + '"', "Private mApp As clsRoute", "Private mHttp As Object", "Private mLast As String", "",
-      "Private Sub Brancher()", "    If mApp Is Nothing Then", "        Set mApp = New clsRoute", "        Set mApp.App = Application", "    End If", "End Sub", "",
-      "' Complement .ppam : branchement automatique au chargement.", "Sub Auto_Open()", "    Brancher", "End Sub", "",
-      "' A lancer par Alt+F8 : branche la liaison puis demarre le diaporama.", "Sub LancerRoute()", "    Brancher", "    mLast = \"\"", "    If Not ActivePresentation Is Nothing Then ActivePresentation.SlideShowSettings.Run", "End Sub", "",
-      "' Evenement automatique de PowerPoint (secours si la classe n'est pas branchee).", "Sub OnSlideShowPageChange(ByVal Wn As SlideShowWindow)", "    On Error Resume Next", "    RouteSignal Wn.View.Slide", "End Sub", "",
-      "Public Sub RouteSignal(ByVal sld As Object)", "    On Error Resume Next", "    Dim n As String", "    n = sld.Tags(\"ROUTE_JEU\")", "    If n = \"\" Then Exit Sub", "    If n = mLast Then Exit Sub", "    mLast = n",
-      "    Set mHttp = CreateObject(\"MSXML2.ServerXMLHTTP.6.0\")", "    mHttp.Open \"POST\", ROUTE_URL, True", "    mHttp.setRequestHeader \"Content-Type\", \"text/plain\"", "    mHttp.send \"JEU|\" & n & \"|\" & sld.SlideIndex", "End Sub", "",
-      "' Test : envoie un signal d'essai et affiche le resultat.", "Sub TesterRoute()", "    On Error GoTo Rate", "    Dim h As Object", "    Set h = CreateObject(\"MSXML2.ServerXMLHTTP.6.0\")", "    h.Open \"POST\", ROUTE_URL, False", "    h.setRequestHeader \"Content-Type\", \"text/plain\"", "    h.send \"TEST|0|0\"",
-      "    If h.Status = 200 Then", "        MsgBox \"Liaison OK : la tour de controle doit afficher 'Signal de test recu'.\", vbInformation, \"Route\"", "    Else", "        MsgBox \"Le relais a repondu : \" & h.Status, vbExclamation, \"Route\"", "    End If", "    Exit Sub", "Rate:", "    MsgBox \"Envoi impossible : \" & Err.Description, vbCritical, \"Route\"", "End Sub", ""].join("\r\n");
-  }
-  function macroCls() {
-    return ["VERSION 1.0 CLASS", "BEGIN", "  MultiUse = -1  'True", "END", 'Attribute VB_Name = "clsRoute"', "Attribute VB_GlobalNameSpace = False", "Attribute VB_Creatable = False", "Attribute VB_PredeclaredId = False", "Attribute VB_Exposed = False", "Option Explicit",
-      "Public WithEvents App As Application", "", "Private Sub App_SlideShowNextSlide(ByVal Wn As SlideShowWindow)", "    On Error Resume Next", "    RouteSignal Wn.View.Slide", "End Sub", "", "Private Sub App_SlideShowBegin(ByVal Wn As SlideShowWindow)", "    On Error Resume Next", "    RouteSignal Wn.View.Slide", "End Sub", ""].join("\r\n");
-  }
   function dl(name, txt) { var a = h("a", { href: URL.createObjectURL(new Blob([txt], { type: "text/plain" })), download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 
   /* ---------- Mode test : parcourir tous les jeux et toutes les cartes sans répondre ---------- */
