@@ -10,9 +10,16 @@ const MAX = 65536;
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
-    if (url.pathname !== "/ws" && url.pathname !== "/ps") return new Response("Relais des JEUX : en service.", { status: 200 });
+    if (url.pathname !== "/ws" && url.pathname !== "/ps" && url.pathname !== "/pub") return new Response("Relais des JEUX : en service.", { status: 200 });
     const origin = req.headers.get("Origin");
     if (origin && !ORIGINES.includes(origin) && !String(env.ORIGINES_EXTRA || "").split(",").includes(origin)) return new Response("Origine refusée", { status: 403 });
+    if (url.pathname === "/pub") {
+      // Publication HTTP sur le bus (complément PowerPoint : pas de WebSocket en VBA). Pas d'en-tête Origin côté VBA : accepté ; la salle (code de séance) fait office de secret.
+      if (req.method !== "POST") return new Response("POST attendu", { status: 405 });
+      const code = (url.searchParams.get("room") || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 40);
+      if (code.length < 6) return new Response("Paramètres manquants", { status: 400 });
+      return env.HUB.get(env.HUB.idFromName("ps:" + code)).fetch(new Request("https://hub/pub?t=" + encodeURIComponent(url.searchParams.get("t") || ""), { method: "POST", body: await req.text() }));
+    }
     if (req.headers.get("Upgrade") !== "websocket") return new Response("WebSocket attendu", { status: 426 });
     if (url.pathname === "/ps") {
       // Bus publication / abonnement (application LAN Live) : une « salle » par séance, des sujets (topics) libres.
