@@ -194,7 +194,7 @@ window.DATA = {
     "methode": [
      "Conclusion d'abord.",
      "Trois arguments, chacun avec un chiffre.",
-     "Une réserve honnête.",
+     "Une réserve sourcée et nuancée.",
      "Une décision demandée et une date."
     ],
     "rows": [
@@ -1007,11 +1007,11 @@ window.DATA = {
   "F6": {
    "id": "F6",
    "titre": "Flash · Quel biais ? (téléphone)",
-   "mode": "Individuel, téléphone",
+   "mode": "Individuel, PC ou téléphone",
    "duree": 5,
    "chap": "Carnet · chapitre 5",
    "situation": [
-    "Sur votre téléphone : scannez le QR de cette page (ou ouvrez l'application), puis appuyez sur le bouton de votre choix pour chaque situation. Quel biais dans chaque situation ?",
+    "Sur vos PC ou sur vos téléphones : scannez le QR de cette page (ou ouvrez l'application), puis appuyez sur le bouton de votre choix pour chaque situation. Quel biais dans chaque situation ?",
     "1. Les études sans résultat marquant ne sont jamais publiées.",
     "2. L'étude est financée par le fabricant du produit testé.",
     "3. Vous ne gardez que les articles qui disent que votre solution préférée est la meilleure.",
@@ -1185,12 +1185,12 @@ window.DATA = {
   },
   "EX17": {
    "id": "EX17",
-   "titre": "Chasser les sophismes (téléphone)",
-   "mode": "Individuel, téléphone",
+   "titre": "Chasser les sophismes (PC ou téléphone)",
+   "mode": "Individuel, PC ou téléphone",
    "duree": 8,
    "chap": "Carnet · chapitre 6",
    "situation": [
-    "Sur votre téléphone : scannez le QR de cette page (ou ouvrez l'application) et appuyez sur le bouton du sophisme pour chaque phrase. Six phrases entendues en réunion :",
+    "Sur vos PC ou sur vos téléphones : scannez le QR de cette page (ou ouvrez l'application) et appuyez sur le bouton du sophisme pour chaque phrase. Six phrases entendues en réunion :",
     "1. « Depuis la mise à jour de jeudi, les tickets ont augmenté : la mise à jour est la cause. »",
     "2. « Si on retarde la migration d'un mois, nous serons piratés. »",
     "3. « Tous les concurrents sont passés au cloud, donc nous devons y passer. »",
@@ -2485,7 +2485,7 @@ window.DATA = {
    "duree": 5,
    "chap": "Carnet · chapitre 2",
    "situation": [
-    "Pour chaque affirmation, appuyez sur VRAI ou FAUX sur votre téléphone, puis la correction."
+    "Pour chaque affirmation, appuyez sur VRAI ou FAUX sur vos PC ou sur vos téléphones, puis la correction."
    ],
    "taches": [
     "93 % du message passe par le non-verbal.",
@@ -4640,7 +4640,7 @@ window.DATA = {
    "chap": "Carnet · chapitre 3",
    "situation": [
     "Votre question de décision (EX1) doit rester d'actualité pendant le projet. Vous mettez en place une veille minimale avec des outils gratuits.",
-    "Outils proposés : Google Alerts (alerte sur une requête, reçue par e-mail ou en flux RSS) ; Inoreader (lecteur de flux RSS, plan gratuit de 150 abonnements) ; le flux RSS du CERT-FR (https://cert.cyber.gouv.fr/flux-rss/).",
+    "Outils proposés : Google Alerts (alerte sur une requête, reçue par e-mail ou en flux RSS) ; Inoreader (lecteur de flux RSS, plan gratuit de 150 abonnements) ; le flux « Avis de sécurité » du CERT-FR (https://cert.cyber.gouv.fr/avis/feed/ ; la page cert.cyber.gouv.fr/flux-rss/ liste tous les flux).",
     "Aucune donnée personnelle ou confidentielle dans ces outils. Si un compte est exigé, utilisez l'adresse de l'école."
    ],
    "taches": [
@@ -4692,12 +4692,12 @@ window.DATA = {
      [
       "2",
       "3 · Lecteur de flux",
-      "Créer un compte gratuit Inoreader ; ajouter trois flux de types différents : une institutionnelle (CERT-FR : https://cert.cyber.gouv.fr/flux-rss/), une scientifique (flux d'un dépôt d'articles), une presse ou éditeur (à pondérer)."
+      "Créer un compte gratuit Inoreader ; ajouter trois flux de types différents : une institutionnelle (CERT-FR, avis de sécurité : https://cert.cyber.gouv.fr/avis/feed/), une scientifique (arXiv, catégorie cs.CR : https://rss.arxiv.org/rss/cs.CR), une presse ou éditeur (à pondérer)."
      ],
      [
       "2",
       "4 · Plan gratuit",
-      "Inoreader : 150 abonnements, 30 règles, 50 filtres en gratuit d'après sa page tarifs (consultée le 23/10/2026) : largement suffisant ici."
+      "Inoreader : 150 abonnements en gratuit d'après sa page tarifs (consultée le 18/11/2026) ; les règles et les filtres relèvent d'un plan payant, inutiles ici. Un compte est exigé : utilisez l'adresse de l'école."
      ],
      [
       "3",
