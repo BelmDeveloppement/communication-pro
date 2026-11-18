@@ -308,6 +308,7 @@
   function sujetsView(G) { var o = {}; sujetList().forEach(function (x) { var s = (G.sujets || {})[x[0]], p = s && G.players[s]; o[x[0]] = p ? p.nom : null; }); return o; }
   function act(G, sid, m, now) {
     if (m.t === "sujet") { var rs = claimSujet(G, sid, String(m.sujet || ""), now); G.players[sid] && (G.players[sid].sujetRes = rs); return rs.ok; }
+    if (m.t === "words") { if (!G.wq || !G.players[sid]) return false; var ws = (Array.isArray(m.w) ? m.w : []).map(function (x) { return String(x || "").trim().replace(/\s+/g, " ").slice(0, 30); }).filter(function (x) { return x; }).slice(0, 3); G.words = G.words || {}; var bq = G.words[G.wq] = G.words[G.wq] || {}; if (ws.length) bq[sid] = ws; else delete bq[sid]; return true; }
     if (m.t === "report") { var pr = G.players[sid]; G.reports = G.reports || []; G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : "?", table: pr ? pr.table : "?", kind: String(m.kind || "").slice(0, 40), txt: String(m.txt || "").slice(0, 600), jeu: String(m.jeu || "").slice(0, 4), done: false }); if (G.reports.length > 300) G.reports.shift(); return true; }
     if (m.t === "draw") return draw(G, sid, now);
     if (m.t === "ans") { var pp = G.players[sid], TT = pp && G.tables[pp.table]; if (m.card && TT && TT.cur && m.card !== TT.round + ":" + TT.cur.jeu + ":" + TT.cur.id) return false; return answer(G, sid, m.ans, now, m.bet); }
@@ -392,6 +393,13 @@
   }
   function nudge(G, sid, now) { G.nudge[sid] = now; }
   /* fiche saisie plus tôt (par le joueur, sinon par un coéquipier) : sert à recopier la fiche de Toulmin du JEU 27 dans le JEU 28 */
+  /* Nuage de mots : chaque joueur propose jusqu'à 3 mots ; regroupement sans accents, casse ni pluriel simple */
+  function wordKey(w) { var k = String(w).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9 ]/g, "").trim(); if (k.length > 3 && /s$/.test(k)) k = k.slice(0, -1); return k; }
+  function cloud(G, q) {
+    var b = (G.words || {})[q] || {}, g = {}; Object.keys(b).forEach(function (sid) { var seen = {}; b[sid].forEach(function (w) { var k = wordKey(w); if (!k || seen[k]) return; seen[k] = 1; var x = g[k] = g[k] || { n: 0, forms: {} }; x.n++; x.forms[w.toLowerCase()] = (x.forms[w.toLowerCase()] || 0) + 1; }); });
+    return Object.keys(g).map(function (k) { var f = g[k].forms, best = Object.keys(f).sort(function (a, b2) { return f[b2] - f[a] || a.length - b2.length; })[0]; return { w: best, n: g[k].n }; }).sort(function (a, b2) { return b2.n - a.n || (a.w < b2.w ? -1 : 1); });
+  }
+  function setWq(G, q) { G.wq = q ? String(q) : null; }
   var PRIOR = { "9": [["7", "votre requête du JEU 7"]], "13": [["3", "votre question de décision du JEU 3"]], "16": [["9", "vos résultats du JEU 9"], ["10", "vos résultats du JEU 10"]], "27": [["3", "votre question du JEU 3"], ["16", "vos sources notées du JEU 16"]], "28": [["27", "votre fiche de Toulmin du JEU 27"]], "32": [["3", "vos critères du JEU 3"]], "35": [["16", "vos sources du JEU 16"]], "37": [["34", "votre plan du JEU 34"], ["32", "votre matrice du JEU 32"], ["16", "vos sources du JEU 16"]], "39": [["37", "votre grille du JEU 37"]] };
   function recOfAll(G, p) { var o = {}; Object.keys(PRIOR).forEach(function (k) { PRIOR[k].forEach(function (x) { if (!(x[0] in o)) o[x[0]] = ficheOf(G, p, x[0]); }); }); return o; }
   function ficheOf(G, p, jeu) {
@@ -403,7 +411,7 @@
   function snapshot(G, sid, now) {
     var p = G.players[sid]; if (!p) return null; var T = G.tables[p.table], tr = tireur(G, T, now);
     return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, gate: D.caps.gate, max: D.caps.max, tpos: T.pos, here: jeuHere(T), tdone: !!T.done, tscore: tableScore(G, T), gauges: Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }), mast: G.status === "ended" || T.done ? masteryAll(p) : null,
-      me: { fiche27: ficheOf(G, p, "27"), rec: recOfAll(G, p), sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
+      me: { wq: G.wq || null, wmine: G.wq ? (((G.words || {})[G.wq] || {})[sid] || []) : [], fiche27: ficheOf(G, p, "27"), rec: recOfAll(G, p), sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
       sujets: sujetsView(G), canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
       table: { id: T.id, round: T.round, jumped: T.jumped || null,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),
@@ -411,6 +419,6 @@
         last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res, zone: T.last.zone, gauge: T.last.gauge, bonus: T.last.bonus, from: T.last.from, to: T.last.to, path: T.last.path } : null } };
   }
   var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, gotoJeu: gotoJeu, moveTable: moveTable, leave: leave, caseIx: caseIx, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
-    claimSujet: claimSujet, releaseSujet: releaseSujet, sujetOf: sujetOf, sujetsView: sujetsView, act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, exactTool: exactTool, reopen: reopen, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
+    claimSujet: claimSujet, cloud: cloud, setWq: setWq, wordKey: wordKey, releaseSujet: releaseSujet, sujetOf: sujetOf, sujetsView: sujetsView, act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, exactTool: exactTool, reopen: reopen, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);

@@ -121,6 +121,12 @@
       for (var i = 1; i <= 10; i++) n.appendChild(h("i", { style: i <= g.lvl ? "background:" + z.col : "" })); r.appendChild(n); r.appendChild(h("b", { class: "jx-bv" }, g.lvl + "/10")); w.appendChild(r); });
     return w;
   }
+  function cloudEl(list) {
+    var w = h("div", { class: "jx-cloud" }), mx = list.length ? list[0].n : 1, cols = ["#3B6FD8", "#2E9E6B", "#E9A400", "#E4572E", "#D6479B"];
+    if (!list.length) w.appendChild(h("span", { class: "meta" }, "Aucun mot reçu pour l'instant."));
+    list.forEach(function (x, i) { w.appendChild(h("span", { style: "font-size:" + Math.round(16 + 40 * x.n / mx) + "px;color:" + cols[i % 5], title: x.n + " joueur(s)" }, x.w)); });
+    return w;
+  }
   function joinPage() {
     var p = q(); MK = MK0 + (p.k || ""); var me = LSget(MK);
     if (me && me.sid && (!p.c || me.code === p.c.toUpperCase()) && (!p.t || String(p.t) === String(me.table).replace(/\D/g, ""))) return play(me);
@@ -191,11 +197,17 @@
       var last = ""; var iv = setInterval(function () { var sg = JSON.stringify([snap.me.sujet, snap.sujets, snap.me.sujetRes]); if (sg !== last) { last = sg; draw(); } }, 400); onLeave(function () { clearInterval(iv); try { ov.remove(); } catch (e) {} });
     }
     function pawns() { return [{ pos: snap.tpos, col: "#1F2A5C", label: "Table " + snap.table.id.slice(1) }]; }
+    var wordsEl = h("div", {}), wsig = "";
+    function drawWords() {
+      var q = snap.me.wq, mine = snap.me.wmine || [], sg = (q || "") + "|" + mine.join(","); if (sg === wsig) return; wsig = sg; wordsEl.innerHTML = ""; if (!q) return;
+      var ins = [0, 1, 2].map(function (i) { return h("input", { placeholder: "Mot " + (i + 1) + (i ? " (facultatif)" : ""), maxlength: 30, value: mine[i] || "", style: "margin:4px 0" }); }), msg = h("p", { class: "meta" }, mine.length ? "Envoyé : " + mine.join(", ") + ". Vous pouvez modifier puis renvoyer." : "");
+      wordsEl.appendChild(h("div", { class: "card", style: "border-left:6px solid #D6479B;background:#FFF4FA" }, h("h2", {}, "Nuage de mots · question " + q), h("p", {}, "Répondez en 1 à 3 mots (sur l'écran du cours : question " + q + ")."), ins, h("button", { onclick: function () { var w = ins.map(function (x) { return x.value; }).filter(function (x) { return x.trim(); }); send({ t: "words", w: w }); msg.textContent = w.length ? "Envoyé : " + w.join(", ") : "Mots effacés."; } }, "Envoyer"), msg));
+    }
     function render() {
       var m = snap.me, ci = m.ci;
       head.innerHTML = ""; head.appendChild(h("div", { class: "card" }, h("span", { class: "jx-dot", style: "background:" + m.col }), h("b", {}, " " + m.nom), "  ·  " + C.COLNAMES[ci] + "  ·  table " + m.table.slice(1),
         h("div", { class: "big" }, "Pion de la table sur la case " + snap.tpos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "")), sujetLine(), info), dualEl); dualShow();
-      board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns())); if (snap.gauges) board.appendChild(barsEl(snap.gauges, "Maîtrise de votre table (5 objectifs, 10 crans)"));
+      drawWords(); board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns())); if (snap.gauges) board.appendChild(barsEl(snap.gauges, "Maîtrise de votre table (5 objectifs, 10 crans)"));
       var T = snap.table, k, pe = snap.me.pend, last = T.last && T.last.res[m.sid] && T.last.round >= ack ? T.last : null;
       if (pa && (!T.cur || T.cur.mine || pa.card !== cardId(T))) { pa = null; paSave(); }
       var needRead = snap.rd !== "ok" && snap.status !== "ended" && !m.done && !(T.cur && T.cur.mine);
@@ -460,7 +472,7 @@
       }
       body.appendChild(box);
     }
-    mount(aideBar(), h("h1", {}, "5 · La route de l'état de l'art"), head, board, body,
+    mount(aideBar(), h("h1", {}, "5 · La route de l'état de l'art"), head, wordsEl, board, body,
       h("p", {}, h("a", { href: "#/plateau/regles" }, "Règles"), "  ·  ", h("a", { href: "#", onclick: function (e) { e.preventDefault(); reportModal(); } }, "⚠ Signaler un problème"), "  ·  ", h("a", { href: "#", onclick: function (e) { e.preventDefault(); if (confirm("Quitter la partie ? Vous reviendrez au formulaire d'inscription. Vos points sont conservés si vous rejoignez la même table avec le même prénom.")) { send({ t: "leave" }); try { localStorage.removeItem(MK); } catch (x) {} setTimeout(function () { stopAll(); if (/^#\/j$/.test(location.hash)) joinPage(); else location.hash = "#/j"; }, 150); } } }, "Quitter la partie")));
     body.appendChild(h("p", { class: "meta" }, "Connexion…"));
   }
@@ -521,7 +533,7 @@
     function onSignal(kind, k, slide) {
       var rx = kind + "|" + k + "|" + slide, t0 = now(); if (rx === lastRx && t0 - (pp.last ? pp.last.at : 0) < 3000) return; lastRx = rx;   /* même signal reçu par le relais ET par ntfy */
       pp.last = { kind: kind, jeu: k, slide: slide, at: t0 };
-      if (kind === "JEU" && /^10[1-4]$/.test(String(k))) { pp.note = "Le PowerPoint est sur la question n° " + (k - 100) + " du nuage de mots (diapositive " + slide + ")."; return refresh(); }
+      if (kind === "JEU" && /^10[1-5]$/.test(String(k))) { C.setWq(G, k - 100); dirty = true; pp.note = "Nuage de mots ouvert : question n° " + (k - 100) + " (diapositive " + slide + ")."; return refresh(); }
       if (kind === "TEST") { pp.note = "Signal de test reçu : la liaison fonctionne."; return refresh(); }
       if (kind !== "JEU" || !D.jeux[k] || ppt.mode === "off") return refresh();
       if (k === G.jeux[0]) { pp.pend = null; pp.note = "Diapositive du JEU " + k + " : déjà ouvert."; return refresh(); }
@@ -601,7 +613,7 @@
     /* ----- vue ----- */
     var pj = "", rows = {}, racesEl = h("div", { class: "jx-races" }), sideEl = h("div", { class: "jx-side" }), headEl = h("div", { class: "jx-head" }), tabsEl = h("div", { class: "jx-tabs" }), detEl = h("div", {});
     wrap.appendChild(headEl); wrap.appendChild(tabsEl);
-    var main = h("div", { class: "jx-main" }, racesEl, sideEl); wrap.appendChild(main); wrap.appendChild(detEl); var drawerEl = h("div", { class: "jx-drawer" }); wrap.appendChild(drawerEl);
+    var cloudHost = h("div", { class: "jx-cloudhost" }); wrap.appendChild(cloudHost); var main = h("div", { class: "jx-main" }, racesEl, sideEl); wrap.appendChild(main); wrap.appendChild(detEl); var drawerEl = h("div", { class: "jx-drawer" }); wrap.appendChild(drawerEl);
     mount(wrap);
     function setView(v) { view = v; document.body.classList.toggle("jx-full", v === "proj"); wrap.className = "jx " + (v === "proj" ? "jx-p" : "jx-t"); refresh(); }
     function exportCsv(S) {
@@ -632,7 +644,9 @@
       ctr.appendChild(h("button", { class: "sec", onclick: function () { if (confirm("Terminer et effacer cette partie ?")) { try { localStorage.removeItem(GK); } catch (e) {} dead = true; location.hash = "#/tour"; setTimeout(function () { location.reload(); }, 50); } } }, "Nouvelle partie"));
       if (endBtn) ctr.appendChild(endBtn);
       if (viewer) { ctr.innerHTML = ""; ctr.appendChild(h("button", { class: "sec", onclick: function () { try { document.documentElement.requestFullscreen(); } catch (e) {} } }, "Plein écran")); }
+      if (!viewer) { var wb = h("span", { class: "meta" }, "Nuage de mots : "); [1, 2, 3, 4, 5].forEach(function (q) { wb.appendChild(h("button", { class: G.wq === String(q) ? "ok" : "sec", style: "padding:2px 8px;margin-right:3px", onclick: function () { C.setWq(G, G.wq === String(q) ? null : q); dirty = true; refresh(); } }, String(q))); }); wb.appendChild(h("button", { class: "sec", style: "padding:2px 8px", onclick: function () { C.setWq(G, null); dirty = true; refresh(); } }, "Fermer")); ctr.appendChild(wb); }
       headEl.appendChild(ctr);
+      cloudHost.innerHTML = ""; if (G.wq) { var cl = C.cloud(G, G.wq), nr = Object.keys((G.words || {})[G.wq] || {}).length; cloudHost.appendChild(h("div", { class: "jx-card", style: "margin:8px 0" }, h("h3", {}, "Nuage de mots · question " + G.wq + " · " + nr + " joueur(s) ont répondu"), cloudEl(cl), !viewer ? h("button", { class: "sec", onclick: function () { if (confirm("Effacer les mots de cette question ?")) { delete (G.words || {})[G.wq]; dirty = true; refresh(); } } }, "Effacer les mots") : null)); }
       var ppTxt = { ok: "● PowerPoint relié", err: "○ relais PowerPoint indisponible", off: "○ liaison PowerPoint désactivée" }[pp.st] || "… liaison PowerPoint";
       var ppBar = h("div", { class: "jx-ctl jx-ppt" }, h("small", {}, ppTxt + (pp.note ? " · " + pp.note : "")));
       if (pp.pend && D.jeux[pp.pend]) { ppBar.appendChild(h("button", { class: "ok", onclick: function () { openJeu(pp.pend, "JEU " + pp.pend + " ouvert à la main depuis le signal du PowerPoint."); } }, "Ouvrir le JEU " + pp.pend + " (diapositive affichée)")); ppBar.appendChild(h("button", { class: "sec", onclick: function () { pp.pend = null; pp.note = ""; refresh(); } }, "Ignorer")); }
