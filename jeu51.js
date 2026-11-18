@@ -115,6 +115,12 @@
     var cp = h("button", { class: "sec", type: "button", style: "margin-left:6px;padding:2px 8px", onclick: function () { try { navigator.clipboard.writeText(JOIN_URL); cp.textContent = "Copié"; setTimeout(function () { cp.textContent = "Copier"; }, 1500); } catch (e) { cp.textContent = "Sélectionnez le lien"; } } }, "Copier");
     return h("span", { class: "jx-join" }, h("a", { href: JOIN_URL, target: "_blank", rel: "noopener" }, "belmdeveloppement.github.io/communication-pro/#/j"), cp);
   }
+  function barsEl(gauges, titre) {
+    var w = h("div", { class: "jx-bars" }); if (titre) w.appendChild(h("div", { class: "jx-bt" }, titre));
+    (gauges || []).forEach(function (g) { var z = D.zones[g.z], r = h("div", { class: "jx-br", title: z.syl + " : " + g.lvl + " sur 10" }, h("span", { class: "jx-bl" }, g.z + " " + z.nom)), n = h("span", { class: "jx-bn" });
+      for (var i = 1; i <= 10; i++) n.appendChild(h("i", { style: i <= g.lvl ? "background:" + z.col : "" })); r.appendChild(n); r.appendChild(h("b", { class: "jx-bv" }, g.lvl + "/10")); w.appendChild(r); });
+    return w;
+  }
   function joinPage() {
     var p = q(); MK = MK0 + (p.k || ""); var me = LSget(MK);
     if (me && me.sid && (!p.c || me.code === p.c.toUpperCase()) && (!p.t || String(p.t) === String(me.table).replace(/\D/g, ""))) return play(me);
@@ -189,7 +195,7 @@
       var m = snap.me, ci = m.ci;
       head.innerHTML = ""; head.appendChild(h("div", { class: "card" }, h("span", { class: "jx-dot", style: "background:" + m.col }), h("b", {}, " " + m.nom), "  ·  " + C.COLNAMES[ci] + "  ·  table " + m.table.slice(1),
         h("div", { class: "big" }, "Pion de la table sur la case " + snap.tpos + " / 62  ·  " + m.score + " point" + (m.score > 1 ? "s" : "")), sujetLine(), info), dualEl); dualShow();
-      board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns()));
+      board.innerHTML = ""; board.appendChild(PL.boardSvg(pawns())); if (snap.gauges) board.appendChild(barsEl(snap.gauges, "Maîtrise de votre table (5 objectifs, 10 crans)"));
       var T = snap.table, k, pe = snap.me.pend, last = T.last && T.last.res[m.sid] && T.last.round >= ack ? T.last : null;
       if (pa && (!T.cur || T.cur.mine || pa.card !== cardId(T))) { pa = null; paSave(); }
       var needRead = snap.rd !== "ok" && snap.status !== "ended" && !m.done && !(T.cur && T.cur.mine);
@@ -659,7 +665,7 @@
       sideEl.innerHTML = "";
       sideEl.appendChild(h("div", { class: "jx-qr" }, h("img", { src: "qr-j.svg", alt: "QR de connexion" }), h("div", {}, h("b", {}, "Connexion perdue ? Scannez à nouveau"), h("small", {}, "même prénom, même table · code " + G.code), joinLink())));
       var LV = { "Débutant": "#E4572E", "Confirmé": "#E9A400", "Expert": "#2E9E6B" };
-      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement des tables"), h("table", {}, S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("b", {}, x.id)), h("td", {}, x.tscore + " pt"), h("td", {}, "case " + x.pos), h("td", {}, x.gauges.map(function (g) { return h("span", { class: "meta", style: "color:" + D.zones[g.z].col + ";font-weight:700;margin-right:5px", title: D.zones[g.z].nom }, g.z + " " + g.lvl); }))); })),
+      sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement des tables"), h("table", {}, S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("b", {}, x.id)), h("td", {}, x.tscore + " pt"), h("td", {}, "case " + x.pos), h("td", {}, barsEl(x.gauges))); })),
         h("p", { class: "meta" }, "Jauges sur 10 par objectif · duels : " + Math.round(S.duels / 2) + " · pièges évités : " + S.trapOk + "/" + S.traps)));
       if (view === "prof") {
         sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement individuel (enseignant)"), h("table", {}, S.players.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 12).map(function (p, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom + " (" + p.table + ")"), h("td", {}, p.score + " pt")); }))));
