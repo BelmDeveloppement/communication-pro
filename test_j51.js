@@ -86,4 +86,7 @@ ok(J.exactTool("1") && !J.exactTool("2") && J.exactTool("4"), "outil exact : JEU
   J.act(G4, "s10", { t: "words", w: ["Phishing", "mot de passe", "  ", "x", "quatrième"] }, NOW); J.act(G4, "s11", { t: "words", w: ["phishing", "Mot de passé"] }, NOW);
   var cl = J.cloud(G4, "1"); eq(cl[0].n, 2, "mots regroupés (casse)"); eq(cl.length, 3, "trois mots distincts (pluriel et accents regroupés, max 3 par joueur)");
   eq(J.snapshot(G4, "s10", NOW).me.wmine.length, 3, "un joueur : 3 mots au plus"); J.act(G4, "s10", { t: "words", w: [] }, NOW); eq(J.snapshot(G4, "s10", NOW).me.wmine.length, 0, "mots effacés"); })();
+// signalements : périmètre, statut initial, envoi hors ligne reçu deux fois
+(function () { var G5 = game(1); J.act(G5, "s10", { t: "report", kind: "Idée d'amélioration", txt: "x", jeu: "6", scope: "page", page: "51", qid: "q1" }, NOW); J.act(G5, "s10", { t: "report", kind: "Idée d'amélioration", txt: "x", jeu: "6", scope: "page", page: "51", qid: "q1" }, NOW);
+  eq(G5.reports.length, 1, "doublon d'envoi ignoré"); eq([G5.reports[0].status, G5.reports[0].scope, G5.reports[0].page, G5.reports[0].gen], ["a_approuver", "page", "51", false], "statut initial et périmètre"); })();
 console.log(process.exitCode ? "ÉCHECS" : "logique tables/joueurs : " + n + " vérifications, tout passe");

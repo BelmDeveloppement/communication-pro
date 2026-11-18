@@ -309,7 +309,9 @@
   function act(G, sid, m, now) {
     if (m.t === "sujet") { var rs = claimSujet(G, sid, String(m.sujet || ""), now); G.players[sid] && (G.players[sid].sujetRes = rs); return rs.ok; }
     if (m.t === "words") { if (!G.wq || !G.players[sid]) return false; var ws = (Array.isArray(m.w) ? m.w : []).map(function (x) { return String(x || "").trim().replace(/\s+/g, " ").slice(0, 30); }).filter(function (x) { return x; }).slice(0, 3); G.words = G.words || {}; var bq = G.words[G.wq] = G.words[G.wq] || {}; if (ws.length) bq[sid] = ws; else delete bq[sid]; return true; }
-    if (m.t === "report") { var pr = G.players[sid]; G.reports = G.reports || []; G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : "?", table: pr ? pr.table : "?", kind: String(m.kind || "").slice(0, 40), txt: String(m.txt || "").slice(0, 600), jeu: String(m.jeu || "").slice(0, 4), done: false }); if (G.reports.length > 300) G.reports.shift(); return true; }
+    if (m.t === "report") { var pr = G.players[sid]; G.reports = G.reports || []; var rtxt = String(m.txt || "").slice(0, 600), rjeu = String(m.jeu || "").slice(0, 4), rkey = String(m.qid || "");
+      if (rkey && G.reports.some(function (x) { return x.qid === rkey; })) return true;   /* même envoi reçu deux fois (file hors ligne) */
+      G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : "?", table: pr ? pr.table : "?", kind: String(m.kind || "").slice(0, 40), txt: rtxt, jeu: rjeu, scope: String(m.scope || "jeu").slice(0, 12), page: String(m.page || "").slice(0, 8), qid: rkey, status: "a_approuver", gen: false, done: false }); if (G.reports.length > 300) G.reports.shift(); return true; }
     if (m.t === "draw") return draw(G, sid, now);
     if (m.t === "ans") { var pp = G.players[sid], TT = pp && G.tables[pp.table]; if (m.card && TT && TT.cur && m.card !== TT.round + ":" + TT.cur.jeu + ":" + TT.cur.id) return false; return answer(G, sid, m.ans, now, m.bet); }
     if (m.t === "outil") return actOutil(G, sid, !!m.ok, now);

@@ -156,6 +156,7 @@
     function onmsg(m) {
       if (m.t === "err") { try { localStorage.removeItem(MK); } catch (e) {} mount(h("h1", {}, "Rejoindre la partie"), h("div", { class: "warn" }, m.msg), h("p", {}, h("a", { href: "#/j" }, "← Réessayer"))); stopAll(); return; }
       if (m.t !== "snap") return;
+      try { var rq = LSget("j-repq") || []; if (rq.length) { LSset("j-repq", []); rq.forEach(function (x) { send(x); }); } } catch (e) {}
       if (gidCur && m.gid !== gidCur && Date.now() - snapAt < 9000) { rejAt = Date.now(); return; } /* une autre tour répond : on reste sur la partie en cours */
       if (rejAt && m.gid === gidCur && Date.now() - rejAt < 9000) dualAt = Date.now();
       snapAt = Date.now();
@@ -382,14 +383,17 @@
     }
     function reportModal() {
       var ov = h("div", { style: "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:90;display:flex;align-items:center;justify-content:center;padding:12px" }), box = h("div", { class: "card", style: "max-width:520px;width:100%;max-height:92vh;overflow:auto" });
-      var kind = h("select", {}, ["Énoncé ou consigne erronée", "Correction ou points injustes", "Problème d'affichage ou bouton qui ne marche pas", "Connexion", "Autre"].map(function (k) { return h("option", { value: k }, k); }));
-      var tx = h("textarea", { rows: 4, placeholder: "Décrivez en une ou deux phrases ce qui ne va pas.", maxlength: 600 }), st = h("p", { class: "meta" });
+      var kind = h("select", {}, ["Énoncé ou consigne erronée", "Correction ou points injustes", "Problème d'affichage ou bouton qui ne marche pas", "Connexion", "Idée d'amélioration", "Autre"].map(function (k) { return h("option", { value: k }, k); }));
+      var scope = h("select", {}, [["jeu", "Ce JEU"], ["page", "Une page du support projeté"], ["outil", "Un outil"], ["appli", "L'application"], ["cours", "Le cours en général"]].map(function (k) { return h("option", { value: k[0] }, k[1]); }));
+      var pg = h("input", { placeholder: "N° de page du support (facultatif)", inputmode: "numeric", maxlength: 4 });
+      var tx = h("textarea", { rows: 4, placeholder: "Décrivez en une ou deux phrases ce qui ne va pas, ou votre idée.", maxlength: 600 }), st = h("p", { class: "meta" });
       var cur = snap && snap.table && snap.table.cur ? snap.table.cur : null;
-      box.appendChild(h("h2", {}, "Signaler un problème")); box.appendChild(h("p", { class: "meta" }, "Le message part à l'enseignant avec votre prénom, votre table et le JEU en cours.")); box.appendChild(kind); box.appendChild(tx); box.appendChild(st);
+      box.appendChild(h("h2", {}, "Signaler un problème ou proposer une idée")); box.appendChild(h("p", { class: "meta" }, "Le message part à l'enseignant avec votre prénom, votre table et le JEU en cours. Il sera relu et approuvé avant toute modification.")); box.appendChild(h("label", {}, "Ça concerne : "));  box.appendChild(scope); box.appendChild(pg); box.appendChild(kind); box.appendChild(tx); box.appendChild(st);
       box.appendChild(h("button", { class: "ok", onclick: function () {
         if (!tx.value.trim()) { st.className = "warn"; st.textContent = "Écrivez quelques mots."; return; }
-        if (!linkOk) { st.className = "warn"; st.textContent = "Vous êtes hors ligne : le message ne peut pas partir. Reconnectez-vous puis réessayez."; return; }
-        send({ t: "report", kind: kind.value, txt: tx.value.trim(), jeu: cur ? cur.jeu : "" }); st.className = "meta"; st.textContent = "Merci, le message est envoyé à l'enseignant."; setTimeout(function () { try { document.body.removeChild(ov); } catch (e) {} }, 1400);
+        var m = { t: "report", kind: kind.value, txt: tx.value.trim(), jeu: cur ? cur.jeu : (snap && snap.here ? String(snap.here) : ""), scope: scope.value, page: pg.value.trim(), qid: me.sid + ":" + Date.now() };
+        if (!linkOk) { var q = LSget("j-repq") || []; q.push(m); LSset("j-repq", q); st.className = "meta"; st.textContent = "Vous êtes hors ligne : le message est gardé et partira dès la reconnexion."; return; }
+        send(m); st.className = "meta"; st.textContent = "Merci, le message est envoyé à l'enseignant."; setTimeout(function () { try { document.body.removeChild(ov); } catch (e) {} }, 1400);
       } }, "Envoyer"));
       box.appendChild(h("button", { class: "sec", onclick: function () { try { document.body.removeChild(ov); } catch (e) {} } }, "Fermer")); ov.appendChild(box); document.body.appendChild(ov);
     }
@@ -701,7 +705,7 @@
       drawerEl.className = "jx-drawer" + (view === "prof" && tab === "corr" ? " on" : "");
       if (view === "prof" && ((tab === "corr" && drawerEl.firstChild) || (tab === "ppt" && detEl.firstChild)) && sig === lastSig) return; lastSig = sig;
       tabsEl.innerHTML = detEl.innerHTML = drawerEl.innerHTML = ""; if (view !== "prof") return;
-      var nrep = (G.reports || []).filter(function (r) { return !r.done; }).length;
+      var nrep = (G.reports || []).filter(function (r) { return (r.status || (r.done ? "traite" : "a_approuver")) === "a_approuver"; }).length;
       [["ens", "Joueurs"], ["prod", "Saisies des joueurs"], ["suj", "Sujets (" + Object.keys(G.sujets || {}).length + "/" + (D.sujets || []).length + ")"], ["rep", "Signalements" + (nrep ? " (" + nrep + ")" : "")], ["mast", "Maîtrise"], ["pts", "Points par JEU"], ["crit", "Critères et cartes"], ["err", "Erreurs fréquentes"], ["eng", "Engagement"], ["corr", "Corrigé du JEU ouvert"], ["ppt", "Liaison PowerPoint"]].forEach(function (a) { tabsEl.appendChild(h("button", { style: a[0] === "rep" && nrep ? "background:#C0392B" : "", class: a[0] === tab ? "" : "sec", onclick: function () { tab = a[0]; refresh(); if (a[0] === "ppt" || a[0] === "prod") try { tabsEl.scrollIntoView({ behavior: "smooth" }); } catch (e) {} } }, a[1])); });
       if (tab === "ens") detEl.appendChild(h("table", {}, h("tr", {}, ["Rang", "Table", "Joueur", "Points", "JEUX joués", "Réussite", "Temps moyen", "Duels", "État", "Retirer"].map(function (c) { return h("th", {}, c); })),
         S.players.slice().sort(function (a, b) { return b.score - a.score; }).map(function (p, i) { return h("tr", {}, h("td", {}, String(i + 1)), h("td", {}, p.table), h("td", {}, h("span", { class: "jx-dot", style: "background:" + p.col }), " " + p.nom), h("td", {}, String(p.score)), h("td", {}, p.n + " (" + p.ok + " à 3 pt)"), h("td", {}, p.n ? pct(p.rate) : "—"), h("td", {}, p.ms == null ? "—" : Math.round(p.ms / 1000) + " s"), h("td", {}, p.duelW + "V " + p.duelL + "D"), h("td", {}, (p.online ? "" : "hors ligne · ") + ST[p.st][1]), h("td", {}, p.online ? "" : h("button", { class: "sec jx-mini", title: "Retirer un doublon ou un joueur parti", onclick: function () { if (confirm("Retirer " + p.nom + " (" + p.table + ") de la partie ? Ses points sont perdus.")) { C.leave(G, p.sid, true); dirty = true; refresh(); } } }, "Retirer"))); })));
@@ -738,9 +742,19 @@
       }
       if (tab === "rep") {
         var rl = G.reports || [], hh = function (t) { var d = new Date(t); return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2); };
-        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Signalements des joueurs (" + nrep + " à traiter)"), h("p", { class: "meta" }, "Envoyés depuis le bouton « Signaler un problème » de l'écran joueur. « Traité » retire la ligne de la liste à traiter ; « Copier » exporte tout pour corriger l'application après le cours."),
-          h("button", { class: "sec", onclick: function () { var tx = rl.map(function (r) { return hh(r.at) + " · " + r.table + " " + r.nom + " · JEU " + (r.jeu || "?") + " · " + r.kind + " · " + r.txt + (r.done ? " [traité]" : ""); }).join("\n"); try { navigator.clipboard.writeText(tx); } catch (e) {} } }, "Copier tous les signalements"),
-          rl.length ? h("table", {}, h("tr", {}, ["Heure", "Table", "Joueur", "JEU", "Type", "Message", "Statut"].map(function (c) { return h("th", {}, c); })), rl.slice().reverse().map(function (r) { return h("tr", {}, h("td", {}, hh(r.at)), h("td", {}, r.table), h("td", {}, r.nom), h("td", {}, r.jeu || "—"), h("td", {}, r.kind), h("td", { style: "white-space:pre-wrap" }, r.txt), h("td", {}, r.done ? "traité" : h("button", { class: "sec", onclick: function () { r.done = true; dirty = true; lastSig = ""; refresh(); } }, "Traité"))); })) : h("p", { class: "meta" }, "Aucun signalement pour l'instant.")));
+        var ST_R = { a_approuver: "à approuver par l'enseignant", approuve: "approuvé", rejete: "rejeté", traite: "traité" }, SC_R = { jeu: "JEU", page: "page du support", outil: "outil", appli: "application", cours: "cours" };
+        var stOf = function (r) { return r.status || (r.done ? "traite" : "a_approuver"); }, norm = function (t) { return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim(); };
+        var groups = {}, order = []; rl.slice().reverse().forEach(function (r) { var k = (r.scope || "jeu") + "|" + (r.jeu || "") + "|" + (r.page || "") + "|" + norm(r.txt); if (!groups[k]) { groups[k] = { first: r, all: [] }; order.push(k); } groups[k].all.push(r); });
+        var setSt = function (g, v) { g.all.forEach(function (r) { r.status = v; r.done = v === "traite" || v === "rejete"; }); dirty = true; lastSig = ""; refresh(); };
+        var exportTxt = function () { var l = ["# Signalements approuvés (lot du " + new Date().toLocaleDateString("fr-FR") + ")", ""]; order.forEach(function (k) { var g = groups[k], r = g.first; if (stOf(r) !== "approuve") return; l.push("- [" + (r.gen ? "À GÉNÉRALISER À TOUS LES JEUX" : "Propre à son périmètre") + "] Périmètre : " + (SC_R[r.scope || "jeu"]) + (r.jeu ? " · JEU " + r.jeu : "") + (r.page ? " · page " + r.page : "") + " · Type : " + r.kind + " · Signalé par " + g.all.map(function (x) { return x.nom + " (" + x.table + ")"; }).join(", ") + " : " + r.txt); }); return l.join("\n"); };
+        detEl.appendChild(h("div", { class: "card" }, h("h3", {}, "Backlog des signalements (" + order.filter(function (k) { return stOf(groups[k].first) === "a_approuver"; }).length + " à approuver)"), h("p", { class: "meta" }, "Envoyés depuis le bouton « Signaler » de l'écran joueur avec le prénom, la table, le JEU et le périmètre. Les messages identiques sont regroupés. Revue en fin de séance : « Approuver » ou « Rejeter », case « À tous les JEUX » si la remarque dépasse le JEU concerné, puis « Copier le lot approuvé » pour lancer les mises à jour (PDF, application, support, contexte du projet)."),
+          h("button", { class: "sec", onclick: function () { try { navigator.clipboard.writeText(exportTxt()); } catch (e) {} } }, "Copier le lot approuvé"), " ",
+          h("button", { class: "sec", onclick: function () { var tx = rl.map(function (r) { return hh(r.at) + " · " + r.table + " " + r.nom + " · " + (SC_R[r.scope || "jeu"]) + " " + (r.jeu || "?") + (r.page ? " p." + r.page : "") + " · " + r.kind + " · " + r.txt + " [" + ST_R[stOf(r)] + (r.gen ? ", tous les JEUX" : "") + "]"; }).join("\n"); try { navigator.clipboard.writeText(tx); } catch (e) {} } }, "Copier tout"),
+          order.length ? h("table", {}, h("tr", {}, ["Heure", "Qui", "Périmètre", "Type", "Message", "Statut"].map(function (c) { return h("th", {}, c); })), order.map(function (k) { var g = groups[k], r = g.first, s0 = stOf(r);
+            return h("tr", {}, h("td", {}, hh(r.at)), h("td", {}, g.all.length > 1 ? g.all.length + " joueurs" : r.nom + " (" + r.table + ")"), h("td", {}, (SC_R[r.scope || "jeu"]) + (r.jeu ? " " + r.jeu : "") + (r.page ? " · p. " + r.page : "")), h("td", {}, r.kind), h("td", { style: "white-space:pre-wrap" }, r.txt),
+              h("td", {}, h("b", {}, ST_R[s0]), h("br"), s0 === "a_approuver" ? [h("button", { class: "ok", onclick: function () { setSt(g, "approuve"); } }, "Approuver"), h("button", { class: "sec", onclick: function () { setSt(g, "rejete"); } }, "Rejeter")] : s0 === "approuve" ? h("button", { class: "sec", onclick: function () { setSt(g, "traite"); } }, "Marquer traité") : null,
+                h("label", { style: "display:block;font-size:.8rem" }, h("input", { type: "checkbox", style: "width:auto", checked: !!r.gen, onchange: function (e) { g.all.forEach(function (x) { x.gen = e.target.checked; }); dirty = true; } }), " À tous les JEUX")));
+          })) : h("p", { class: "meta" }, "Aucun signalement pour l'instant.")));
       }
       if (tab === "prod") {
         if (!pj) pj = G.jeux[0];
