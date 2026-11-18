@@ -109,6 +109,11 @@
 
   /* ---------- Page joueur ---------- */
   var MK0 = "j-me", MK = MK0;
+  var JOIN_URL = "https://belmdeveloppement.github.io/communication-pro/#/j";
+  function joinLink() {
+    var cp = h("button", { class: "sec", type: "button", style: "margin-left:6px;padding:2px 8px", onclick: function () { try { navigator.clipboard.writeText(JOIN_URL); cp.textContent = "Copié"; setTimeout(function () { cp.textContent = "Copier"; }, 1500); } catch (e) { cp.textContent = "Sélectionnez le lien"; } } }, "Copier");
+    return h("span", { class: "jx-join" }, h("a", { href: JOIN_URL, target: "_blank", rel: "noopener" }, "belmdeveloppement.github.io/communication-pro/#/j"), cp);
+  }
   function joinPage() {
     var p = q(); MK = MK0 + (p.k || ""); var me = LSget(MK);
     if (me && me.sid && (!p.c || me.code === p.c.toUpperCase()) && (!p.t || String(p.t) === String(me.table).replace(/\D/g, ""))) return play(me);
@@ -300,8 +305,8 @@
       if (nt) body.appendChild(h("div", { class: "card", style: "border-left:6px solid #0F8B8D" }, h("b", {}, "Dernier événement : "), nt));
       jumpNote();
       if (!j) return body.appendChild(h("div", { class: "card" }, h("h2", {}, "Rien à jouer pour l'instant"), h("p", {}, "Votre pion est sur la case " + snap.tpos + ".")));
-      if (snap.wait) return body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), h("p", { class: "big" }, "Attendez le signal de l'enseignant : ce JEU n'est pas encore ouvert."), h("p", {}, "L'enseignant est sur le JEU " + (snap.jeux && snap.jeux[0] ? snap.jeux[0] : "…") + ". Votre table est en avance : ne cherchez pas à passer au suivant, l'écran se débloquera tout seul à l'ouverture. En attendant, relisez le concept du JEU précédent.")));
-      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Case " + snap.tpos + " : JEU " + hj + " · " + j.titre), enonceEl(hj) || h("p", {}, j.regle), C.exactTool(hj) ? h("p", {}, helpBtn(C.exactTool(hj))) : null,
+      if (snap.wait) return body.appendChild(h("div", { class: "card", style: "border-left:6px solid #1F2A5C" }, h("h2", {}, "Case " + snap.tpos + " · JEU " + hj + " · " + j.titre), h("p", { class: "big" }, "Attendez le signal de l'enseignant : ce JEU n'est pas encore ouvert."), h("p", {}, "L'enseignant est sur le JEU " + (snap.jeux && snap.jeux[0] ? snap.jeux[0] : "…") + ". Votre table est en avance : ne cherchez pas à passer au suivant, l'écran se débloquera tout seul à l'ouverture. En attendant, relisez le concept du JEU précédent.")));
+      body.appendChild(h("div", { class: "card" }, h("h2", {}, "Case " + snap.tpos + " · JEU " + hj + " · " + j.titre), enonceEl(hj) || h("p", {}, j.regle), C.exactTool(hj) ? h("p", {}, helpBtn(C.exactTool(hj))) : null,
         snap.canDraw ? h("div", {}, h("p", { class: "big" }, "C'est à vous de lancer le JEU pour la table."), h("button", { class: "ok", onclick: function () { send({ t: "draw" }); } }, "Commencer le JEU"))
           : h("p", { class: "big" }, "Au tour de " + (snap.tireur || "…") + " de lancer le JEU."), chips(T)));
     }
@@ -627,7 +632,7 @@
       if (!viewer) headEl.appendChild(ppBar);
       /* courses */
       var ids = S.tables.map(function (x) { return x.id; });
-      if (!ids.length) { racesEl.innerHTML = ""; rows = {}; racesEl.appendChild(h("div", { class: "jx-empty" }, h("img", { src: "qr-j.svg", alt: "QR de connexion", width: 220, height: 220 }), h("div", {}, h("h2", {}, "Les joueurs se connectent"), h("p", {}, "Scannez le QR ou ouvrez le lien, choisissez votre table (1 à 5) et saisissez le code " + G.code + "."), h("p", { class: "jx-link" }, "belmdeveloppement.github.io/communication-pro/#/j"), h("p", { class: "jx-link2" }, "code  ", h("b", { class: "jx-code" }, G.code)), h("p", { class: "meta" }, "Les tables apparaissent ici dès qu'un joueur s'y inscrit.")))); }
+      if (!ids.length) { racesEl.innerHTML = ""; rows = {}; racesEl.appendChild(h("div", { class: "jx-empty" }, h("img", { src: "qr-j.svg", alt: "QR de connexion", width: 220, height: 220 }), h("div", {}, h("h2", {}, "Les joueurs se connectent"), h("p", {}, "Scannez le QR ou ouvrez le lien, choisissez votre table (1 à 5) et saisissez le code " + G.code + "."), h("p", { class: "jx-link" }, joinLink()), h("p", { class: "jx-link2" }, "code  ", h("b", { class: "jx-code" }, G.code)), h("p", { class: "meta" }, "Les tables apparaissent ici dès qu'un joueur s'y inscrit.")))); }
       else { var em = racesEl.querySelector(".jx-empty"); if (em) em.remove(); }
       ids.forEach(function (id) {
         var T = G.tables[id], x = S.tables.filter(function (y) { return y.id === id; })[0], R = rows[id];
@@ -651,7 +656,7 @@
       });
       /* panneau latéral */
       sideEl.innerHTML = "";
-      sideEl.appendChild(h("div", { class: "jx-qr" }, h("img", { src: "qr-j.svg", alt: "QR de connexion" }), h("div", {}, h("b", {}, "Connexion perdue ? Scannez à nouveau"), h("small", {}, "même prénom, même table · code " + G.code))));
+      sideEl.appendChild(h("div", { class: "jx-qr" }, h("img", { src: "qr-j.svg", alt: "QR de connexion" }), h("div", {}, h("b", {}, "Connexion perdue ? Scannez à nouveau"), h("small", {}, "même prénom, même table · code " + G.code), joinLink())));
       var LV = { "Débutant": "#E4572E", "Confirmé": "#E9A400", "Expert": "#2E9E6B" };
       sideEl.appendChild(h("div", { class: "jx-card" }, h("h3", {}, "Classement des tables"), h("table", {}, S.tables.slice().sort(function (a, b) { return b.tscore - a.tscore || b.pos - a.pos; }).map(function (x, i) { return h("tr", {}, h("td", {}, "#" + (i + 1)), h("td", {}, h("b", {}, x.id)), h("td", {}, x.tscore + " pt"), h("td", {}, "case " + x.pos), h("td", {}, x.gauges.map(function (g) { return h("span", { class: "meta", style: "color:" + D.zones[g.z].col + ";font-weight:700;margin-right:5px", title: D.zones[g.z].nom }, g.z + " " + g.lvl); }))); })),
         h("p", { class: "meta" }, "Jauges sur 10 par objectif · duels : " + Math.round(S.duels / 2) + " · pièges évités : " + S.trapOk + "/" + S.traps)));
