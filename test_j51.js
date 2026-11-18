@@ -79,4 +79,14 @@ ok(J.exactTool("1") && !J.exactTool("2") && J.exactTool("4"), "outil exact : JEU
 (function () { var G3 = game(2); G3.players.s10.res.push({ jeu: "27", id: "x", pts: 3, txt: "Affirmation : A ; Données : B" });
   eq(J.snapshot(G3, "s10", NOW).me.fiche27, "Affirmation : A ; Données : B", "fiche 27 du joueur"); eq(J.snapshot(G3, "s11", NOW).me.fiche27, "Affirmation : A ; Données : B", "fiche 27 reprise d'un coéquipier");
   eq(J.snapshot(game(1, 2), "s20", NOW).me.fiche27, "", "pas de fiche : chaîne vide"); })();
+// rappel des productions antérieures (P69G) et nuage de mots
+(function () { var G4 = game(2); G4.players.s10.res.push({ jeu: "7", id: "x", pts: 3, txt: "Requête : A OR B" });
+  eq(J.snapshot(G4, "s11", NOW).me.rec["7"], "Requête : A OR B", "JEU 7 repris pour le JEU 9 (coéquipier)"); eq(J.snapshot(G4, "s10", NOW).me.rec["3"], "", "JEU 3 absent : vide");
+  ok(!J.act(G4, "s10", { t: "words", w: ["a"] }, NOW), "mots refusés si aucune question ouverte"); J.setWq(G4, 1);
+  J.act(G4, "s10", { t: "words", w: ["Phishing", "mot de passe", "  ", "x", "quatrième"] }, NOW); J.act(G4, "s11", { t: "words", w: ["phishing", "Mot de passé"] }, NOW);
+  var cl = J.cloud(G4, "1"); eq(cl[0].n, 2, "mots regroupés (casse)"); eq(cl.length, 3, "trois mots distincts (pluriel et accents regroupés, max 3 par joueur)");
+  eq(J.snapshot(G4, "s10", NOW).me.wmine.length, 3, "un joueur : 3 mots au plus"); J.act(G4, "s10", { t: "words", w: [] }, NOW); eq(J.snapshot(G4, "s10", NOW).me.wmine.length, 0, "mots effacés"); })();
+// signalements : périmètre, statut initial, envoi hors ligne reçu deux fois
+(function () { var G5 = game(1); J.act(G5, "s10", { t: "report", kind: "Idée d'amélioration", txt: "x", jeu: "6", scope: "page", page: "51", qid: "q1" }, NOW); J.act(G5, "s10", { t: "report", kind: "Idée d'amélioration", txt: "x", jeu: "6", scope: "page", page: "51", qid: "q1" }, NOW);
+  eq(G5.reports.length, 1, "doublon d'envoi ignoré"); eq([G5.reports[0].status, G5.reports[0].scope, G5.reports[0].page, G5.reports[0].gen], ["a_approuver", "page", "51", false], "statut initial et périmètre"); })();
 console.log(process.exitCode ? "ÉCHECS" : "logique tables/joueurs : " + n + " vérifications, tout passe");
