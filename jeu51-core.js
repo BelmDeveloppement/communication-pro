@@ -392,6 +392,8 @@
   }
   function nudge(G, sid, now) { G.nudge[sid] = now; }
   /* fiche saisie plus tôt (par le joueur, sinon par un coéquipier) : sert à recopier la fiche de Toulmin du JEU 27 dans le JEU 28 */
+  var PRIOR = { "9": [["7", "votre requête du JEU 7"]], "13": [["3", "votre question de décision du JEU 3"]], "16": [["9", "vos résultats du JEU 9"], ["10", "vos résultats du JEU 10"]], "27": [["3", "votre question du JEU 3"], ["16", "vos sources notées du JEU 16"]], "28": [["27", "votre fiche de Toulmin du JEU 27"]], "32": [["3", "vos critères du JEU 3"]], "35": [["16", "vos sources du JEU 16"]], "37": [["34", "votre plan du JEU 34"], ["32", "votre matrice du JEU 32"], ["16", "vos sources du JEU 16"]], "39": [["37", "votre grille du JEU 37"]] };
+  function recOfAll(G, p) { var o = {}; Object.keys(PRIOR).forEach(function (k) { PRIOR[k].forEach(function (x) { if (!(x[0] in o)) o[x[0]] = ficheOf(G, p, x[0]); }); }); return o; }
   function ficheOf(G, p, jeu) {
     var own = (p.res || []).filter(function (r) { return String(r.jeu) === String(jeu) && r.txt; })[0]; if (own) return own.txt;
     var T = G.tables[p.table]; if (!T) return "";
@@ -401,7 +403,7 @@
   function snapshot(G, sid, now) {
     var p = G.players[sid]; if (!p) return null; var T = G.tables[p.table], tr = tireur(G, T, now);
     return { t: "snap", now: now, gid: G.gid, code: G.code, off: Object.keys(G.off), rd: readState(G, p), nudge: G.nudge[sid] || 0, status: G.status, end: G.end, min: G.min, jeux: G.jeux, gate: D.caps.gate, max: D.caps.max, tpos: T.pos, here: jeuHere(T), tdone: !!T.done, tscore: tableScore(G, T), gauges: Object.keys(D.zones).map(function (z) { return { z: z, lvl: gaugeLvl(T, z, T.players.length) }; }), mast: G.status === "ended" || T.done ? masteryAll(p) : null,
-      me: { fiche27: ficheOf(G, p, "27"), sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
+      me: { fiche27: ficheOf(G, p, "27"), rec: recOfAll(G, p), sujet: p.sujet || null, sujetRes: p.sujetRes || null, sid: sid, nom: p.nom, table: p.table, col: p.col, ci: p.ci, pos: p.pos, score: p.score, done: p.done, tools: p.tools, pend: pendView(G, p, now), notes: (p.notes || []).slice(0, 3), bets: p.bets, betsWon: p.betsWon },
       sujets: sujetsView(G), canDraw: canDraw(G, sid, now), played: false, lim: lim(G), wait: !playable(G, T) && !T.done, tireur: tr ? tr.nom : null,
       table: { id: T.id, round: T.round, jumped: T.jumped || null,
         players: T.players.map(function (s) { var q = G.players[s]; return { sid: s, nom: q.nom, col: q.col, pos: q.pos, score: q.score, st: pastille(G, q, now), on: online(q, now), tools: Object.keys(q.tools || {}).length, rd: readState(G, q) }; }),

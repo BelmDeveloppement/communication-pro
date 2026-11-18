@@ -109,6 +109,7 @@
 
   /* ---------- Page joueur ---------- */
   var MK0 = "j-me", MK = MK0;
+  var PRIOR_UI = { "9": [["7", "votre requête du JEU 7"]], "13": [["3", "votre question de décision du JEU 3"]], "16": [["9", "vos résultats du JEU 9"], ["10", "vos résultats du JEU 10"]], "27": [["3", "votre question du JEU 3"], ["16", "vos sources notées du JEU 16"]], "28": [["27", "votre fiche de Toulmin du JEU 27"]], "32": [["3", "vos critères du JEU 3"]], "35": [["16", "vos sources du JEU 16"]], "37": [["34", "votre plan du JEU 34"], ["32", "votre matrice du JEU 32"], ["16", "vos sources du JEU 16"]], "39": [["37", "votre grille du JEU 37"]] };
   var JOIN_URL = "https://belmdeveloppement.github.io/communication-pro/#/j";
   function joinLink() {
     var cp = h("button", { class: "sec", type: "button", style: "margin-left:6px;padding:2px 8px", onclick: function () { try { navigator.clipboard.writeText(JOIN_URL); cp.textContent = "Copié"; setTimeout(function () { cp.textContent = "Copier"; }, 1500); } catch (e) { cp.textContent = "Sélectionnez le lien"; } } }, "Copier");
@@ -244,7 +245,7 @@
       if (e.rend) box.appendChild(h("p", {}, h("b", {}, "Vous rendez : "), e.rend));
       if (e.but) box.appendChild(h("p", {}, h("b", {}, "But du JEU : "), e.but));
       var zz = D.jeux[k] && D.zones[D.jeux[k].zone]; if (zz) box.appendChild(h("p", { class: "meta", style: "margin:2px 0 6px" }, "Lien avec le syllabus ECUE-S7-1-2 : " + zz.syl + "."));
-      if (k === "28") { var f27 = snap && snap.me.fiche27; box.appendChild(h("div", { style: "background:#FFF8E1;border-left:4px solid #E9A400;padding:4px 8px;margin:6px 0" }, h("b", {}, "Votre fiche de Toulmin du JEU 27 (copie) : "), f27 ? h("div", { style: "white-space:pre-wrap" }, f27) : h("span", { class: "meta" }, "aucune fiche trouvée pour votre équipe : reprenez-la dans votre carnet."))); }
+      (PRIOR_UI[k] || []).forEach(function (x) { var txt = snap && snap.me.rec && snap.me.rec[x[0]]; box.appendChild(h("div", { style: "background:#FFF8E1;border-left:4px solid #E9A400;padding:4px 8px;margin:6px 0" }, h("b", {}, "Rappel : " + x[1] + " (copie, à recopier ou coller) : "), txt ? h("div", {}, h("div", { style: "white-space:pre-wrap" }, txt), h("button", { class: "sec", type: "button", style: "padding:2px 8px;margin-top:4px", onclick: function (ev) { var b = ev.target; try { navigator.clipboard.writeText(txt); b.textContent = "Copié"; setTimeout(function () { b.textContent = "Copier"; }, 1500); } catch (e) { b.textContent = "Sélectionnez le texte"; } } }, "Copier")) : h("span", { class: "meta" }, "Aucune production trouvée pour votre équipe : reprenez-la dans votre carnet ou jouez d'abord le JEU " + x[0] + "."))); });
       if (e.consigne) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "Consigne"))); para(e.consigne).forEach(function (x) { box.appendChild(x); }); }
       if (e.situation) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "Mise en situation"))); para(e.situation).forEach(function (x) { box.appendChild(x); }); }
       if (e.afaire && e.afaire.length) { box.appendChild(h("p", { style: "margin-bottom:0" }, h("b", {}, "À faire"))); box.appendChild(h("ol", {}, e.afaire.map(function (l) { return h("li", {}, l); }))); }
