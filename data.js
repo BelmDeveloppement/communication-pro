@@ -832,7 +832,7 @@ window.DATA = {
     "Quelles sont la méthode et le résultat principal (avec son chiffre) ?",
     "Combien de limites l'article reconnaît-il lui-même ?",
     "Une déclaration de financement ou de conflit d'intérêts est-elle indiquée ?",
-    "Écrivez la phrase honnête qui citerait ce résultat dans votre état de l'art.",
+    "Écrivez la phrase sourcée et nuancée qui citerait ce résultat dans votre état de l'art.",
     "Avec Gemini ou une autre IA (document public seulement ; notez laquelle) : demandez un résumé de l'article. Le résumé contient-il une erreur ou oublie-t-il une limite ?"
    ],
    "types": [
@@ -1321,7 +1321,7 @@ window.DATA = {
     "Choisissez votre phrase (A, B, C ou D), différente de celle de votre voisin de gauche.",
     "Posez à votre phrase les 5 questions (base, mesure, échantillon, auteur, durée) et notez ce que la phrase dit, ou « non indiqué ».",
     "Combien de questions restent sans réponse pour votre phrase ?",
-    "Écrivez la phrase honnête que vous mettriez dans votre état de l'art pour votre phrase.",
+    "Écrivez la phrase sourcée et nuancée que vous mettriez dans votre état de l'art pour votre phrase.",
     "Phrase E : trouvez-en une sur un site de fournisseur, posez les mêmes 5 questions. Combien restent sans réponse ?",
     "Avec Perplexity ou une autre IA (notez laquelle) : demandez-lui les questions à poser à votre phrase. En oublie-t-elle une des cinq (base, mesure, échantillon, auteur, durée) ?"
    ],
@@ -4913,7 +4913,7 @@ window.DATA = {
     "Quelle phrase correspond aux données publiées ?",
     "Quel est l'écart entre les deux chiffres, en points de pourcentage ? (le nombre)",
     "Pour juger la dynamique commerciale hors effet des devises, quel chiffre citez-vous ?",
-    "Écrivez une phrase honnête qui donne les deux chiffres et la source.",
+    "Écrivez une phrase sourcée et nuancée qui donne les deux chiffres et la source.",
     "Avec Copilot ou une autre IA (notez laquelle) : demandez « De combien le chiffre d'affaires d'Inditex a-t-il progressé ? ». Précise-t-elle les conditions (données publiées ou taux de change constants) ?"
    ],
    "types": [
@@ -5484,7 +5484,7 @@ window.DATA = {
   },
   "M3": {
    "id": "M3",
-   "titre": "Mission : écrire la phrase honnête (source, chiffre, limite)",
+   "titre": "Mission : écrire la phrase sourcée et nuancée (source, chiffre, limite)",
    "mode": "Équipes",
    "duree": 20,
    "chap": "Carnet · chapitre 7",
@@ -5549,7 +5549,7 @@ window.DATA = {
      [
       "5",
       "IA · plus percutant",
-      "Une IA enlève souvent la limite et durcit le verbe (« prouve »). Remettez la limite : une phrase honnête est plus crédible qu'une phrase forte."
+      "Une IA enlève souvent la limite et durcit le verbe (« prouve »). Remettez la limite : une phrase sourcée et nuancée est plus crédible qu'une phrase forte."
      ]
     ],
     "erreurs": [
@@ -7085,7 +7085,7 @@ window.DATA = {
    "t": "jeu5",
    "route": "j",
    "page": 141,
-   "titre": "Jeu 5.7 · La phrase honnête"
+   "titre": "Jeu 5.7 · La phrase sourcée et nuancée"
   },
   {
    "t": "jeu5",
