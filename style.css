@@ -49,3 +49,7 @@ body.jx-full header,body.jx-full footer{display:none}body.jx-full{background:#0E
 .jx-bars{margin:8px 0}.jx-bt{font-weight:700;margin-bottom:4px}.jx-br{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:.85rem}.jx-bl{flex:0 0 150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.jx-bn{display:inline-flex;gap:2px}.jx-bn i{display:inline-block;width:14px;height:10px;border-radius:2px;background:#E3E8F2}.jx-bv{font-size:.8rem;min-width:34px}
 .jx-card .jx-bl{flex-basis:96px;font-size:.72rem}.jx-card .jx-bn i{width:8px;height:7px}
 .jx-cloud{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;justify-content:center;padding:10px;min-height:70px;font-weight:700}
+
+/* ---- Tour (v29) : colonne gauche = parcours + détail de l'onglet ; plus de blanc ni de défilement horizontal ---- */
+.jx-left{min-width:0}.jx-left>div:last-child{overflow-x:auto}.jx-side{min-width:0}.jx-side .jx-card{overflow-x:auto}
+.jx-ctl select{width:auto;display:inline-block}

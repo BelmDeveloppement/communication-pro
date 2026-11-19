@@ -3,7 +3,7 @@
 // Le serveur garde un court historique par sujet pour les abonnés tardifs (rechargement de la tour, joueur qui arrive en retard).
 // Sujet « …h » (état de la partie) : seul l'état le plus récent est conservé. Sujet « …s » (diapos) : seule la dernière diapo est conservée. Publication HTTP : POST /pub (complément PowerPoint). Sujet « …k » : dernière valeur de chaque clé ({k,v}). Autres sujets : 1500 messages au plus. Tout est effacé 24 h après la dernière activité.
 import { DurableObject } from "cloudflare:workers";
-const MAX = 65536, KEEP = 1500, TOTAL = 900000, TTL = 24 * 3600 * 1000;
+const MAX = 65536, KEEP = 1500, TOTAL = 900000, TTL = 90 * 24 * 3600 * 1000;   // 90 jours : conserve aussi les signalements archivés (sujet « rapports »)
 export class Hub extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
