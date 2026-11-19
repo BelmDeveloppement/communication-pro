@@ -109,7 +109,10 @@
     Object.keys(G.tables).forEach(function (t) { var T = G.tables[t]; if (T.done || G.status === "lobby" && T.pos === 0) return; if (T.cur) T.jump = k; else moveTable(G, T, k, now || 0); });
     return k;
   }
+  function imgOk(v) { return typeof v === "string" && v.length <= 48000 && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(v); }
   function setJeu(G, k, now) { return gotoJeu(G, k, now); }
+  /* Forcer le passage : les cartes en cours sont closes (les réponses non validées valent 0 point), puis toutes les tables rejoignent le JEU k. */
+  function forceJeu(G, k, now) { k = gotoJeu(G, k, now); Object.keys(G.tables).forEach(function (t) { if (G.tables[t].cur) closeRound(G, t, now || 0); }); return k; }
   function nextJeu(G, dir, now) { var ks = Object.keys(D.jeux), i = ks.indexOf(G.jeux[0]), n = Math.max(0, Math.min(ks.length - 1, (i < 0 ? 0 : i) + (dir || 1))); return gotoJeu(G, ks[n], now); }
   /* Retire un joueur (il a quitté la partie, ou l'enseignant retire un doublon). Sans « force », seulement s'il n'a encore rien joué. */
   function leave(G, sid, force) {
@@ -311,7 +314,7 @@
     if (m.t === "words") { if (!G.wq || !G.players[sid]) return false; var ws = (Array.isArray(m.w) ? m.w : []).map(function (x) { return String(x || "").trim().replace(/\s+/g, " ").slice(0, 30); }).filter(function (x) { return x; }).slice(0, 3); G.words = G.words || {}; var bq = G.words[G.wq] = G.words[G.wq] || {}; if (ws.length) bq[sid] = ws; else delete bq[sid]; return true; }
     if (m.t === "report") { var pr = G.players[sid]; G.reports = G.reports || []; var rtxt = String(m.txt || "").slice(0, 600), rjeu = String(m.jeu || "").slice(0, 4), rkey = String(m.qid || "");
       if (rkey && G.reports.some(function (x) { return x.qid === rkey; })) return true;   /* même envoi reçu deux fois (file hors ligne) */
-      G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : "?", table: pr ? pr.table : "?", kind: String(m.kind || "").slice(0, 40), txt: rtxt, jeu: rjeu, scope: String(m.scope || "jeu").slice(0, 12), page: String(m.page || "").slice(0, 8), qid: rkey, status: "a_approuver", gen: false, done: false }); if (G.reports.length > 300) G.reports.shift(); return true; }
+      G.reports.push({ at: now, sid: sid, nom: pr ? pr.nom : (m.prof ? "Enseignant" : "?"), table: pr ? pr.table : (m.prof ? "—" : "?"), kind: String(m.kind || "").slice(0, 40), txt: rtxt, jeu: rjeu, scope: String(m.scope || "jeu").slice(0, 12), page: String(m.page || "").slice(0, 8), qid: rkey, img: imgOk(m.img) ? m.img : "", status: "a_approuver", gen: false, done: false }); if (G.reports.length > 300) G.reports.shift(); var wi = G.reports.filter(function (x) { return x.img; }); while (wi.length > 25) { wi.shift().img = ""; } return true; }
     if (m.t === "draw") return draw(G, sid, now);
     if (m.t === "ans") { var pp = G.players[sid], TT = pp && G.tables[pp.table]; if (m.card && TT && TT.cur && m.card !== TT.round + ":" + TT.cur.jeu + ":" + TT.cur.id) return false; return answer(G, sid, m.ans, now, m.bet); }
     if (m.t === "outil") return actOutil(G, sid, !!m.ok, now);
@@ -420,7 +423,7 @@
         cur: T.cur ? { jeu: T.cur.jeu, id: T.cur.id, at: T.cur.at, answered: Object.keys(T.cur.ans), mine: !!T.cur.ans[sid] } : null,
         last: T.last ? { round: T.last.round, jeu: T.last.jeu, id: T.last.id, res: T.last.res, zone: T.last.zone, gauge: T.last.gauge, bonus: T.last.bonus, from: T.last.from, to: T.last.to, path: T.last.path } : null } };
   }
-  var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, gotoJeu: gotoJeu, moveTable: moveTable, leave: leave, caseIx: caseIx, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
+  var api = { setData: setData, COLORS: COLORS, COLNAMES: COLNAMES, MAXP: MAXP, MAXT: MAXT, newGame: newGame, tid: tid, join: join, start: start, stop: stop, running: running, canDraw: canDraw, draw: draw, pool: pool, counts: counts, setExtra: setExtra, setN2: setN2, nextJeu: nextJeu, setJeu: setJeu, forceJeu: forceJeu, gotoJeu: gotoJeu, moveTable: moveTable, leave: leave, caseIx: caseIx, answer: answer, closeRound: closeRound, tick: tick, pastille: pastille, stats: stats, snapshot: snapshot, crit: crit, cardOf: cardOf, online: online, tireur: tireur,
     claimSujet: claimSujet, cloud: cloud, setWq: setWq, wordKey: wordKey, releaseSujet: releaseSujet, sujetOf: sujetOf, sujetsView: sujetsView, act: act, actBroken: actBroken, actRead: actRead, actHelp: actHelp, setTool: setTool, toolOff: toolOff, nudge: nudge, readyTable: readyTable, readState: readState, resetRead: resetRead, actOutil: actOutil, actPiege: actPiege, actDuel: actDuel, actRel: actRel, ansText: ansText, soloCard: soloCard, toolFor: toolFor, exactTool: exactTool, reopen: reopen, lim: lim, arbitrate: arbitrate, fixJeu: fixJeu, gaugeLvl: gaugeLvl, tableScore: tableScore, mastery: mastery, masteryAll: masteryAll, masteryTable: masteryTable, playable: playable, jeuHere: jeuHere, levelOf: levelOf };
   if (typeof module !== "undefined") module.exports = api; else root.J51Core = api;
 })(typeof window !== "undefined" ? window : this);

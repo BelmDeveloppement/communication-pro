@@ -89,4 +89,16 @@ ok(J.exactTool("1") && !J.exactTool("2") && J.exactTool("4"), "outil exact : JEU
 // signalements : périmètre, statut initial, envoi hors ligne reçu deux fois
 (function () { var G5 = game(1); J.act(G5, "s10", { t: "report", kind: "Idée d'amélioration", txt: "x", jeu: "6", scope: "page", page: "51", qid: "q1" }, NOW); J.act(G5, "s10", { t: "report", kind: "Idée d'amélioration", txt: "x", jeu: "6", scope: "page", page: "51", qid: "q1" }, NOW);
   eq(G5.reports.length, 1, "doublon d'envoi ignoré"); eq([G5.reports[0].status, G5.reports[0].scope, G5.reports[0].page, G5.reports[0].gen], ["a_approuver", "page", "51", false], "statut initial et périmètre"); })();
+// v29 : forcer le passage (réponses non validées = 0 point), signalement enseignant et image jointe
+(function () { var Gf = game(2); Gf.jeux = ["1"]; var T = Gf.tables.T1, tr = J.tireur(Gf, T, NOW); ok(J.draw(Gf, tr.sid, NOW), "forcer : tirage JEU 1"); ok(!!T.cur, "forcer : carte en cours");
+  var sc0 = Gf.players.s10.score + Gf.players.s11.score; J.answer(Gf, "s10", ansFor(Gf, "s10", 3), NOW + 1);   /* s11 n'a rien validé */
+  J.forceJeu(Gf, "3", NOW + 2); ok(!T.cur, "forcer : carte close"); eq(D.cases[T.pos].jeu, "3", "forcer : la table est sur le JEU 3"); eq(Gf.jeux[0], "3", "forcer : JEU 3 ouvert");
+  eq(Gf.players.s11.score, 0, "forcer : réponse non validée = 0 point"); ok(Gf.players.s10.score > 0, "forcer : la réponse validée est comptée"); ok(Gf.players.s10.score + Gf.players.s11.score >= sc0, "forcer : aucun point retiré");
+  var Gg = game(1); eq(J.forceJeu(Gg, "4", NOW), "4", "forcer sans carte en cours = simple changement de JEU");
+  var Gr = game(1), jpg = "data:image/jpeg;base64,/9j/4AAQSkZJRg==";
+  J.act(Gr, "prof", { t: "report", prof: 1, kind: "Autre", txt: "remarque prof", jeu: "5", scope: "appli", qid: "prof:1" }, NOW); eq([Gr.reports[0].nom, Gr.reports[0].table, Gr.reports[0].status], ["Enseignant", "—", "a_approuver"], "signalement enseignant");
+  J.act(Gr, "s10", { t: "report", kind: "Autre", txt: "avec image", jeu: "5", qid: "q-img", img: jpg }, NOW); eq(Gr.reports[1].img, jpg, "image JPEG acceptée");
+  J.act(Gr, "s10", { t: "report", kind: "Autre", txt: "html", jeu: "5", qid: "q-bad", img: "data:text/html;base64,PHNjcmlwdD4=" }, NOW); eq(Gr.reports[2].img, "", "image non JPEG refusée");
+  J.act(Gr, "s10", { t: "report", kind: "Autre", txt: "trop grosse", jeu: "5", qid: "q-big", img: "data:image/jpeg;base64," + new Array(50000).join("A") }, NOW); eq(Gr.reports[3].img, "", "image trop grosse refusée");
+  for (var i = 0; i < 30; i++) J.act(Gr, "s10", { t: "report", kind: "Autre", txt: "n" + i, jeu: "5", qid: "m" + i, img: jpg }, NOW); eq(Gr.reports.filter(function (r) { return r.img; }).length, 25, "au plus 25 images conservées"); })();
 console.log(process.exitCode ? "ÉCHECS" : "logique tables/joueurs : " + n + " vérifications, tout passe");
